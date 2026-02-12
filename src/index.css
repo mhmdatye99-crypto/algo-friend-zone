@@ -6,49 +6,49 @@
 
 @layer base {
   :root {
-    --background: 230 20% 2%;
-    --foreground: 210 40% 95%;
+    --background: 240 20% 1.5%;
+    --foreground: 210 40% 93%;
 
-    --card: 230 15% 6%;
-    --card-foreground: 210 40% 95%;
+    --card: 240 12% 4%;
+    --card-foreground: 210 40% 93%;
 
-    --popover: 230 15% 6%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 240 12% 4%;
+    --popover-foreground: 210 40% 93%;
 
     --primary: 43 100% 50%;
-    --primary-foreground: 230 20% 5%;
+    --primary-foreground: 240 20% 3%;
 
-    --secondary: 230 15% 12%;
-    --secondary-foreground: 210 40% 90%;
+    --secondary: 240 10% 8%;
+    --secondary-foreground: 210 30% 85%;
 
-    --muted: 230 10% 15%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 215 15% 50%;
 
     --accent: 190 100% 50%;
-    --accent-foreground: 230 20% 5%;
+    --accent-foreground: 240 20% 3%;
 
     --destructive: 350 100% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 155 100% 50%;
-    --success-foreground: 230 20% 5%;
+    --success: 155 100% 45%;
+    --success-foreground: 240 20% 3%;
 
     --warning: 38 100% 50%;
-    --warning-foreground: 230 20% 5%;
+    --warning-foreground: 240 20% 3%;
 
-    --border: 230 15% 15%;
-    --input: 230 15% 12%;
+    --border: 240 10% 10%;
+    --input: 240 10% 8%;
     --ring: 43 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 230 15% 4%;
-    --sidebar-foreground: 210 40% 90%;
+    --sidebar-background: 240 12% 3%;
+    --sidebar-foreground: 210 40% 88%;
     --sidebar-primary: 43 100% 50%;
-    --sidebar-primary-foreground: 230 20% 5%;
-    --sidebar-accent: 230 15% 10%;
-    --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 230 15% 12%;
+    --sidebar-primary-foreground: 240 20% 3%;
+    --sidebar-accent: 240 10% 7%;
+    --sidebar-accent-foreground: 210 40% 88%;
+    --sidebar-border: 240 10% 8%;
     --sidebar-ring: 43 100% 50%;
   }
 }
@@ -71,11 +71,11 @@
 
 @layer utilities {
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+    @apply bg-card/50 backdrop-blur-[40px] border border-border/30;
   }
 
   .glass-strong {
-    @apply bg-card/80 backdrop-blur-2xl border border-border/60;
+    @apply bg-card/70 backdrop-blur-[40px] border border-border/40;
   }
 
   .glow-gold {
