@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import {
   TrendingUp, TrendingDown, Zap, Brain, Activity, Target,
-  ChevronLeft, Anchor, ArrowUpRight, ArrowDownRight, BarChart3
+  ChevronRight, Anchor, ArrowUpRight, ArrowDownRight, BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +15,9 @@ const fadeUp = {
 };
 
 const mockSignals = [
-  { pair: "BTC/USDT", action: "LONG", confidence: 87, price: "67,450", target: "68,500", alpha: 92, urgent: true },
-  { pair: "EUR/USD", action: "SHORT", confidence: 82, price: "1.0845", target: "1.0790", alpha: 78, urgent: false },
-  { pair: "GOLD", action: "LONG", confidence: 91, price: "2,345", target: "2,380", alpha: 95, urgent: true },
+  { pair: "BTC/USDT", action: "شراء", confidence: 87, price: "67,450", target: "68,500", alpha: 92, urgent: true },
+  { pair: "EUR/USD", action: "بيع", confidence: 82, price: "1.0845", target: "1.0790", alpha: 78, urgent: false },
+  { pair: "GOLD", action: "شراء", confidence: 91, price: "2,345", target: "2,380", alpha: 95, urgent: true },
 ];
 
 const mockMarket = [
@@ -29,9 +29,9 @@ const mockMarket = [
 ];
 
 const whaleActivity = [
-  { asset: "BTC", amount: "1,200 BTC", value: "$80.9M", direction: "in", exchange: "Binance", time: "2m ago" },
-  { asset: "ETH", amount: "15,000 ETH", value: "$48.7M", direction: "out", exchange: "Coinbase", time: "5m ago" },
-  { asset: "USDT", amount: "50M USDT", value: "$50M", direction: "in", exchange: "Kraken", time: "8m ago" },
+  { asset: "BTC", amount: "1,200 BTC", value: "$80.9M", direction: "in", exchange: "Binance", time: "منذ 2 د" },
+  { asset: "ETH", amount: "15,000 ETH", value: "$48.7M", direction: "out", exchange: "Coinbase", time: "منذ 5 د" },
+  { asset: "USDT", amount: "50M USDT", value: "$50M", direction: "in", exchange: "Kraken", time: "منذ 8 د" },
 ];
 
 const Dashboard = () => {
@@ -42,23 +42,23 @@ const Dashboard = () => {
       animate="show"
       className="px-4 pt-10 pb-4 space-y-4 max-w-lg mx-auto"
     >
-      {/* Header */}
+      {/* العنوان */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Trading Terminal</p>
-          <h1 className="text-lg font-bold text-foreground">Performance Dashboard</h1>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محطة التداول</p>
+          <h1 className="text-lg font-bold text-foreground">لوحة الأداء</h1>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          <span className="text-[10px] font-mono text-muted-foreground">LIVE</span>
+          <span className="text-[10px] font-mono text-muted-foreground">مباشر</span>
         </div>
       </motion.div>
 
-      {/* Portfolio Card */}
+      {/* بطاقة المحفظة */}
       <motion.div variants={fadeUp} className="glass rounded-lg p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">Total Portfolio Value</p>
-          <span className="text-[9px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">24H</span>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">إجمالي قيمة المحفظة</p>
+          <span className="text-[9px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">24 ساعة</span>
         </div>
         <h2 className="text-2xl font-bold font-mono text-foreground">$24,750.00</h2>
         <div className="flex items-center gap-3 mt-1.5">
@@ -70,31 +70,31 @@ const Dashboard = () => {
         </div>
         <div className="grid grid-cols-4 gap-2 mt-4">
           {[
-            { icon: Zap, label: "Quick Trade", shortcut: "⌘T" },
-            { icon: Brain, label: "AI Analysis", shortcut: "⌘A" },
-            { icon: Activity, label: "Whale Watch", shortcut: "⌘W" },
-            { icon: Target, label: "Targets", shortcut: "⌘G" },
+            { icon: Zap, label: "تداول سريع" },
+            { icon: Brain, label: "تحليل AI" },
+            { icon: Activity, label: "الحيتان" },
+            { icon: Target, label: "الأهداف" },
           ].map((item) => (
             <button
               key={item.label}
               className="flex flex-col items-center gap-1 py-2 rounded-lg bg-secondary/40 hover:bg-secondary/70 transition-colors border border-border/20"
             >
               <item.icon className="w-4 h-4 text-muted-foreground" />
-              <span className="text-[8px] text-muted-foreground font-mono">{item.shortcut}</span>
+              <span className="text-[8px] text-muted-foreground font-mono">{item.label}</span>
             </button>
           ))}
         </div>
       </motion.div>
 
-      {/* Predictive Alpha Signals */}
+      {/* إشارات ألفا التنبؤية */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider flex items-center gap-2 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-            Predictive Alpha Signals
+            إشارات ألفا التنبؤية
           </h3>
           <button className="text-[10px] text-primary flex items-center gap-1 font-mono">
-            View All <ChevronLeft className="w-3 h-3" />
+            عرض الكل <ChevronRight className="w-3 h-3" />
           </button>
         </div>
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-4 px-4">
@@ -111,7 +111,7 @@ const Dashboard = () => {
                 <span
                   className={cn(
                     "text-[9px] font-bold font-mono px-2 py-0.5 rounded",
-                    signal.action === "LONG"
+                    signal.action === "شراء"
                       ? "bg-success/15 text-success"
                       : "bg-destructive/15 text-destructive"
                   )}
@@ -132,13 +132,13 @@ const Dashboard = () => {
                 <span className="text-[9px] font-mono text-muted-foreground">α{signal.alpha}</span>
               </div>
               <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
-                <span>Entry: {signal.price}</span>
-                <span>TP: {signal.target}</span>
+                <span>الدخول: {signal.price}</span>
+                <span>الهدف: {signal.target}</span>
               </div>
               {signal.urgent && (
                 <div className="mt-2 text-[9px] text-warning flex items-center gap-1 font-mono">
                   <span className="w-1 h-1 rounded-full bg-warning animate-pulse" />
-                  EXPIRES IN 5 MIN
+                  تنتهي خلال 5 دقائق
                 </div>
               )}
             </div>
@@ -146,18 +146,17 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Market Sentiment & Flow Analysis */}
+      {/* تحليل معنويات السوق والتدفقات */}
       <motion.div variants={fadeUp}>
         <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-2 font-mono">
-          Market Sentiment & Flow Analysis
+          تحليل معنويات السوق والتدفقات
         </h3>
         <div className="glass rounded-lg divide-y divide-border/20">
-          {/* Table Header */}
           <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3 py-2 text-[9px] font-mono text-muted-foreground uppercase tracking-wider">
-            <span>Pair</span>
-            <span className="w-16 text-left">Price</span>
-            <span className="w-12 text-left">Chg%</span>
-            <span className="w-10 text-left">RSI</span>
+            <span>الزوج</span>
+            <span className="w-16 text-start">السعر</span>
+            <span className="w-12 text-start">التغيّر%</span>
+            <span className="w-10 text-start">RSI</span>
           </div>
           {mockMarket.map((item, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center px-3 py-2.5">
@@ -169,17 +168,17 @@ const Dashboard = () => {
                 </div>
                 <span className="text-xs font-mono font-medium">{item.pair}</span>
               </div>
-              <span className="text-xs font-mono font-medium w-16 text-left">{item.price}</span>
+              <span className="text-xs font-mono font-medium w-16 text-start">{item.price}</span>
               <span
                 className={cn(
-                  "text-[11px] font-mono font-medium w-12 text-left",
+                  "text-[11px] font-mono font-medium w-12 text-start",
                   item.up ? "text-success" : "text-destructive"
                 )}
               >
                 {item.up ? "+" : ""}{item.change}%
               </span>
               <span className={cn(
-                "text-[11px] font-mono w-10 text-left",
+                "text-[11px] font-mono w-10 text-start",
                 item.rsi > 70 ? "text-destructive" : item.rsi < 30 ? "text-success" : "text-muted-foreground"
               )}>
                 {item.rsi}
@@ -189,14 +188,14 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Whale Watcher */}
+      {/* مراقب الحيتان */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider font-mono flex items-center gap-2">
             <Anchor className="w-3 h-3 text-accent" />
-            Whale Watcher
+            مراقب الحيتان
           </h3>
-          <span className="text-[9px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">LIVE</span>
+          <span className="text-[9px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">مباشر</span>
         </div>
         <div className="glass rounded-lg divide-y divide-border/20">
           {whaleActivity.map((whale, i) => (
@@ -223,10 +222,10 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Journey Progress */}
+      {/* سلسلة الأداء */}
       <motion.div variants={fadeUp} className="glass rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider font-mono">Performance Streak</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider font-mono">سلسلة الأداء</h3>
           <span className="text-[10px] text-primary font-mono">65%</span>
         </div>
         <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-1.5">
@@ -238,16 +237,16 @@ const Dashboard = () => {
           />
         </div>
         <p className="text-[10px] text-muted-foreground font-mono">
-          3 days to weekly target · <span className="text-success">+$850</span> realized
+          3 أيام للهدف الأسبوعي · <span className="text-success">+$850</span> محققة
         </p>
       </motion.div>
 
-      {/* Community Pulse */}
+      {/* نبض المجتمع */}
       <motion.div variants={fadeUp} className="glass rounded-lg p-3">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
           <span className="text-[10px] text-muted-foreground font-mono">
-            <span className="font-bold text-foreground">12,453</span> traders online
+            <span className="font-bold text-foreground">12,453</span> متداول متصل
           </span>
         </div>
         <div className="flex -space-x-1.5 rtl:space-x-reverse">
@@ -265,17 +264,17 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Daily Quests */}
+      {/* الأهداف اليومية */}
       <motion.div variants={fadeUp} className="glass rounded-lg p-3">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider font-mono mb-2 flex items-center gap-2">
-          Daily Objectives
+          الأهداف اليومية
           <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded font-mono">2/3</span>
         </h3>
         <div className="space-y-1.5">
           {[
-            { label: "Execute 1 trade", done: true },
-            { label: "Complete 1 academy module", done: true },
-            { label: "Share analysis with community", done: false },
+            { label: "تنفيذ صفقة واحدة", done: true },
+            { label: "إكمال وحدة من الأكاديمية", done: true },
+            { label: "مشاركة تحليل مع المجتمع", done: false },
           ].map((q, i) => (
             <div key={i} className="flex items-center gap-2">
               <div

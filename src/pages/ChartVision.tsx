@@ -35,12 +35,12 @@ interface AnalysisResult {
 type Step = "idle" | "loading" | "results";
 
 const loadingSteps = [
-  { label: "Uploading image data...", icon: Upload },
-  { label: "Identifying pair & timeframe...", icon: Crosshair },
-  { label: "Neural pattern recognition...", icon: Cpu },
-  { label: "Technical indicator analysis...", icon: BarChart3 },
-  { label: "Computing support & resistance...", icon: Layers },
-  { label: "Generating alpha recommendation...", icon: Target },
+  { label: "جارٍ رفع بيانات الصورة...", icon: Upload },
+  { label: "تحديد الزوج والإطار الزمني...", icon: Crosshair },
+  { label: "التعرف العصبي على الأنماط...", icon: Cpu },
+  { label: "تحليل المؤشرات الفنية...", icon: BarChart3 },
+  { label: "حساب مستويات الدعم والمقاومة...", icon: Layers },
+  { label: "توليد توصية ألفا...", icon: Target },
 ];
 
 const ChartVision = () => {
@@ -55,7 +55,7 @@ const ChartVision = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      toast.error("يرجى اختيار ملف صورة صالح");
       return;
     }
     const reader = new FileReader();
@@ -92,7 +92,7 @@ const ChartVision = () => {
     } catch (err: any) {
       clearInterval(interval);
       console.error(err);
-      toast.error("Analysis failed. Please retry.");
+      toast.error("فشل التحليل. يرجى المحاولة مرة أخرى.");
       setStep("idle");
     }
   };
@@ -126,16 +126,16 @@ const ChartVision = () => {
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
 
       <AnimatePresence mode="wait">
-        {/* IDLE */}
+        {/* الحالة الأولية */}
         {step === "idle" && (
           <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Neural Analysis Engine</p>
-            <h1 className="text-lg font-bold mb-1">Chart Vision AI</h1>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
+            <h1 className="text-lg font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
             <p className="text-[10px] text-muted-foreground font-mono mb-6">
-              Upload any chart image for institutional-grade pattern recognition & alpha generation
+              ارفع أي صورة شارت للتعرف على الأنماط وتوليد إشارات ألفا بدقة مؤسسية
             </p>
 
-            {/* Upload */}
+            {/* الرفع */}
             <div className="grid grid-cols-2 gap-2 mb-6">
               <motion.button
                 whileTap={{ scale: 0.97 }}
@@ -143,7 +143,7 @@ const ChartVision = () => {
                 className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-primary/15 hover:border-primary/30 transition-all"
               >
                 <Camera className="w-6 h-6 text-primary" />
-                <span className="text-[11px] font-mono font-medium">Capture</span>
+                <span className="text-[11px] font-mono font-medium">التقاط</span>
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.97 }}
@@ -151,20 +151,20 @@ const ChartVision = () => {
                 className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-border/20 hover:border-accent/30 transition-all"
               >
                 <Upload className="w-6 h-6 text-accent" />
-                <span className="text-[11px] font-mono font-medium">Upload</span>
+                <span className="text-[11px] font-mono font-medium">رفع صورة</span>
               </motion.button>
             </div>
 
-            {/* Capabilities */}
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-2 font-mono">Capabilities</h3>
+            {/* القدرات */}
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-2 font-mono">القدرات</h3>
             <div className="grid grid-cols-3 gap-1.5 mb-6">
               {[
-                { icon: Target, label: "50+ Patterns" },
-                { icon: BarChart3, label: "S/R Detection" },
-                { icon: TrendingUp, label: "Direction AI" },
-                { icon: Shield, label: "Risk Calc" },
-                { icon: Sparkles, label: "Strategy Gen" },
-                { icon: Camera, label: "Live Compare" },
+                { icon: Target, label: "+50 نمط" },
+                { icon: BarChart3, label: "كشف الدعم/المقاومة" },
+                { icon: TrendingUp, label: "اتجاه AI" },
+                { icon: Shield, label: "حساب المخاطر" },
+                { icon: Sparkles, label: "توليد استراتيجية" },
+                { icon: Camera, label: "مقارنة مباشرة" },
               ].map((cap, i) => (
                 <motion.div
                   key={i}
@@ -179,23 +179,23 @@ const ChartVision = () => {
               ))}
             </div>
 
-            {/* Empty State */}
+            {/* الحالة الفارغة */}
             <div className="glass rounded-lg p-6 text-center border border-border/10">
               <Cpu className="w-8 h-8 mx-auto mb-2 text-muted-foreground animate-pulse" />
-              <h4 className="text-xs font-semibold font-mono mb-0.5">Neural Engine Ready</h4>
+              <h4 className="text-xs font-semibold font-mono mb-0.5">المحرك العصبي جاهز</h4>
               <p className="text-[10px] text-muted-foreground font-mono">
-                Upload a chart image to begin AI analysis
+                ارفع صورة شارت لبدء التحليل بالذكاء الاصطناعي
               </p>
             </div>
           </motion.div>
         )}
 
-        {/* LOADING */}
+        {/* التحميل */}
         {step === "loading" && (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4">
             {imagePreview && (
               <div className="rounded-lg overflow-hidden mb-4 border border-border/20 relative">
-                <img src={imagePreview} alt="Chart" className="w-full h-44 object-cover opacity-60" />
+                <img src={imagePreview} alt="الشارت" className="w-full h-44 object-cover opacity-60" />
                 <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
                   <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <Cpu className="w-6 h-6 text-primary animate-pulse" />
@@ -205,12 +205,12 @@ const ChartVision = () => {
             )}
 
             <div className="glass rounded-lg p-4 text-center mb-4">
-              <h3 className="text-sm font-bold font-mono mb-4">Neural Processing...</h3>
-              <div className="space-y-2 text-right">
+              <h3 className="text-sm font-bold font-mono mb-4">جارٍ المعالجة العصبية...</h3>
+              <div className="space-y-2">
                 {loadingSteps.map((s, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, x: -8 }}
+                    initial={{ opacity: 0, x: 8 }}
                     animate={{ opacity: i <= loadingStep ? 1 : 0.2, x: 0 }}
                     transition={{ delay: i * 0.08 }}
                     className="flex items-center gap-2 text-xs font-mono"
@@ -230,35 +230,35 @@ const ChartVision = () => {
           </motion.div>
         )}
 
-        {/* RESULTS */}
+        {/* النتائج */}
         {step === "results" && analysis && (
           <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
             {imagePreview && (
               <div className="rounded-lg overflow-hidden border border-border/20">
-                <img src={imagePreview} alt="Chart" className="w-full h-36 object-cover" />
+                <img src={imagePreview} alt="الشارت" className="w-full h-36 object-cover" />
               </div>
             )}
 
-            {/* Pair & Direction */}
+            {/* الزوج والاتجاه */}
             <div className="glass rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h2 className="text-base font-bold font-mono">{analysis.pair || "Unknown"}</h2>
+                  <h2 className="text-base font-bold font-mono">{analysis.pair || "غير معروف"}</h2>
                   <span className="text-[9px] text-muted-foreground font-mono">{analysis.timeframe || ""}</span>
                 </div>
                 <div className={cn("flex items-center gap-1 text-sm font-bold font-mono", directionColor)}>
                   {directionIcon}
-                  <span>{analysis.direction?.toUpperCase()}</span>
+                  <span>{analysis.directionAr || analysis.direction?.toUpperCase()}</span>
                 </div>
               </div>
               <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                Confidence: {analysis.directionConfidence}%
+                الثقة: {analysis.directionConfidence}%
               </span>
             </div>
 
-            {/* Pattern */}
+            {/* النمط */}
             <div className="glass rounded-lg p-3">
-              <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-1.5">Pattern Detected</h3>
+              <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-1.5">النمط المكتشف</h3>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">{analysis.pattern}</p>
@@ -270,34 +270,34 @@ const ChartVision = () => {
               </div>
             </div>
 
-            {/* Support & Resistance */}
+            {/* الدعم والمقاومة */}
             <div className="grid grid-cols-2 gap-2">
               <div className="glass rounded-lg p-3">
-                <h4 className="text-[9px] font-mono font-bold text-success uppercase tracking-wider mb-1.5">Support</h4>
+                <h4 className="text-[9px] font-mono font-bold text-success uppercase tracking-wider mb-1.5">الدعم</h4>
                 <div className="space-y-1">
                   {analysis.supportLevels?.map((l, i) => (
                     <div key={i} className="text-[11px] font-mono bg-success/5 px-2 py-0.5 rounded text-success border border-success/10">
-                      S{i + 1}: {l}
+                      د{i + 1}: {l}
                     </div>
                   ))}
                 </div>
               </div>
               <div className="glass rounded-lg p-3">
-                <h4 className="text-[9px] font-mono font-bold text-destructive uppercase tracking-wider mb-1.5">Resistance</h4>
+                <h4 className="text-[9px] font-mono font-bold text-destructive uppercase tracking-wider mb-1.5">المقاومة</h4>
                 <div className="space-y-1">
                   {analysis.resistanceLevels?.map((l, i) => (
                     <div key={i} className="text-[11px] font-mono bg-destructive/5 px-2 py-0.5 rounded text-destructive border border-destructive/10">
-                      R{i + 1}: {l}
+                      م{i + 1}: {l}
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Indicators */}
+            {/* المؤشرات */}
             {analysis.indicators && analysis.indicators.length > 0 && (
               <div className="glass rounded-lg p-3">
-                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">Technical Convergence</h3>
+                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">التقارب الفني</h3>
                 <div className="space-y-1.5">
                   {analysis.indicators.map((ind, i) => (
                     <div key={i} className="flex items-center justify-between text-[11px] font-mono">
@@ -317,38 +317,38 @@ const ChartVision = () => {
               </div>
             )}
 
-            {/* Strategy */}
+            {/* الاستراتيجية */}
             <div className="glass rounded-lg p-3 border border-primary/10">
-              <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">Strategy Recommendation</h3>
+              <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">توصية الاستراتيجية</h3>
               <p className="text-[11px] text-muted-foreground font-mono mb-3">{analysis.strategy}</p>
               <div className="grid grid-cols-2 gap-1.5 text-[11px]">
                 <div className="bg-secondary/40 rounded-lg p-2 border border-border/10">
-                  <span className="text-[9px] text-muted-foreground font-mono block">ENTRY</span>
+                  <span className="text-[9px] text-muted-foreground font-mono block">الدخول</span>
                   <span className="font-mono font-bold">{analysis.entry}</span>
                 </div>
                 <div className="bg-destructive/5 rounded-lg p-2 border border-destructive/10">
-                  <span className="text-[9px] text-destructive font-mono block">STOP</span>
+                  <span className="text-[9px] text-destructive font-mono block">وقف الخسارة</span>
                   <span className="font-mono font-bold text-destructive">{analysis.stopLoss}</span>
                 </div>
                 <div className="bg-success/5 rounded-lg p-2 border border-success/10">
-                  <span className="text-[9px] text-success font-mono block">TP1</span>
+                  <span className="text-[9px] text-success font-mono block">الهدف 1</span>
                   <span className="font-mono font-bold text-success">{analysis.takeProfit1}</span>
                 </div>
                 <div className="bg-success/5 rounded-lg p-2 border border-success/10">
-                  <span className="text-[9px] text-success font-mono block">TP2</span>
+                  <span className="text-[9px] text-success font-mono block">الهدف 2</span>
                   <span className="font-mono font-bold text-success">{analysis.takeProfit2}</span>
                 </div>
               </div>
               <div className="mt-2 text-center">
-                <span className="text-[10px] text-muted-foreground font-mono">R:R </span>
+                <span className="text-[10px] text-muted-foreground font-mono">المخاطرة:العائد </span>
                 <span className="text-xs font-bold font-mono text-primary">{analysis.riskReward}</span>
               </div>
             </div>
 
-            {/* Reasoning */}
+            {/* المنطق */}
             {analysis.reasoning && (
               <div className="glass rounded-lg p-3">
-                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">AI Reasoning</h3>
+                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-2">منطق الذكاء الاصطناعي</h3>
                 <div className="space-y-1.5">
                   {analysis.reasoning.map((r, i) => (
                     <div key={i} className="flex items-start gap-1.5 text-[11px] font-mono">
@@ -360,38 +360,38 @@ const ChartVision = () => {
               </div>
             )}
 
-            {/* Summary */}
+            {/* الملخص */}
             {analysis.summary && (
               <div className="glass rounded-lg p-3 border border-accent/10">
-                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-1.5">Executive Summary</h3>
+                <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-1.5">الملخص التنفيذي</h3>
                 <p className="text-[11px] text-muted-foreground font-mono leading-relaxed">{analysis.summary}</p>
               </div>
             )}
 
-            {/* Actions */}
+            {/* الإجراءات */}
             <div className="grid grid-cols-3 gap-1.5">
               <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
                 <Bookmark className="w-4 h-4 text-primary" />
-                Save
+                حفظ
               </motion.button>
               <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
                 <Share2 className="w-4 h-4 text-accent" />
-                Share
+                مشاركة
               </motion.button>
               <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
                 <Bell className="w-4 h-4 text-warning" />
-                Alert
+                تنبيه
               </motion.button>
             </div>
 
-            {/* Reset */}
+            {/* إعادة التحليل */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={resetAnalysis}
               className="w-full glass rounded-lg p-3 flex items-center justify-center gap-2 border border-primary/10 hover:border-primary/20 transition-all"
             >
               <RotateCcw className="w-4 h-4 text-primary" />
-              <span className="font-mono text-xs font-medium">Analyze Another Chart</span>
+              <span className="font-mono text-xs font-medium">تحليل شارت آخر</span>
             </motion.button>
           </motion.div>
         )}

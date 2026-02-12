@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "Dashboard" },
-  { path: "/signals", icon: BarChart3, label: "Alpha Signals" },
-  { path: "/chart-vision", icon: Camera, label: "Chart Vision" },
-  { path: "/academy", icon: GraduationCap, label: "Academy" },
-  { path: "/profile", icon: User, label: "Profile" },
+  { path: "/", icon: Home, label: "الرئيسية" },
+  { path: "/signals", icon: BarChart3, label: "إشارات ألفا" },
+  { path: "/chart-vision", icon: Camera, label: "رؤية الشارت" },
+  { path: "/academy", icon: GraduationCap, label: "الأكاديمية" },
+  { path: "/profile", icon: User, label: "الملف الشخصي" },
 ];
 
 const BottomNav = () => {
