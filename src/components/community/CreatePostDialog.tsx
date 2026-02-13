@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, TrendingUp, TrendingDown, Send, Sparkles } from "lucide-react";
+import { X, TrendingUp, TrendingDown, Send, Sparkles, ImagePlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string }) => void;
+  onCreate: (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null }) => void;
 }
 
 const pairs = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "EUR/USD", "GBP/USD", "GOLD", "XRP/USDT", "BNB/USDT"];
@@ -18,12 +18,30 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
   const [confidence, setConfidence] = useState(70);
   const [summary, setSummary] = useState("");
   const [timeframe, setTimeframe] = useState("4H");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return; // 5MB max
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const handleSubmit = () => {
     if (!summary.trim()) return;
-    onCreate({ pair, prediction, ai_confidence: confidence, analysis_summary: summary, timeframe });
+    onCreate({ pair, prediction, ai_confidence: confidence, analysis_summary: summary, timeframe, image: imageFile });
     setSummary("");
     setConfidence(70);
+    removeImage();
     onClose();
   };
 
@@ -139,6 +157,28 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                 placeholder="اشرح تحليلك... مستويات الدعم والمقاومة، المؤشرات الفنية، السيناريوهات..."
                 className="w-full bg-secondary/60 border border-border/30 rounded-xl px-3 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 resize-none h-20"
               />
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5 block">صورة / شارت (اختياري)</label>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+              {imagePreview ? (
+                <div className="relative rounded-xl overflow-hidden border border-border/30">
+                  <img src={imagePreview} alt="preview" className="w-full max-h-40 object-cover" />
+                  <button onClick={removeImage} className="absolute top-2 left-2 w-7 h-7 rounded-lg bg-background/80 backdrop-blur flex items-center justify-center">
+                    <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/40 bg-secondary/30 text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors"
+                >
+                  <ImagePlus className="w-4 h-4" />
+                  <span className="text-[11px] font-mono">إضافة صورة أو شارت</span>
+                </button>
+              )}
             </div>
 
             {/* Submit */}

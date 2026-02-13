@@ -12,6 +12,7 @@ export interface CommunityPost {
   analysis_summary: string | null;
   timeframe: string;
   created_at: string;
+  image_url: string | null;
   display_name?: string;
   bullish_count: number;
   bearish_count: number;
@@ -103,9 +104,24 @@ export function useCommunity() {
     fetchPosts();
   };
 
-  const createPost = async (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string }) => {
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("community-images").upload(path, file);
+    if (error) { toast({ title: "فشل رفع الصورة", variant: "destructive" }); return null; }
+    const { data: urlData } = supabase.storage.from("community-images").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
+
+  const createPost = async (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null }) => {
     if (!user) return;
-    await supabase.from("community_posts").insert({ ...data, user_id: user.id });
+    let image_url: string | null = null;
+    if (data.image) {
+      image_url = await uploadImage(data.image);
+    }
+    const { image, ...rest } = data;
+    await supabase.from("community_posts").insert({ ...rest, user_id: user.id, image_url });
     toast({ title: "✅ تم نشر التحليل في غرفة العمليات" });
     fetchPosts();
   };
