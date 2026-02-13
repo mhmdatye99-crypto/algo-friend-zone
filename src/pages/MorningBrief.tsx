@@ -58,21 +58,21 @@ const MorningBrief = () => {
 
   return (
     <motion.div
-      className="px-4 pt-10 pb-4 max-w-lg mx-auto"
+      className="px-4 pt-10 pb-28 max-w-lg mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">الملخص الصباحي</p>
-          <h1 className="text-lg font-bold">خريطة الطريق المالية</h1>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">الملخص الصباحي</p>
+          <h1 className="text-xl font-bold">خريطة الطريق المالية</h1>
         </div>
         <div className="flex items-center gap-1.5">
-          <Sun className="w-4 h-4 text-warning" />
-          <span className="text-[10px] font-mono text-muted-foreground">8:00 صباحاً</span>
+          <Sun className="w-5 h-5 text-warning" />
+          <span className="text-[11px] font-mono text-muted-foreground">8:00 صباحاً</span>
         </div>
       </div>
-      <p className="text-[10px] text-muted-foreground font-mono mb-5">
+      <p className="text-[11px] text-muted-foreground font-mono mb-5">
         ملخصك اليومي المولّد بالذكاء الاصطناعي لتخطيط جلسة التداول
       </p>
 
@@ -133,7 +133,7 @@ const MorningBrief = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-3"
+            className="space-y-4"
           >
             {/* التاريخ والتحية */}
             <div className="glass rounded-lg p-3">

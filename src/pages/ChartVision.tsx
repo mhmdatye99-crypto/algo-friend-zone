@@ -118,7 +118,7 @@ const ChartVision = () => {
 
   return (
     <motion.div
-      className="px-4 pt-10 pb-4 max-w-lg mx-auto"
+      className="px-4 pt-10 pb-28 max-w-lg mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -129,9 +129,9 @@ const ChartVision = () => {
         {/* الحالة الأولية */}
         {step === "idle" && (
           <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
-            <h1 className="text-lg font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
-            <p className="text-[10px] text-muted-foreground font-mono mb-6">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
+            <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
+            <p className="text-[11px] text-muted-foreground font-mono mb-6">
               ارفع أي صورة شارت للتعرف على الأنماط وتوليد إشارات ألفا بدقة مؤسسية
             </p>
 
@@ -143,7 +143,7 @@ const ChartVision = () => {
                 className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-primary/15 hover:border-primary/30 transition-all"
               >
                 <Camera className="w-6 h-6 text-primary" />
-                <span className="text-[11px] font-mono font-medium">التقاط</span>
+                <span className="text-[12px] font-mono font-medium">التقاط</span>
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.97 }}
@@ -151,13 +151,13 @@ const ChartVision = () => {
                 className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-border/20 hover:border-accent/30 transition-all"
               >
                 <Upload className="w-6 h-6 text-accent" />
-                <span className="text-[11px] font-mono font-medium">رفع صورة</span>
+                <span className="text-[12px] font-mono font-medium">رفع صورة</span>
               </motion.button>
             </div>
 
             {/* القدرات */}
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-2 font-mono">القدرات</h3>
-            <div className="grid grid-cols-3 gap-1.5 mb-6">
+            <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">القدرات</h3>
+            <div className="grid grid-cols-3 gap-2 mb-6">
               {[
                 { icon: Target, label: "+50 نمط" },
                 { icon: BarChart3, label: "كشف الدعم/المقاومة" },
@@ -174,7 +174,7 @@ const ChartVision = () => {
                   className="glass rounded-lg p-2.5 flex flex-col items-center gap-1.5 text-center"
                 >
                   <cap.icon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-[8px] text-muted-foreground font-mono uppercase tracking-wider">{cap.label}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{cap.label}</span>
                 </motion.div>
               ))}
             </div>
@@ -370,16 +370,16 @@ const ChartVision = () => {
 
             {/* الإجراءات */}
             <div className="grid grid-cols-3 gap-1.5">
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
-                <Bookmark className="w-4 h-4 text-primary" />
+              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+                <Bookmark className="w-5 h-5 text-primary" />
                 حفظ
               </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
-                <Share2 className="w-4 h-4 text-accent" />
+              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+                <Share2 className="w-5 h-5 text-accent" />
                 مشاركة
               </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-2.5 flex flex-col items-center gap-1 text-[9px] font-mono">
-                <Bell className="w-4 h-4 text-warning" />
+              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+                <Bell className="w-5 h-5 text-warning" />
                 تنبيه
               </motion.button>
             </div>
