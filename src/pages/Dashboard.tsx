@@ -98,7 +98,7 @@ const Dashboard = () => {
       <motion.div variants={fadeUp} className="overflow-x-auto scrollbar-hide -mx-4 px-4">
         <div className="flex gap-2 min-w-max">
           {assets.slice(0, 10).map((asset, i) => (
-            <div key={i} className="flex items-center gap-2 bg-secondary/40 rounded-lg px-3 py-2 border border-border/10">
+            <div key={i} onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)} className="flex items-center gap-2 bg-secondary/40 rounded-lg px-3 py-2 border border-border/10 cursor-pointer hover:bg-secondary/60 transition-colors">
               <span className="text-sm font-bold">{asset.icon}</span>
               <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
               <MiniChart data={asset.sparkline} up={asset.up} width={40} height={16} />
@@ -291,10 +291,11 @@ const Dashboard = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: i * 0.03 }}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 items-center px-4 py-2.5 hover:bg-secondary/20 transition-colors"
+              onClick={() => navigate(`/asset/${encodeURIComponent(item.pair)}`)}
+              className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 items-center px-4 py-2.5 hover:bg-secondary/20 transition-colors cursor-pointer"
             >
               <button
-                onClick={() => isLoggedIn && toggleFavorite(item.pair)}
+                onClick={(e) => { e.stopPropagation(); isLoggedIn && toggleFavorite(item.pair); }}
                 className={cn(
                   "w-5 h-5 flex items-center justify-center transition-colors",
                   favorites.has(item.pair) ? "text-primary" : "text-muted-foreground/30 hover:text-muted-foreground"
