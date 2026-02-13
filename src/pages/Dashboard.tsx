@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import {
   Brain, Activity, Anchor, ArrowUpRight, ArrowDownRight,
   Sun, Gauge, Radar, BookOpenCheck, Pen, ChevronLeft,
-  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe
+  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -48,11 +48,13 @@ const researchQuests = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<AssetCategory>("الكل");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const assets = useLivePrices();
 
-  const filteredAssets = activeCategory === "الكل"
-    ? assets
-    : assets.filter(a => a.category === activeCategory);
+  const filteredAssets = assets
+    .filter(a => activeCategory === "الكل" || a.category === activeCategory)
+    .filter(a => !searchQuery || a.pair.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const pulseColor = marketPulse.index >= 70
     ? "text-success" : marketPulse.index >= 45
@@ -165,10 +167,56 @@ const Dashboard = () => {
             <Globe className="w-4 h-4 text-accent" />
             الأسواق العالمية — مباشر
           </h3>
-          <button onClick={() => navigate("/signals")} className="text-[10px] text-primary flex items-center gap-1 font-mono">
-            خطة المعركة <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setShowSearch(!showSearch); setSearchQuery(""); }}
+              className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                showSearch ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+              )}
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button onClick={() => navigate("/signals")} className="text-[10px] text-primary flex items-center gap-1 font-mono">
+              خطة المعركة <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
+
+        {/* شريط البحث */}
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3"
+          >
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="ابحث عن عملة... BTC, EUR, GOLD"
+                className="w-full bg-secondary/60 border border-border/30 rounded-xl pr-10 pl-10 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="text-[10px] font-mono text-muted-foreground mt-1.5">
+                {filteredAssets.length} نتيجة لـ "{searchQuery}"
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {/* تبويبات التصنيف */}
         <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide">
