@@ -2,14 +2,15 @@ import { motion } from "framer-motion";
 import {
   Brain, Activity, Anchor, ArrowUpRight, ArrowDownRight,
   Sun, Gauge, Radar, BookOpenCheck, Pen, ChevronLeft,
-  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X, Star
+  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X, Star, Target, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLivePrices, formatPrice, assetCategories, type AssetCategory } from "@/hooks/useLivePrices";
 import MiniChart from "@/components/MiniChart";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 
 const stagger = {
   hidden: {},
@@ -54,6 +55,24 @@ const Dashboard = () => {
   const [showFavOnly, setShowFavOnly] = useState(false);
   const assets = useLivePrices();
   const { favorites, toggle: toggleFavorite, isLoggedIn } = useFavorites();
+  const { goal, stats } = useGoalPlanner();
+
+  // Countdown timer
+  const [countdown, setCountdown] = useState("");
+  useEffect(() => {
+    if (!goal?.target_date) return;
+    const tick = () => {
+      const diff = new Date(goal.target_date!).getTime() - Date.now();
+      if (diff <= 0) { setCountdown("انتهى"); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setCountdown(`${d}d ${h}h ${m}m`);
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [goal?.target_date]);
 
   const filteredAssets = assets
     .filter(a => activeCategory === "الكل" || a.category === activeCategory)
@@ -370,6 +389,47 @@ const Dashboard = () => {
           ))}
         </div>
       </motion.div>
+
+      {/* الأوديسة المالية - Countdown */}
+      {goal && stats && (
+        <motion.div
+          variants={fadeUp}
+          onClick={() => navigate("/goal-planner")}
+          className="glass rounded-xl p-4 cursor-pointer hover:bg-secondary/20 transition-colors border border-primary/10"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[13px] font-semibold uppercase tracking-wider font-mono flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" />
+              الأوديسة المالية
+            </h3>
+            <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20">
+              <Clock className="w-3 h-3 text-primary" />
+              <span className="text-[11px] font-mono font-bold text-primary">{countdown}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
+                    boxShadow: "0 0 8px hsl(43 100% 50% / 0.4)",
+                  }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${stats.progress}%` }}
+                  transition={{ duration: 1.5 }}
+                />
+              </div>
+            </div>
+            <span className="text-[12px] font-mono font-bold text-primary">{stats.progress.toFixed(0)}%</span>
+          </div>
+          <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground">
+            <span>${goal.current_balance.toLocaleString()}</span>
+            <span>الهدف: ${goal.target_goal.toLocaleString()}</span>
+          </div>
+        </motion.div>
+      )}
 
       {/* مهام البحث السوقي */}
       <motion.div variants={fadeUp} className="glass rounded-xl p-4">

@@ -13,6 +13,7 @@ import MorningBrief from "./pages/MorningBrief";
 import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
 import Community from "./pages/Community";
+import GoalPlanner from "./pages/GoalPlanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/morning-brief" element={<MorningBrief />} />
               <Route path="/asset/:pair" element={<AssetDetail />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/goal-planner" element={<GoalPlanner />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

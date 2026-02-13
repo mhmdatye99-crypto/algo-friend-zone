@@ -145,6 +145,92 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_goals: {
+        Row: {
+          created_at: string
+          current_balance: number
+          current_level: number
+          expert_title: string
+          id: string
+          initial_capital: number
+          is_active: boolean
+          risk_appetite: string
+          started_at: string
+          target_date: string | null
+          target_goal: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_balance?: number
+          current_level?: number
+          expert_title?: string
+          id?: string
+          initial_capital: number
+          is_active?: boolean
+          risk_appetite?: string
+          started_at?: string
+          target_date?: string | null
+          target_goal: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_balance?: number
+          current_level?: number
+          expert_title?: string
+          id?: string
+          initial_capital?: number
+          is_active?: boolean
+          risk_appetite?: string
+          started_at?: string
+          target_date?: string | null
+          target_goal?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      goal_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          entry_date: string
+          goal_id: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          entry_date?: string
+          goal_id: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          entry_date?: string
+          goal_id?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_entries_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "financial_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

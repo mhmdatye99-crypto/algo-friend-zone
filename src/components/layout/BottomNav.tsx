@@ -1,4 +1,4 @@
-import { Home, Radar, Camera, GraduationCap, User, Network } from "lucide-react";
+import { Home, Radar, Camera, GraduationCap, User, Network, Target } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ const tabs = [
   { path: "/signals", icon: Radar, label: "إشارات" },
   { path: "/community", icon: Network, label: "المجتمع", glow: true },
   { path: "/chart-vision", icon: Camera, label: "الشارت" },
+  { path: "/goal-planner", icon: Target, label: "الأوديسة", glow: true },
   { path: "/academy", icon: GraduationCap, label: "الأكاديمية" },
   { path: "/profile", icon: User, label: "المحلل" },
 ];
