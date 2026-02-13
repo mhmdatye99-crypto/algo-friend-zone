@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import SignalCard from "@/components/signals/SignalCard";
+import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { useSignals } from "@/hooks/useSignals";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -50,7 +50,7 @@ const Signals = () => {
           variants={{ show: { transition: { staggerChildren: 0.08 } } }}
         >
           {filteredSignals.map((signal) => (
-            <SignalCard key={signal.pair} signal={signal} />
+            <SignalCardCollapsible key={signal.pair} signal={signal} />
           ))}
         </motion.div>
       )}

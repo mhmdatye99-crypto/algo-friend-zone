@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import TopBar from "./TopBar";
+import FloatingAlpha from "./FloatingAlpha";
 
 const AppLayout = () => {
   return (
@@ -11,6 +12,7 @@ const AppLayout = () => {
         <Outlet />
       </main>
       <BottomNav />
+      <FloatingAlpha />
     </div>
   );
 };
