@@ -9,6 +9,7 @@ import Signals from "./pages/Signals";
 import ChartVision from "./pages/ChartVision";
 import Academy from "./pages/Academy";
 import Profile from "./pages/Profile";
+import MorningBrief from "./pages/MorningBrief";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/chart-vision" element={<ChartVision />} />
             <Route path="/academy" element={<Academy />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/morning-brief" element={<MorningBrief />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
