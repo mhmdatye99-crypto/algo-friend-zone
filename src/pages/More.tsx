@@ -55,7 +55,7 @@ const menuItems = [
     icon: User,
     label: "الملف الشخصي",
     desc: "إعدادات الحساب والتفضيلات",
-    path: "/profile",
+    path: "/risk-calculator",
     color: "text-muted-foreground",
     bg: "bg-secondary",
     border: "border-border/20",
