@@ -306,24 +306,11 @@ const Profile = () => {
 
   return (
     <motion.div
-      className="px-4 pt-8 pb-24 max-w-lg mx-auto space-y-5"
+      className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-5"
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
     >
-      {/* Header */}
-      <motion.div className="flex items-center justify-between" variants={fadeUp} custom={0}>
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono font-medium">ملف المحلل</p>
-          <h1 className="text-xl font-bold tracking-tight">مركز الأداء والتداول</h1>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          className="w-9 h-9 rounded-xl glass flex items-center justify-center hover:bg-secondary/50 transition-colors duration-200"
-        >
-          <Settings className="w-4 h-4" />
-        </motion.button>
-      </motion.div>
 
       {/* Analyst Card */}
       <motion.div className="glass rounded-2xl p-5 text-center glow-gold" variants={fadeUp} custom={1}>
@@ -351,14 +338,10 @@ const Profile = () => {
       {/* Tabs */}
       <motion.div variants={fadeUp} custom={2}>
         <Tabs defaultValue="journal" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 bg-secondary/30 border border-border/20 rounded-xl h-11 p-1 gap-1">
+          <TabsList className="w-full grid grid-cols-2 bg-secondary/30 border border-border/20 rounded-xl h-11 p-1 gap-1">
             <TabsTrigger value="journal" className="text-[10px] font-mono font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
               سجل الصفقات
-            </TabsTrigger>
-            <TabsTrigger value="risk" className="text-[10px] font-mono font-medium data-[state=active]:bg-accent/10 data-[state=active]:text-accent data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
-              <Calculator className="w-3.5 h-3.5" />
-              حاسبة المخاطر
             </TabsTrigger>
             <TabsTrigger value="psychology" className="text-[10px] font-mono font-medium data-[state=active]:bg-accent/10 data-[state=active]:text-accent data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
               <Brain className="w-3.5 h-3.5" />
@@ -459,14 +442,6 @@ const Profile = () => {
             </div>
           </TabsContent>
 
-          {/* Risk Calculator */}
-          <TabsContent value="risk" className="mt-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 font-mono flex items-center gap-2">
-              <Calculator className="w-3.5 h-3.5 text-accent" />
-              حاسبة إدارة المخاطر
-            </h3>
-            <RiskCalculator />
-          </TabsContent>
 
           {/* Psychology */}
           <TabsContent value="psychology" className="mt-3 space-y-3">

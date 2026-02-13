@@ -14,6 +14,9 @@ const pageTitles: Record<string, string> = {
   "/goal-planner": "الأوديسة المالية",
   "/morning-brief": "الملخص الصباحي",
   "/profile": "الملف الشخصي",
+  "/risk-calculator": "حاسبة المخاطر",
+  "/subscription": "الاشتراك",
+  "/admin": "لوحة الإدارة",
 };
 
 const TopBar = () => {
