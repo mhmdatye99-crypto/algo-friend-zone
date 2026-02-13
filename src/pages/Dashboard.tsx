@@ -428,6 +428,21 @@ const Dashboard = () => {
             <span>${goal.current_balance.toLocaleString()}</span>
             <span>الهدف: ${goal.target_goal.toLocaleString()}</span>
           </div>
+          {/* Daily reminder */}
+          {stats && !stats.todayLogged && (
+            <motion.div
+              className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 border border-warning/20"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
+              <span className="text-[10px] font-mono text-warning font-bold">
+                {stats.missedDays > 0
+                  ? `⚠ فاتتك ${stats.missedDays} أيام — سجّل أرباحك الآن`
+                  : "لم تسجّل أرباح اليوم — اضغط للتسجيل"}
+              </span>
+            </motion.div>
+          )}
         </motion.div>
       )}
 

@@ -162,6 +162,19 @@ export function useGoalPlanner() {
     const recentEntries = entries.slice(-5);
     const losingStreak = recentEntries.filter(e => e.amount < 0).length >= 3;
 
+    // Missed days detection
+    const today = new Date().toISOString().split("T")[0];
+    const todayLogged = entries.some(e => e.entry_date === today);
+    const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
+    let missedDays = 0;
+    if (lastEntry) {
+      const lastDate = new Date(lastEntry.entry_date);
+      const diffMs = now.getTime() - lastDate.getTime();
+      missedDays = Math.max(0, Math.floor(diffMs / 86400000) - 1);
+    } else {
+      missedDays = Math.max(0, daysPassed - 1);
+    }
+
     // Growth path projection
     const avgDailyProfit = daysPassed > 0 ? achieved / daysPassed : 0;
     const projectionDays = daysRemaining > 0 ? daysRemaining : 90;
@@ -179,6 +192,8 @@ export function useGoalPlanner() {
       daysRemaining,
       dailyRequired,
       losingStreak,
+      todayLogged,
+      missedDays,
       growthPath,
       level: goal.current_level,
       title: goal.expert_title,
