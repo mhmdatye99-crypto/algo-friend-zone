@@ -1,40 +1,45 @@
-import { LayoutDashboard, Database, ScanLine, Users, Brain } from "lucide-react";
+import { Home, BarChart3, ScanLine, Zap, MoreHorizontal } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: LayoutDashboard, label: "القيادة" },
-  { path: "/signals", icon: Database, label: "الإشارات" },
+  { path: "/", icon: Home, label: "الرئيسية" },
+  { path: "/markets", icon: BarChart3, label: "الأسواق" },
   { path: "/chart-vision", icon: ScanLine, label: "الشارت", center: true },
-  { path: "/community", icon: Users, label: "المجتمع" },
-  { path: "/academy", icon: Brain, label: "المحلل" },
+  { path: "/signals", icon: Zap, label: "الإشارات" },
+  { path: "/more", icon: MoreHorizontal, label: "المزيد" },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isActive = (path: string) => {
+    if (path === "/more") {
+      return ["/more", "/community", "/academy", "/goal-planner", "/morning-brief", "/profile"].includes(location.pathname);
+    }
+    return location.pathname === path;
+  };
+
   return (
     <nav className="fixed bottom-4 left-4 right-4 z-50 safe-area-bottom max-w-lg mx-auto">
       <div
         className="flex items-center justify-around h-16 rounded-[10px] px-2"
         style={{
-          background: "hsla(240, 15%, 3%, 0.8)",
+          background: "hsla(240, 15%, 3%, 0.85)",
           backdropFilter: "blur(30px)",
           border: "1px solid hsla(43, 100%, 50%, 0.1)",
           boxShadow: "0 -4px 30px hsla(0,0%,0%,0.4), inset 0 1px 0 hsla(43,100%,50%,0.06)",
         }}
       >
-        {/* Gold top-line */}
         <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
         {tabs.map((tab) => {
-          const isActive = location.pathname === tab.path;
+          const active = isActive(tab.path);
           const Icon = tab.icon;
-          const isCenter = tab.center;
 
-          if (isCenter) {
+          if (tab.center) {
             return (
               <button
                 key={tab.path}
@@ -44,12 +49,12 @@ const BottomNav = () => {
                 <motion.div
                   className={cn(
                     "w-14 h-14 rounded-[10px] flex items-center justify-center transition-all duration-300",
-                    isActive
+                    active
                       ? "bg-primary text-primary-foreground"
                       : "bg-primary/15 text-primary border border-primary/30"
                   )}
                   style={{
-                    boxShadow: isActive
+                    boxShadow: active
                       ? "0 0 24px hsl(43 100% 50% / 0.4), 0 0 60px hsl(43 100% 50% / 0.15)"
                       : "0 0 12px hsl(43 100% 50% / 0.15)",
                   }}
@@ -59,7 +64,7 @@ const BottomNav = () => {
                 </motion.div>
                 <span className={cn(
                   "text-[9px] font-mono font-medium mt-1",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  active ? "text-primary" : "text-muted-foreground"
                 )}>{tab.label}</span>
               </button>
             );
@@ -69,11 +74,9 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={cn(
-                "relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-[10px] transition-all duration-300"
-              )}
+              className="relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-[10px] transition-all duration-300"
             >
-              {isActive && (
+              {active && (
                 <motion.div
                   layoutId="activeTab"
                   className="absolute inset-0 rounded-[10px]"
@@ -87,11 +90,11 @@ const BottomNav = () => {
               )}
               <Icon className={cn(
                 "w-5 h-5 relative z-10 transition-colors duration-300",
-                isActive ? "text-accent" : "text-muted-foreground"
+                active ? "text-accent" : "text-muted-foreground"
               )} />
               <span className={cn(
                 "text-[9px] font-mono font-medium relative z-10 transition-colors duration-300",
-                isActive ? "text-accent" : "text-muted-foreground"
+                active ? "text-accent" : "text-muted-foreground"
               )}>{tab.label}</span>
             </button>
           );

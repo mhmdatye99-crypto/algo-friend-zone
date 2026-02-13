@@ -14,6 +14,8 @@ import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
 import Community from "./pages/Community";
 import GoalPlanner from "./pages/GoalPlanner";
+import Markets from "./pages/Markets";
+import More from "./pages/More";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,8 @@ const App = () => (
               <Route path="/asset/:pair" element={<AssetDetail />} />
               <Route path="/community" element={<Community />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
+              <Route path="/markets" element={<Markets />} />
+              <Route path="/more" element={<More />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
