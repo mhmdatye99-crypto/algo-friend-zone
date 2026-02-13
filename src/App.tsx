@@ -11,6 +11,7 @@ import Academy from "./pages/Academy";
 import Profile from "./pages/Profile";
 import MorningBrief from "./pages/MorningBrief";
 import Auth from "./pages/Auth";
+import AssetDetail from "./pages/AssetDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/academy" element={<Academy />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
+              <Route path="/asset/:pair" element={<AssetDetail />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
