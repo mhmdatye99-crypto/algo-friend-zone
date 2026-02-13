@@ -1,14 +1,14 @@
-import { Home, BarChart3, Camera, GraduationCap, User } from "lucide-react";
+import { Home, Radar, Camera, GraduationCap, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "الرئيسية" },
-  { path: "/signals", icon: BarChart3, label: "إشارات ألفا" },
+  { path: "/", icon: Home, label: "مركز القيادة" },
+  { path: "/signals", icon: Radar, label: "إشارات ألفا" },
   { path: "/chart-vision", icon: Camera, label: "رؤية الشارت" },
-  { path: "/academy", icon: GraduationCap, label: "الأكاديمية" },
-  { path: "/profile", icon: User, label: "الملف الشخصي" },
+  { path: "/academy", icon: GraduationCap, label: "الأكاديمية الكمّية" },
+  { path: "/profile", icon: User, label: "المحلل" },
 ];
 
 const BottomNav = () => {
@@ -38,7 +38,7 @@ const BottomNav = () => {
                 />
               )}
               <Icon className="w-5 h-5 relative z-10" />
-              <span className="text-[10px] font-medium relative z-10">{tab.label}</span>
+              <span className="text-[9px] font-medium relative z-10 font-mono">{tab.label}</span>
             </button>
           );
         })}
