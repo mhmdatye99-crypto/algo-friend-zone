@@ -2,13 +2,14 @@ import { motion } from "framer-motion";
 import {
   Brain, Activity, Anchor, ArrowUpRight, ArrowDownRight,
   Sun, Gauge, Radar, BookOpenCheck, Pen, ChevronLeft,
-  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X
+  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X, Star
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLivePrices, formatPrice, assetCategories, type AssetCategory } from "@/hooks/useLivePrices";
 import MiniChart from "@/components/MiniChart";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const stagger = {
   hidden: {},
@@ -50,11 +51,16 @@ const Dashboard = () => {
   const [activeCategory, setActiveCategory] = useState<AssetCategory>("الكل");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [showFavOnly, setShowFavOnly] = useState(false);
   const assets = useLivePrices();
+  const { favorites, toggle: toggleFavorite, isLoggedIn } = useFavorites();
 
   const filteredAssets = assets
     .filter(a => activeCategory === "الكل" || a.category === activeCategory)
-    .filter(a => !searchQuery || a.pair.toLowerCase().includes(searchQuery.toLowerCase()));
+    .filter(a => !searchQuery || a.pair.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(a => !showFavOnly || favorites.has(a.pair));
+
+  const favoriteAssets = assets.filter(a => favorites.has(a.pair));
 
   const pulseColor = marketPulse.index >= 70
     ? "text-success" : marketPulse.index >= 45
@@ -168,6 +174,17 @@ const Dashboard = () => {
             الأسواق العالمية — مباشر
           </h3>
           <div className="flex items-center gap-2">
+            {isLoggedIn && (
+              <button
+                onClick={() => setShowFavOnly(!showFavOnly)}
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                  showFavOnly ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                )}
+              >
+                <Star className={cn("w-4 h-4", showFavOnly && "fill-current")} />
+              </button>
+            )}
             <button
               onClick={() => { setShowSearch(!showSearch); setSearchQuery(""); }}
               className={cn(
@@ -239,8 +256,30 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* قائمة المفضلة */}
+        {isLoggedIn && favoriteAssets.length > 0 && !showFavOnly && (
+          <div className="mb-3">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Star className="w-3 h-3 text-primary fill-primary" /> المفضلة ({favoriteAssets.length})
+            </p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {favoriteAssets.map((asset) => (
+                <div key={asset.pair} className="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 min-w-max">
+                  <span className="text-sm">{asset.icon}</span>
+                  <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
+                  <MiniChart data={asset.sparkline} up={asset.up} width={36} height={14} />
+                  <span className={cn("text-[10px] font-mono font-medium", asset.up ? "text-success" : "text-destructive")}>
+                    {asset.up ? "+" : ""}{asset.change}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="glass rounded-xl divide-y divide-border/20">
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-2 text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2 text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            <span className="w-5"></span>
             <span>الأصل</span>
             <span className="w-16 text-start">السعر</span>
             <span className="w-[60px] text-center">الشارت</span>
@@ -252,8 +291,17 @@ const Dashboard = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: i * 0.03 }}
-              className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center px-4 py-2.5 hover:bg-secondary/20 transition-colors"
+              className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 items-center px-4 py-2.5 hover:bg-secondary/20 transition-colors"
             >
+              <button
+                onClick={() => isLoggedIn && toggleFavorite(item.pair)}
+                className={cn(
+                  "w-5 h-5 flex items-center justify-center transition-colors",
+                  favorites.has(item.pair) ? "text-primary" : "text-muted-foreground/30 hover:text-muted-foreground"
+                )}
+              >
+                <Star className={cn("w-3.5 h-3.5", favorites.has(item.pair) && "fill-current")} />
+              </button>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
                   <span className="text-sm">{item.icon}</span>
