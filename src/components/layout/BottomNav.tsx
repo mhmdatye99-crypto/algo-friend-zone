@@ -18,7 +18,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border/30 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t safe-area-bottom" style={{ background: "hsla(240, 15%, 3%, 0.75)", backdropFilter: "blur(30px)", borderColor: "hsla(43, 100%, 50%, 0.08)" }}>
       <div className="flex items-center justify-around h-18 max-w-lg mx-auto px-2">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
