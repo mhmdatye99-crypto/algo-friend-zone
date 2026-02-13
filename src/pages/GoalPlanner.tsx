@@ -54,7 +54,7 @@ const SetupWizard = ({ onComplete }: { onComplete: (data: any) => void }) => {
   };
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="px-4 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
+    <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
       <motion.div variants={fadeUp}>
         <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">إعداد الأوديسة</p>
         <h1 className="text-xl font-bold text-foreground">الأوديسة المالية</h1>
@@ -196,7 +196,7 @@ const ProgressTracker = () => {
   };
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="px-4 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
+    <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
       {/* Header */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>

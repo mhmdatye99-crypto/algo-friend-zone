@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import {
   Brain, Activity, Anchor, ArrowUpRight, ArrowDownRight,
   Sun, Gauge, Radar, BookOpenCheck, Pen, ChevronLeft,
-  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X, Star, Target, Clock
+  TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, Globe, Search, X, Star, Target, Clock, Shield, Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -90,7 +90,7 @@ const Dashboard = () => {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className="px-4 pt-10 pb-28 space-y-5 max-w-lg mx-auto"
+      className="px-5 pt-10 pb-28 space-y-5 max-w-lg mx-auto"
     >
       {/* العنوان */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
@@ -98,19 +98,32 @@ const Dashboard = () => {
           <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">مركز القيادة</p>
           <h1 className="text-xl font-bold text-foreground">TradeJourney AI</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/morning-brief")}
-            className="flex items-center gap-1.5 text-[11px] font-mono text-warning bg-warning/10 px-3 py-1.5 rounded-lg border border-warning/20 hover:bg-warning/15 transition-colors"
-          >
-            <Sun className="w-3.5 h-3.5" />
-            الملخص الصباحي
-          </button>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-[10px] font-mono text-muted-foreground">مباشر</span>
-          </span>
-        </div>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          <span className="text-[10px] font-mono text-muted-foreground">مباشر</span>
+        </span>
+      </motion.div>
+
+      {/* الملخص الصباحي — Wide Prominent Button */}
+      <motion.div variants={fadeUp}>
+        <button
+          onClick={() => navigate("/morning-brief")}
+          className="w-full flex items-center gap-3 px-5 py-4 rounded-[10px] transition-all duration-300 hover:brightness-110"
+          style={{
+            background: "linear-gradient(135deg, hsla(38, 100%, 50%, 0.12) 0%, hsla(43, 100%, 50%, 0.06) 100%)",
+            border: "1px solid hsla(38, 100%, 50%, 0.2)",
+            boxShadow: "0 4px 20px hsla(38, 100%, 50%, 0.08)",
+          }}
+        >
+          <div className="w-10 h-10 rounded-[10px] bg-warning/15 flex items-center justify-center shrink-0">
+            <Sun className="w-5 h-5 text-warning" />
+          </div>
+          <div className="flex-1 text-right">
+            <p className="text-[13px] font-mono font-bold text-warning">الملخص الصباحي</p>
+            <p className="text-[10px] font-mono text-muted-foreground">تقرير السوق اليومي بالذكاء الاصطناعي</p>
+          </div>
+          <ChevronLeft className="w-4 h-4 text-warning/60" />
+        </button>
       </motion.div>
 
       {/* شريط الأسعار السريع - Ticker Bar */}
@@ -166,21 +179,86 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* إجراءات سريعة */}
-      <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
-        {[
-          { icon: Radar, label: "تحليل استراتيجية", path: "/signals" },
-          { icon: Eye, label: "رؤية الشارت", path: "/chart-vision" },
-          { icon: Brain, label: "الأكاديمية الكمّية", path: "/academy" },
-          { icon: Pen, label: "يوميات المتداول", path: "/profile" },
-        ].map((item) => (
-          <button
-            key={item.label}
-            onClick={() => navigate(item.path)}
-            className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-secondary/40 hover:bg-secondary/70 transition-colors border border-border/20"
+      {/* الأوديسة المالية — Wealth Path Horizontal Bar */}
+      {goal && stats && (
+        <motion.div variants={fadeUp}>
+          <div
+            onClick={() => navigate("/goal-planner")}
+            className="flex items-center gap-3 px-4 py-3 rounded-[10px] cursor-pointer transition-all hover:brightness-110"
+            style={{
+              background: "hsla(240, 15%, 3.5%, 0.5)",
+              border: "1px solid hsla(43, 100%, 50%, 0.1)",
+            }}
           >
-            <item.icon className="w-5 h-5 text-muted-foreground" />
-            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{item.label}</span>
+            <Target className="w-4 h-4 text-primary shrink-0" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">مسار الثروة</span>
+                <span className="text-[11px] font-mono font-bold text-primary">{stats.progress.toFixed(0)}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
+                    boxShadow: "0 0 8px hsl(43 100% 50% / 0.4)",
+                  }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${stats.progress}%` }}
+                  transition={{ duration: 1.5 }}
+                />
+              </div>
+              <div className="flex justify-between mt-1 text-[9px] font-mono text-muted-foreground">
+                <span>${goal.current_balance.toLocaleString()}</span>
+                <span>${goal.target_goal.toLocaleString()}</span>
+              </div>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate("/goal-planner"); }}
+              className="w-7 h-7 rounded-[10px] bg-secondary/60 flex items-center justify-center shrink-0 hover:bg-secondary transition-colors"
+            >
+              <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </div>
+          {/* Daily reminder inline */}
+          {!stats.todayLogged && (
+            <motion.div
+              className="mt-2 flex items-center gap-2 px-3 py-2 rounded-[10px] bg-warning/10 border border-warning/20"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
+              <span className="text-[10px] font-mono text-warning font-bold">
+                {stats.missedDays > 0 ? `⚠ فاتتك ${stats.missedDays} أيام — سجّل أرباحك` : "لم تسجّل أرباح اليوم"}
+              </span>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {/* أزرار القوة — Power Buttons */}
+      <motion.div variants={fadeUp} className="flex justify-center gap-6">
+        {[
+          { icon: Anchor, label: "مراقب الحيتان", color: "text-accent", bg: "bg-accent/10", border: "border-accent/20", section: "whales" },
+          { icon: Activity, label: "خريطة الحرارة", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", section: "pulse" },
+          { icon: Shield, label: "حاسبة المخاطر", color: "text-success", bg: "bg-success/10", border: "border-success/20", section: "risk" },
+        ].map((btn) => (
+          <button
+            key={btn.label}
+            className="flex flex-col items-center gap-2 group"
+          >
+            <div
+              className={cn(
+                "w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 group-hover:scale-105",
+                btn.bg, btn.border
+              )}
+              style={{
+                background: `linear-gradient(180deg, hsla(0,0%,100%,0.04) 0%, transparent 100%), ${btn.bg.includes('accent') ? 'hsla(190,100%,50%,0.08)' : btn.bg.includes('primary') ? 'hsla(43,100%,50%,0.08)' : 'hsla(155,100%,45%,0.08)'}`,
+              }}
+            >
+              <btn.icon className={cn("w-5 h-5", btn.color)} />
+            </div>
+            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">{btn.label}</span>
           </button>
         ))}
       </motion.div>
@@ -390,61 +468,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* الأوديسة المالية - Countdown */}
-      {goal && stats && (
-        <motion.div
-          variants={fadeUp}
-          onClick={() => navigate("/goal-planner")}
-          className="glass rounded-xl p-4 cursor-pointer hover:bg-secondary/20 transition-colors border border-primary/10"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[13px] font-semibold uppercase tracking-wider font-mono flex items-center gap-2">
-              <Target className="w-4 h-4 text-primary" />
-              الأوديسة المالية
-            </h3>
-            <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20">
-              <Clock className="w-3 h-3 text-primary" />
-              <span className="text-[11px] font-mono font-bold text-primary">{countdown}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{
-                    background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
-                    boxShadow: "0 0 8px hsl(43 100% 50% / 0.4)",
-                  }}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${stats.progress}%` }}
-                  transition={{ duration: 1.5 }}
-                />
-              </div>
-            </div>
-            <span className="text-[12px] font-mono font-bold text-primary">{stats.progress.toFixed(0)}%</span>
-          </div>
-          <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground">
-            <span>${goal.current_balance.toLocaleString()}</span>
-            <span>الهدف: ${goal.target_goal.toLocaleString()}</span>
-          </div>
-          {/* Daily reminder */}
-          {stats && !stats.todayLogged && (
-            <motion.div
-              className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 border border-warning/20"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
-              <span className="text-[10px] font-mono text-warning font-bold">
-                {stats.missedDays > 0
-                  ? `⚠ فاتتك ${stats.missedDays} أيام — سجّل أرباحك الآن`
-                  : "لم تسجّل أرباح اليوم — اضغط للتسجيل"}
-              </span>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
+      {/* (Wealth Path moved to top — removed duplicate here) */}
 
       {/* مهام البحث السوقي */}
       <motion.div variants={fadeUp} className="glass rounded-xl p-4">
