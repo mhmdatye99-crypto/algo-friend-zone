@@ -7,6 +7,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useLivePrices, formatPrice, assetCategories, type AssetCategory } from "@/hooks/useLivePrices";
+import MiniChart from "@/components/MiniChart";
 
 const stagger = {
   hidden: {},
@@ -28,30 +30,12 @@ const marketPulse = {
   ],
 };
 
-type AssetCategory = "الكل" | "كريبتو" | "فوركس" | "سلع";
-
-const allAssets = [
-  { pair: "BTC/USDT", price: "67,450.00", change: +2.34, up: true, vol: "$2.4B", rsi: 62, macd: "صعودي", signal: "شراء", category: "كريبتو" as AssetCategory },
-  { pair: "ETH/USDT", price: "3,245.80", change: +1.87, up: true, vol: "$1.1B", rsi: 58, macd: "صعودي", signal: "شراء", category: "كريبتو" as AssetCategory },
-  { pair: "SOL/USDT", price: "148.32", change: -1.23, up: false, vol: "$380M", rsi: 38, macd: "هبوطي", signal: "محايد", category: "كريبتو" as AssetCategory },
-  { pair: "BNB/USDT", price: "612.40", change: +0.95, up: true, vol: "$290M", rsi: 54, macd: "صعودي", signal: "شراء", category: "كريبتو" as AssetCategory },
-  { pair: "XRP/USDT", price: "0.5234", change: -0.45, up: false, vol: "$180M", rsi: 41, macd: "هبوطي", signal: "محايد", category: "كريبتو" as AssetCategory },
-  { pair: "EUR/USD", price: "1.0845", change: -0.12, up: false, vol: "$890M", rsi: 44, macd: "هبوطي", signal: "بيع", category: "فوركس" as AssetCategory },
-  { pair: "GBP/USD", price: "1.2634", change: +0.18, up: true, vol: "$620M", rsi: 52, macd: "صعودي", signal: "شراء", category: "فوركس" as AssetCategory },
-  { pair: "USD/JPY", price: "154.82", change: +0.34, up: true, vol: "$780M", rsi: 71, macd: "صعودي", signal: "تشبع شرائي", category: "فوركس" as AssetCategory },
-  { pair: "AUD/USD", price: "0.6543", change: -0.28, up: false, vol: "$210M", rsi: 36, macd: "هبوطي", signal: "بيع", category: "فوركس" as AssetCategory },
-  { pair: "GOLD", price: "2,345.60", change: +0.45, up: true, vol: "$540M", rsi: 67, macd: "صعودي", signal: "شراء", category: "سلع" as AssetCategory },
-  { pair: "SILVER", price: "27.84", change: +1.12, up: true, vol: "$120M", rsi: 59, macd: "صعودي", signal: "شراء", category: "سلع" as AssetCategory },
-  { pair: "OIL", price: "78.45", change: -0.67, up: false, vol: "$340M", rsi: 45, macd: "هبوطي", signal: "محايد", category: "سلع" as AssetCategory },
-];
-
 const whaleActivity = [
   { asset: "BTC", amount: "1,200 BTC", value: "$80.9M", direction: "in", exchange: "Binance", time: "منذ 2 د", type: "تجميع" },
   { asset: "ETH", amount: "15,000 ETH", value: "$48.7M", direction: "out", exchange: "Coinbase", time: "منذ 5 د", type: "تفريغ" },
   { asset: "USDT", amount: "50M USDT", value: "$50M", direction: "in", exchange: "Kraken", time: "منذ 8 د", type: "تحويل" },
   { asset: "BTC", amount: "800 BTC", value: "$53.9M", direction: "in", exchange: "OKX", time: "منذ 12 د", type: "تجميع" },
   { asset: "SOL", amount: "200K SOL", value: "$29.6M", direction: "out", exchange: "Binance", time: "منذ 15 د", type: "تفريغ" },
-  { asset: "XRP", amount: "80M XRP", value: "$41.8M", direction: "in", exchange: "Bitstamp", time: "منذ 20 د", type: "تجميع" },
 ];
 
 const researchQuests = [
@@ -61,15 +45,14 @@ const researchQuests = [
   { label: "إكمال وحدة من الأكاديمية الكمّية", done: false },
 ];
 
-const assetCategories: AssetCategory[] = ["الكل", "كريبتو", "فوركس", "سلع"];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<AssetCategory>("الكل");
+  const assets = useLivePrices();
 
   const filteredAssets = activeCategory === "الكل"
-    ? allAssets
-    : allAssets.filter(a => a.category === activeCategory);
+    ? assets
+    : assets.filter(a => a.category === activeCategory);
 
   const pulseColor = marketPulse.index >= 70
     ? "text-success" : marketPulse.index >= 45
@@ -106,10 +89,11 @@ const Dashboard = () => {
       {/* شريط الأسعار السريع - Ticker Bar */}
       <motion.div variants={fadeUp} className="overflow-x-auto scrollbar-hide -mx-4 px-4">
         <div className="flex gap-2 min-w-max">
-          {allAssets.slice(0, 8).map((asset, i) => (
+          {assets.slice(0, 10).map((asset, i) => (
             <div key={i} className="flex items-center gap-2 bg-secondary/40 rounded-lg px-3 py-2 border border-border/10">
+              <span className="text-sm font-bold">{asset.icon}</span>
               <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
-              <span className="text-[11px] font-mono text-muted-foreground">{asset.price}</span>
+              <MiniChart data={asset.sparkline} up={asset.up} width={40} height={16} />
               <span className={cn("text-[10px] font-mono font-medium", asset.up ? "text-success" : "text-destructive")}>
                 {asset.up ? "+" : ""}{asset.change}%
               </span>
@@ -125,9 +109,11 @@ const Dashboard = () => {
             <Gauge className="w-5 h-5 text-primary" />
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-mono">نبض الذكاء السوقي</p>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-lg">تحديث مباشر</span>
+          <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-lg flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+            تحديث مباشر
+          </span>
         </div>
-        
         <div className="flex items-end gap-3 mb-3">
           <span className={cn("text-4xl font-bold font-mono", pulseColor)}>{marketPulse.index}</span>
           <div className="mb-1">
@@ -135,7 +121,6 @@ const Dashboard = () => {
             <p className="text-[10px] text-muted-foreground font-mono">مؤشر ثقة AI المركّب</p>
           </div>
         </div>
-
         <div className="h-2.5 rounded-full bg-muted overflow-hidden mb-4">
           <motion.div
             className="h-full rounded-full bg-gradient-to-l from-destructive via-warning to-success"
@@ -144,7 +129,6 @@ const Dashboard = () => {
             transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
           />
         </div>
-
         <div className="grid grid-cols-4 gap-2">
           {marketPulse.subMetrics.map((m, i) => (
             <div key={i} className="bg-secondary/40 rounded-lg px-2 py-2 text-center border border-border/10">
@@ -179,7 +163,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[13px] font-semibold uppercase tracking-wider font-mono flex items-center gap-2">
             <Globe className="w-4 h-4 text-accent" />
-            تدفق المعنويات العالمية
+            الأسواق العالمية — مباشر
           </h3>
           <button onClick={() => navigate("/signals")} className="text-[10px] text-primary flex items-center gap-1 font-mono">
             خطة المعركة <ChevronLeft className="w-3.5 h-3.5" />
@@ -187,61 +171,60 @@ const Dashboard = () => {
         </div>
 
         {/* تبويبات التصنيف */}
-        <div className="flex gap-1.5 mb-3">
+        <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide">
           {assetCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-[11px] font-mono font-medium transition-all duration-300",
+                "px-3 py-1.5 rounded-lg text-[11px] font-mono font-medium transition-all duration-300 whitespace-nowrap",
                 activeCategory === cat
                   ? "bg-primary text-primary-foreground"
                   : "bg-secondary text-muted-foreground hover:bg-secondary/80"
               )}
             >
               {cat}
+              <span className="text-[10px] opacity-60 mr-1">
+                ({activeCategory === "الكل" ? assets.length : assets.filter(a => a.category === cat).length})
+              </span>
             </button>
           ))}
         </div>
 
         <div className="glass rounded-xl divide-y divide-border/20">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 px-4 py-2 text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-            <span>الزوج</span>
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-2 text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            <span>الأصل</span>
             <span className="w-16 text-start">السعر</span>
-            <span className="w-12 text-start">التغيّر</span>
-            <span className="w-8 text-start">RSI</span>
-            <span className="w-12 text-start">MACD</span>
+            <span className="w-[60px] text-center">الشارت</span>
+            <span className="w-14 text-start">التغيّر</span>
           </div>
-          {filteredAssets.map((item, i) => (
-            <div key={i} className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 items-center px-4 py-2.5">
+          {filteredAssets.slice(0, 15).map((item, i) => (
+            <motion.div
+              key={item.pair}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.03 }}
+              className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center px-4 py-2.5 hover:bg-secondary/20 transition-colors"
+            >
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center">
-                  <span className="text-[10px] font-bold font-mono text-foreground">
-                    {item.pair.slice(0, 2)}
-                  </span>
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
+                  <span className="text-sm">{item.icon}</span>
                 </div>
                 <div>
                   <span className="text-[12px] font-mono font-medium block leading-tight">{item.pair}</span>
                   <span className="text-[10px] font-mono text-muted-foreground">{item.vol}</span>
                 </div>
               </div>
-              <span className="text-[12px] font-mono font-medium w-16 text-start">{item.price}</span>
-              <span className={cn("text-[11px] font-mono font-medium w-12 text-start", item.up ? "text-success" : "text-destructive")}>
+              <span className="text-[12px] font-mono font-medium w-16 text-start tabular-nums">
+                {formatPrice(item.price)}
+              </span>
+              <div className="w-[60px] flex justify-center">
+                <MiniChart data={item.sparkline} up={item.up} width={50} height={20} />
+              </div>
+              <span className={cn("text-[11px] font-mono font-medium w-14 text-start tabular-nums", item.up ? "text-success" : "text-destructive")}>
                 {item.up ? "+" : ""}{item.change}%
               </span>
-              <span className={cn(
-                "text-[11px] font-mono w-8 text-start",
-                item.rsi > 70 ? "text-destructive" : item.rsi < 30 ? "text-success" : "text-muted-foreground"
-              )}>
-                {item.rsi}
-              </span>
-              <span className={cn(
-                "text-[10px] font-mono w-12 text-start",
-                item.macd === "صعودي" ? "text-success" : "text-destructive"
-              )}>
-                {item.macd}
-              </span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </motion.div>
@@ -319,7 +302,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* تحذير عدم التنفيذ */}
+      {/* تحذير */}
       <motion.div variants={fadeUp} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-secondary/30 border border-border/10">
         <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0" />
         <p className="text-[10px] text-muted-foreground font-mono">
