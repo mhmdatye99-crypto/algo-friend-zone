@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_posts: {
+        Row: {
+          ai_confidence: number
+          analysis_summary: string | null
+          created_at: string
+          id: string
+          pair: string
+          prediction: string
+          timeframe: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_confidence?: number
+          analysis_summary?: string | null
+          created_at?: string
+          id?: string
+          pair: string
+          prediction: string
+          timeframe?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_confidence?: number
+          analysis_summary?: string | null
+          created_at?: string
+          id?: string
+          pair?: string
+          prediction?: string
+          timeframe?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_votes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+          vote: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+          vote: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+          vote?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorite_assets: {
         Row: {
           created_at: string
@@ -114,6 +224,35 @@ export type Database = {
             columns: ["trade_id"]
             isOneToOne: false
             referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_strategies: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_strategies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
             referencedColumns: ["id"]
           },
         ]

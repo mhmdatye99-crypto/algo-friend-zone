@@ -1,13 +1,14 @@
-import { Home, Radar, Camera, GraduationCap, User } from "lucide-react";
+import { Home, Radar, Camera, GraduationCap, User, Network } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "مركز القيادة" },
-  { path: "/signals", icon: Radar, label: "إشارات ألفا" },
-  { path: "/chart-vision", icon: Camera, label: "رؤية الشارت" },
-  { path: "/academy", icon: GraduationCap, label: "الأكاديمية الكمّية" },
+  { path: "/", icon: Home, label: "القيادة" },
+  { path: "/signals", icon: Radar, label: "إشارات" },
+  { path: "/community", icon: Network, label: "المجتمع", glow: true },
+  { path: "/chart-vision", icon: Camera, label: "الشارت" },
+  { path: "/academy", icon: GraduationCap, label: "الأكاديمية" },
   { path: "/profile", icon: User, label: "المحلل" },
 ];
 
@@ -37,8 +38,16 @@ const BottomNav = () => {
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <Icon className="w-[22px] h-[22px] relative z-10" />
-              <span className="text-[11px] font-medium relative z-10">{tab.label}</span>
+              {'glow' in tab && tab.glow && !isActive && (
+                <motion.div
+                  className="absolute inset-0 rounded-xl"
+                  style={{ boxShadow: "0 0 12px hsl(190 100% 50% / 0.2), 0 0 4px hsl(190 100% 50% / 0.1)" }}
+                  animate={{ opacity: [0.4, 0.8, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
+              <Icon className={cn("w-[20px] h-[20px] relative z-10", 'glow' in tab && tab.glow && !isActive && "text-accent")} />
+              <span className="text-[9px] font-medium relative z-10">{tab.label}</span>
             </button>
           );
         })}
