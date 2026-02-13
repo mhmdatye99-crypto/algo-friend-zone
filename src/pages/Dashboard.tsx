@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import {
   TrendingUp, TrendingDown, Zap, Brain, Activity, Target,
-  ChevronRight, Anchor, ArrowUpRight, ArrowDownRight, BarChart3
+  ChevronRight, Anchor, ArrowUpRight, ArrowDownRight, BarChart3, Sun
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const stagger = {
   hidden: {},
@@ -35,6 +36,8 @@ const whaleActivity = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       variants={stagger}
@@ -49,6 +52,13 @@ const Dashboard = () => {
           <h1 className="text-lg font-bold text-foreground">لوحة الأداء</h1>
         </div>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => navigate("/morning-brief")}
+            className="flex items-center gap-1 text-[10px] font-mono text-warning bg-warning/10 px-2 py-1 rounded-lg border border-warning/20 hover:bg-warning/15 transition-colors"
+          >
+            <Sun className="w-3 h-3" />
+            الملخص الصباحي
+          </button>
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
           <span className="text-[10px] font-mono text-muted-foreground">مباشر</span>
         </div>
