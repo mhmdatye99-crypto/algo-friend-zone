@@ -25,6 +25,7 @@ interface Signal {
   convergence: number;
   reasons: string[];
   risk: string;
+  category?: string;
 }
 
 interface Props {
