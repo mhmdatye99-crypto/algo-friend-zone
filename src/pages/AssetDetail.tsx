@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -211,6 +212,11 @@ const AssetDetail = () => {
             <p className="text-[10px] font-mono text-muted-foreground">حجم التداول اليومي</p>
           </div>
         </div>
+      </motion.div>
+
+      {/* AI Consultant */}
+      <motion.div variants={fadeUp} className="flex justify-center">
+        <AlphaConsultant asset={asset} />
       </motion.div>
 
       {/* Quick Actions */}
