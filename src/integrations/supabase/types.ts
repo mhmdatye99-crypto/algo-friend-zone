@@ -14,7 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          capital: number | null
+          created_at: string
+          display_name: string | null
+          experience_level: string | null
+          id: string
+          trading_style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          capital?: number | null
+          created_at?: string
+          display_name?: string | null
+          experience_level?: string | null
+          id?: string
+          trading_style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          capital?: number | null
+          created_at?: string
+          display_name?: string | null
+          experience_level?: string | null
+          id?: string
+          trading_style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      psychology_entries: {
+        Row: {
+          created_at: string
+          discipline_score: number | null
+          energy_level: number | null
+          id: string
+          lessons_learned: string | null
+          mistakes: string | null
+          mood: string
+          notes: string | null
+          trade_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discipline_score?: number | null
+          energy_level?: number | null
+          id?: string
+          lessons_learned?: string | null
+          mistakes?: string | null
+          mood: string
+          notes?: string | null
+          trade_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discipline_score?: number | null
+          energy_level?: number | null
+          id?: string
+          lessons_learned?: string | null
+          mistakes?: string | null
+          mood?: string
+          notes?: string | null
+          trade_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "psychology_entries_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trades: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          direction: string
+          emotion: string | null
+          entry_price: number
+          exit_price: number | null
+          id: string
+          notes: string | null
+          pair: string
+          pnl: number | null
+          position_size: number | null
+          status: string
+          stop_loss: number | null
+          take_profit: number | null
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          direction: string
+          emotion?: string | null
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          notes?: string | null
+          pair: string
+          pnl?: number | null
+          position_size?: number | null
+          status?: string
+          stop_loss?: number | null
+          take_profit?: number | null
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          direction?: string
+          emotion?: string | null
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          notes?: string | null
+          pair?: string
+          pnl?: number | null
+          position_size?: number | null
+          status?: string
+          stop_loss?: number | null
+          take_profit?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
