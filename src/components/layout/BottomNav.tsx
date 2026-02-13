@@ -15,9 +15,9 @@ const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isActive = (path: string) => {
+    const isActive = (path: string) => {
     if (path === "/more") {
-      return ["/more", "/community", "/academy", "/goal-planner", "/morning-brief", "/profile"].includes(location.pathname);
+      return ["/more", "/community", "/academy", "/goal-planner", "/morning-brief", "/profile", "/risk-calculator", "/subscription", "/admin"].includes(location.pathname);
     }
     return location.pathname === path;
   };
@@ -63,7 +63,7 @@ const BottomNav = () => {
                   <Icon className="w-6 h-6" />
                 </motion.div>
                 <span className={cn(
-                  "text-[9px] font-mono font-medium mt-1",
+                  "text-[10px] font-mono font-medium mt-1",
                   active ? "text-primary" : "text-muted-foreground"
                 )}>{tab.label}</span>
               </button>
@@ -93,7 +93,7 @@ const BottomNav = () => {
                 active ? "text-accent" : "text-muted-foreground"
               )} />
               <span className={cn(
-                "text-[9px] font-mono font-medium relative z-10 transition-colors duration-300",
+                "text-[10px] font-mono font-medium relative z-10 transition-colors duration-300",
                 active ? "text-accent" : "text-muted-foreground"
               )}>{tab.label}</span>
             </button>

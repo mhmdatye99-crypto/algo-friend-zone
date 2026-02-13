@@ -118,7 +118,7 @@ const ChartVision = () => {
 
   return (
     <motion.div
-      className="px-5 pt-10 pb-28 max-w-lg mx-auto space-y-6"
+      className="px-4 pt-4 pb-28 max-w-lg mx-auto space-y-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -129,17 +129,6 @@ const ChartVision = () => {
         {/* الحالة الأولية */}
         {step === "idle" && (
           <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col min-h-[75vh]">
-            {/* Header with History */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
-                <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
-              </div>
-              <button className="w-9 h-9 rounded-[10px] bg-secondary/60 border border-border/20 flex items-center justify-center hover:bg-secondary transition-colors">
-                <RotateCcw className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-
             {/* القدرات */}
             <div className="mb-4">
               <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">قدرات المحرك العصبي</h3>

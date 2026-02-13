@@ -1,10 +1,7 @@
 import { motion } from "framer-motion";
-import { Filter, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import SignalCard from "@/components/signals/SignalCard";
-import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
-import MiniChart from "@/components/MiniChart";
 
 const filters = ["الكل", "فوركس", "كريبتو", "سلع", "مؤشرات"];
 
@@ -97,7 +94,6 @@ const signals = [
 
 const Signals = () => {
   const [activeFilter, setActiveFilter] = useState("الكل");
-  const assets = useLivePrices();
 
   const filteredSignals = activeFilter === "الكل"
     ? signals
@@ -109,53 +105,9 @@ const Signals = () => {
         return true;
       });
 
-  // Get top movers
-  const topMovers = [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 6);
 
   return (
-    <div className="px-4 pt-10 pb-28 max-w-lg mx-auto">
-      {/* العنوان */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل التنبؤي</p>
-          <h1 className="text-xl font-bold">إشارات ألفا التنبؤية</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            مباشر · 30 ثانية
-          </span>
-          <button className="w-9 h-9 rounded-xl glass flex items-center justify-center">
-            <Filter className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* شريط الأسعار المتحركة */}
-      <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 mb-4">
-        <div className="flex gap-2 min-w-max">
-          {topMovers.map((asset, i) => (
-            <div key={i} className="flex items-center gap-2 bg-secondary/40 rounded-lg px-3 py-2 border border-border/10">
-              <span className="text-sm font-bold">{asset.icon}</span>
-              <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
-              <MiniChart data={asset.sparkline} up={asset.up} width={36} height={14} />
-              <div className="flex items-center gap-0.5">
-                {asset.up ? <TrendingUp className="w-3 h-3 text-success" /> : <TrendingDown className="w-3 h-3 text-destructive" />}
-                <span className={cn("text-[10px] font-mono font-medium", asset.up ? "text-success" : "text-destructive")}>
-                  {asset.up ? "+" : ""}{asset.change}%
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* تحذير */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/40 border border-border/10 mb-4">
-        <AlertTriangle className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-        <p className="text-[10px] text-muted-foreground font-mono">توصيات تحليلية فقط — وليست أوامر تنفيذ</p>
-      </div>
-
+    <div className="px-4 pt-4 pb-28 max-w-lg mx-auto">
       {/* الفلاتر */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 -mx-4 px-4">
         {filters.map((f) => (
