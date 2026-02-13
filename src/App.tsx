@@ -16,6 +16,7 @@ import Community from "./pages/Community";
 import GoalPlanner from "./pages/GoalPlanner";
 import Markets from "./pages/Markets";
 import More from "./pages/More";
+import RiskCalculator from "./pages/RiskCalculator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/goal-planner" element={<GoalPlanner />} />
               <Route path="/markets" element={<Markets />} />
               <Route path="/more" element={<More />} />
+              <Route path="/risk-calculator" element={<RiskCalculator />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
