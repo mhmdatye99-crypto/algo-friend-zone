@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  Users, Brain, Target, Sun, User, Shield,
+  Users, Brain, Target, Sun, User, Shield, Crown,
   ChevronLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -68,6 +68,15 @@ const menuItems = [
     color: "text-success",
     bg: "bg-success/10",
     border: "border-success/15",
+  },
+  {
+    icon: Crown,
+    label: "الاشتراك",
+    desc: "عرض خطة اشتراكك وتفاصيلها",
+    path: "/subscription",
+    color: "text-primary",
+    bg: "bg-primary/10",
+    border: "border-primary/15",
   },
 ];
 
