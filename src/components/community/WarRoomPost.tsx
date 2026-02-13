@@ -104,6 +104,13 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
           </p>
         )}
 
+        {/* Post Image */}
+        {post.image_url && (
+          <div className="rounded-xl overflow-hidden border border-border/15">
+            <img src={post.image_url} alt="تحليل" className="w-full max-h-64 object-cover" loading="lazy" />
+          </div>
+        )}
+
         {/* Asset Tag with Price */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className={cn(

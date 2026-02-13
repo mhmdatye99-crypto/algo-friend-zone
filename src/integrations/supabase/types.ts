@@ -62,6 +62,7 @@ export type Database = {
           analysis_summary: string | null
           created_at: string
           id: string
+          image_url: string | null
           pair: string
           prediction: string
           timeframe: string | null
@@ -73,6 +74,7 @@ export type Database = {
           analysis_summary?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           pair: string
           prediction: string
           timeframe?: string | null
@@ -84,6 +86,7 @@ export type Database = {
           analysis_summary?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           pair?: string
           prediction?: string
           timeframe?: string | null
