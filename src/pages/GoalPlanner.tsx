@@ -210,6 +210,53 @@ const ProgressTracker = () => {
         </div>
       </motion.div>
 
+      {/* Smart Notification: Not logged today */}
+      {!stats.todayLogged && (
+        <motion.div
+          variants={fadeUp}
+          className="relative overflow-hidden rounded-xl border border-warning/30"
+        >
+          <motion.div
+            className="absolute inset-0 bg-warning/5"
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <div className="relative flex items-center gap-3 px-4 py-3">
+            <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[12px] font-mono font-bold text-warning">لم تسجّل أرباح اليوم بعد!</p>
+              <p className="text-[10px] font-mono text-muted-foreground">
+                {stats.missedDays > 0
+                  ? `فاتتك ${stats.missedDays} أيام — المسار يحتاج $${stats.dailyRequired.toFixed(0)}/يوم للتعويض`
+                  : `سجّل الآن للبقاء على مسار الهدف — المطلوب: $${stats.dailyRequired.toFixed(0)}`}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddEntry(true)}
+              className="shrink-0 px-3 py-2 rounded-lg bg-warning text-warning-foreground text-[10px] font-mono font-bold hover:brightness-110 transition-all"
+            >
+              سجّل الآن
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Missed Days Alert */}
+      {stats.missedDays >= 3 && (
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20"
+        >
+          <Flame className="w-5 h-5 text-destructive shrink-0" />
+          <div>
+            <p className="text-[12px] font-mono font-bold text-destructive">تنبيه حرج: {stats.missedDays} أيام بدون تسجيل</p>
+            <p className="text-[10px] font-mono text-muted-foreground">الانتظام في التسجيل أساسي لنجاح الأوديسة — المدرب الذكي يعيد حساب المسار تلقائياً</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Level Progress */}
       <motion.div variants={fadeUp} className="glass rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
