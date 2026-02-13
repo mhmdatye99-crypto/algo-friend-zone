@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export type AssetCategory = "الكل" | "كريبتو" | "فوركس" | "سلع" | "مؤشرات";
 
@@ -25,6 +25,46 @@ const generateSparkline = (base: number, points = 20): number[] => {
   }
   return data;
 };
+
+// Map from our pair names to Binance stream symbols
+const BINANCE_SYMBOL_MAP: Record<string, string> = {
+  "BTC/USDT": "btcusdt",
+  "ETH/USDT": "ethusdt",
+  "SOL/USDT": "solusdt",
+  "BNB/USDT": "bnbusdt",
+  "XRP/USDT": "xrpusdt",
+  "ADA/USDT": "adausdt",
+  "DOGE/USDT": "dogeusdt",
+  "DOT/USDT": "dotusdt",
+  "AVAX/USDT": "avaxusdt",
+  "LINK/USDT": "linkusdt",
+  "MATIC/USDT": "maticusdt",
+  "ATOM/USDT": "atomusdt",
+  "UNI/USDT": "uniusdt",
+  "LTC/USDT": "ltcusdt",
+  "NEAR/USDT": "nearusdt",
+  "APT/USDT": "aptusdt",
+  "FIL/USDT": "filusdt",
+  "ARB/USDT": "arbusdt",
+  "OP/USDT": "opusdt",
+  "SUI/USDT": "suiusdt",
+  "INJ/USDT": "injusdt",
+  "TIA/USDT": "tiausdt",
+  "SEI/USDT": "seiusdt",
+  "PEPE/USDT": "pepeusdt",
+  "SHIB/USDT": "shibusdt",
+  "WIF/USDT": "wifusdt",
+  "RENDER/USDT": "renderusdt",
+  "FET/USDT": "fetusdt",
+  "AAVE/USDT": "aaveusdt",
+  "TRX/USDT": "trxusdt",
+};
+
+// Reverse map: binance symbol -> our pair name
+const REVERSE_SYMBOL_MAP: Record<string, string> = {};
+for (const [pair, sym] of Object.entries(BINANCE_SYMBOL_MAP)) {
+  REVERSE_SYMBOL_MAP[sym] = pair;
+}
 
 const initialAssets: Asset[] = [
   // كريبتو — Top 30
@@ -58,7 +98,7 @@ const initialAssets: Asset[] = [
   { pair: "FET/USDT", price: 2.15, change: 2.89, up: true, vol: "$62M", rsi: 61, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🤖", sparkline: [] },
   { pair: "AAVE/USDT", price: 92.45, change: 0.45, up: true, vol: "$35M", rsi: 50, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "👻", sparkline: [] },
   { pair: "TRX/USDT", price: 0.1089, change: 0.23, up: true, vol: "$78M", rsi: 47, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "⚡", sparkline: [] },
-  // فوركس — All Major + Cross pairs
+  // فوركس
   { pair: "EUR/USD", price: 1.0845, change: -0.12, up: false, vol: "$890M", rsi: 44, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "€", sparkline: [] },
   { pair: "GBP/USD", price: 1.2634, change: 0.18, up: true, vol: "$620M", rsi: 52, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£", sparkline: [] },
   { pair: "USD/JPY", price: 154.82, change: 0.34, up: true, vol: "$780M", rsi: 71, macd: "صعودي", signal: "تشبع", category: "فوركس", icon: "¥", sparkline: [] },
@@ -104,16 +144,136 @@ const initialAssets: Asset[] = [
 
 export const assetCategories: AssetCategory[] = ["الكل", "كريبتو", "فوركس", "سلع", "مؤشرات"];
 
+// Helper: compute RSI-like value from sparkline
+function computeRsi(sparkline: number[]): number {
+  if (sparkline.length < 5) return 50;
+  let gains = 0, losses = 0;
+  const len = Math.min(14, sparkline.length - 1);
+  for (let i = sparkline.length - len; i < sparkline.length; i++) {
+    const diff = sparkline[i] - sparkline[i - 1];
+    if (diff > 0) gains += diff; else losses -= diff;
+  }
+  if (losses === 0) return 90;
+  const rs = gains / losses;
+  return Math.round(100 - 100 / (1 + rs));
+}
+
+function deriveSignal(rsi: number, macd: string): string {
+  if (rsi > 70) return "تشبع";
+  if (rsi > 55 && macd === "صعودي") return "شراء";
+  if (rsi < 30) return "تشبع";
+  if (rsi < 45 && macd === "هبوطي") return "بيع";
+  return "محايد";
+}
+
+function formatVolume(vol: number): string {
+  if (vol >= 1e9) return `$${(vol / 1e9).toFixed(1)}B`;
+  if (vol >= 1e6) return `$${(vol / 1e6).toFixed(0)}M`;
+  return `$${(vol / 1e3).toFixed(0)}K`;
+}
+
 export const useLivePrices = () => {
   const [assets, setAssets] = useState<Asset[]>(() =>
     initialAssets.map(a => ({ ...a, sparkline: generateSparkline(a.price) }))
   );
+  const wsRef = useRef<WebSocket | null>(null);
+  const openPricesRef = useRef<Record<string, number>>({});
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Store initial open prices for 24h change calculation
+  useEffect(() => {
+    const openPrices: Record<string, number> = {};
+    initialAssets.forEach(a => {
+      if (a.category === "كريبتو") {
+        openPrices[a.pair] = a.price;
+      }
+    });
+    openPricesRef.current = openPrices;
+  }, []);
+
+  // Binance WebSocket for crypto
+  useEffect(() => {
+    const cryptoSymbols = Object.values(BINANCE_SYMBOL_MAP);
+    
+    // Build combined stream URL for all crypto pairs using miniTicker
+    const streams = cryptoSymbols.map(s => `${s}@miniTicker`).join("/");
+    const wsUrl = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+
+    let isUnmounted = false;
+
+    const connect = () => {
+      if (isUnmounted) return;
+      
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          const data = msg.data;
+          if (!data || !data.s) return;
+
+          const symbol = data.s.toLowerCase();
+          const pair = REVERSE_SYMBOL_MAP[symbol];
+          if (!pair) return;
+
+          const price = parseFloat(data.c); // current price
+          const open24h = parseFloat(data.o); // 24h open price
+          const volume = parseFloat(data.v) * price; // volume in USDT (approx)
+          const change = open24h > 0 ? +((price / open24h - 1) * 100).toFixed(2) : 0;
+
+          setAssets(prev => prev.map(a => {
+            if (a.pair !== pair) return a;
+            const newSparkline = [...a.sparkline.slice(1), price];
+            const rsi = computeRsi(newSparkline);
+            const macd = change > 0.5 ? "صعودي" : change < -0.5 ? "هبوطي" : "محايد";
+            return {
+              ...a,
+              price,
+              change,
+              up: change >= 0,
+              vol: formatVolume(volume),
+              sparkline: newSparkline,
+              rsi,
+              macd,
+              signal: deriveSignal(rsi, macd),
+            };
+          }));
+        } catch (e) {
+          // Silently ignore parse errors
+        }
+      };
+
+      ws.onerror = () => {
+        console.warn("Binance WebSocket error, will reconnect...");
+      };
+
+      ws.onclose = () => {
+        if (!isUnmounted) {
+          reconnectTimeoutRef.current = setTimeout(connect, 3000);
+        }
+      };
+    };
+
+    connect();
+
+    return () => {
+      isUnmounted = true;
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
+  // Simulation tick for non-crypto assets only (forex, commodities, indices)
   const tick = useCallback(() => {
     setAssets(prev =>
       prev.map(asset => {
+        if (asset.category === "كريبتو") return asset; // Skip crypto — handled by WebSocket
         const delta = (Math.random() - 0.48) * asset.price * 0.001;
-        const newPrice = +(asset.price + delta).toFixed(asset.price < 1 ? 4 : asset.price < 100 ? 2 : 2);
+        const newPrice = +(asset.price + delta).toFixed(asset.price < 1 ? 4 : 2);
         const newChange = +((newPrice / (asset.price / (1 + asset.change / 100)) - 1) * 100).toFixed(2);
         const newSparkline = [...asset.sparkline.slice(1), newPrice];
         return {
@@ -128,7 +288,7 @@ export const useLivePrices = () => {
   }, []);
 
   useEffect(() => {
-    const id = setInterval(tick, 2000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [tick]);
 
