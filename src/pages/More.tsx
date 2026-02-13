@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  Users, Brain, Target, Sun, User, Shield, Crown,
+  Brain, Target, Sun, User, Shield, Crown,
   ChevronLeft, LogOut, ShieldCheck
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -19,15 +19,6 @@ const fadeUp = {
 };
 
 const menuItems = [
-  {
-    icon: Users,
-    label: "غرفة العمليات",
-    desc: "المجتمع والتوقعات والنقاشات",
-    path: "/community",
-    color: "text-accent",
-    bg: "bg-accent/10",
-    border: "border-accent/15",
-  },
   {
     icon: Brain,
     label: "الأكاديمية الكمّية",
@@ -56,15 +47,6 @@ const menuItems = [
     border: "border-warning/15",
   },
   {
-    icon: User,
-    label: "الملف الشخصي",
-    desc: "إعدادات الحساب والتفضيلات",
-    path: "/profile",
-    color: "text-muted-foreground",
-    bg: "bg-secondary",
-    border: "border-border/20",
-  },
-  {
     icon: Shield,
     label: "حاسبة المخاطر",
     desc: "حجم الصفقة ونسبة المخاطرة للعائد",
@@ -81,6 +63,15 @@ const menuItems = [
     color: "text-primary",
     bg: "bg-primary/10",
     border: "border-primary/15",
+  },
+  {
+    icon: User,
+    label: "الملف الشخصي",
+    desc: "إعدادات الحساب والتفضيلات",
+    path: "/profile",
+    color: "text-muted-foreground",
+    bg: "bg-secondary",
+    border: "border-border/20",
   },
 ];
 
