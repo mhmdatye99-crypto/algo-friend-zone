@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface Signal {
   pair: string;
   direction: string;
+  icon?: string;
   confidence: number;
   entry: string;
   target1: string;
@@ -44,6 +45,9 @@ const SignalCard = ({ signal }: Props) => {
         <div className="flex items-center gap-2">
           {signal.alphaScore >= 90 && (
             <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono font-bold tracking-wider">ألفا+</span>
+          )}
+          {signal.icon && (
+            <span className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center text-sm border border-border/20">{signal.icon}</span>
           )}
           <span className="font-mono font-bold text-base">{signal.pair}</span>
           <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-md">{signal.timeFrame}</span>
