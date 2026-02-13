@@ -118,7 +118,7 @@ const ChartVision = () => {
 
   return (
     <motion.div
-      className="px-4 pt-10 pb-28 max-w-lg mx-auto"
+      className="px-4 pt-10 pb-28 max-w-lg mx-auto space-y-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -128,99 +128,115 @@ const ChartVision = () => {
       <AnimatePresence mode="wait">
         {/* الحالة الأولية */}
         {step === "idle" && (
-          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
-            <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
-            <p className="text-[11px] text-muted-foreground font-mono mb-6">
-              ارفع أي صورة شارت للتعرف على الأنماط وتوليد إشارات ألفا بدقة مؤسسية
-            </p>
+          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
+              <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
+              <p className="text-[11px] text-muted-foreground font-mono">
+                ارفع أي صورة شارت للتعرف على الأنماط وتوليد إشارات ألفا بدقة مؤسسية
+              </p>
+            </div>
 
-            {/* الرفع */}
-            <div className="grid grid-cols-2 gap-2 mb-6">
+            {/* الرفع — Camera shutter style */}
+            <div className="grid grid-cols-2 gap-3">
               <motion.button
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => cameraInputRef.current?.click()}
-                className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-primary/15 hover:border-primary/30 transition-all"
+                className="intel-card rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/20 transition-all group"
               >
-                <Camera className="w-6 h-6 text-primary" />
-                <span className="text-[12px] font-mono font-medium">التقاط</span>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:glow-gold transition-all">
+                  <Camera className="w-6 h-6 text-primary" />
+                </div>
+                <span className="text-[12px] font-mono font-medium">التقاط مباشر</span>
+                <span className="text-[9px] font-mono text-muted-foreground">كاميرا الجهاز</span>
               </motion.button>
               <motion.button
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => fileInputRef.current?.click()}
-                className="glass rounded-lg p-5 flex flex-col items-center gap-2 border border-border/20 hover:border-accent/30 transition-all"
+                className="intel-card rounded-xl p-6 flex flex-col items-center gap-3 hover:border-accent/20 transition-all group"
               >
-                <Upload className="w-6 h-6 text-accent" />
+                <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:glow-cyan transition-all">
+                  <Upload className="w-6 h-6 text-accent" />
+                </div>
                 <span className="text-[12px] font-mono font-medium">رفع صورة</span>
+                <span className="text-[9px] font-mono text-muted-foreground">من المعرض</span>
               </motion.button>
             </div>
 
             {/* القدرات */}
-            <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">القدرات</h3>
-            <div className="grid grid-cols-3 gap-2 mb-6">
-              {[
-                { icon: Target, label: "+50 نمط" },
-                { icon: BarChart3, label: "كشف الدعم/المقاومة" },
-                { icon: TrendingUp, label: "اتجاه AI" },
-                { icon: Shield, label: "حساب المخاطر" },
-                { icon: Sparkles, label: "توليد استراتيجية" },
-                { icon: Camera, label: "مقارنة مباشرة" },
-              ].map((cap, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="glass rounded-lg p-2.5 flex flex-col items-center gap-1.5 text-center"
-                >
-                  <cap.icon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{cap.label}</span>
-                </motion.div>
-              ))}
+            <div>
+              <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">قدرات المحرك العصبي</h3>
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { icon: Target, label: "+50 نمط فني" },
+                  { icon: BarChart3, label: "كشف الدعم/المقاومة" },
+                  { icon: TrendingUp, label: "تحليل الاتجاه" },
+                  { icon: Shield, label: "حساب المخاطر" },
+                  { icon: Sparkles, label: "توليد استراتيجية" },
+                  { icon: Camera, label: "مسح فوري" },
+                ].map((cap, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="intel-card rounded-xl p-3 flex flex-col items-center gap-2 text-center"
+                  >
+                    <cap.icon className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-tight">{cap.label}</span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
             {/* الحالة الفارغة */}
-            <div className="glass rounded-lg p-6 text-center border border-border/10">
-              <Cpu className="w-8 h-8 mx-auto mb-2 text-muted-foreground animate-pulse" />
-              <h4 className="text-xs font-semibold font-mono mb-0.5">المحرك العصبي جاهز</h4>
+            <div className="intel-card rounded-xl p-8 text-center">
+              <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40 animate-pulse" />
+              <h4 className="text-xs font-semibold font-mono mb-1">المحرك العصبي في وضع الاستعداد</h4>
               <p className="text-[10px] text-muted-foreground font-mono">
-                ارفع صورة شارت لبدء التحليل بالذكاء الاصطناعي
+                ارفع صورة شارت لبدء التحليل المؤسسي بالذكاء الاصطناعي
               </p>
             </div>
           </motion.div>
         )}
 
-        {/* التحميل */}
+        {/* التحميل — Camera shutter */}
         {step === "loading" && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4">
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-4 space-y-4">
             {imagePreview && (
-              <div className="rounded-lg overflow-hidden mb-4 border border-border/20 relative">
-                <img src={imagePreview} alt="الشارت" className="w-full h-44 object-cover opacity-60" />
-                <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <Cpu className="w-6 h-6 text-primary animate-pulse" />
-                  </div>
+              <motion.div
+                className="rounded-xl overflow-hidden border border-primary/15 relative shutter-anim"
+              >
+                <img src={imagePreview} alt="الشارت" className="w-full h-48 object-cover opacity-50" />
+                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                  <motion.div
+                    className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center"
+                    animate={{ scale: [1, 1.1, 1], boxShadow: ["0 0 0 hsl(43 100% 50% / 0)", "0 0 30px hsl(43 100% 50% / 0.3)", "0 0 0 hsl(43 100% 50% / 0)"] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Cpu className="w-7 h-7 text-primary" />
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
-            <div className="glass rounded-lg p-4 text-center mb-4">
+            <div className="intel-card rounded-xl p-5 text-center">
               <h3 className="text-sm font-bold font-mono mb-4">جارٍ المعالجة العصبية...</h3>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {loadingSteps.map((s, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: 8 }}
                     animate={{ opacity: i <= loadingStep ? 1 : 0.2, x: 0 }}
                     transition={{ delay: i * 0.08 }}
-                    className="flex items-center gap-2 text-xs font-mono"
+                    className="flex items-center gap-2.5 text-xs font-mono"
                   >
                     {i < loadingStep ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                     ) : i === loadingStep ? (
-                      <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
+                      <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
                     ) : (
-                      <div className="w-3.5 h-3.5 rounded border border-border/30 shrink-0" />
+                      <div className="w-4 h-4 rounded border border-border/30 shrink-0" />
                     )}
                     <span className={i <= loadingStep ? "text-foreground" : "text-muted-foreground"}>{s.label}</span>
                   </motion.div>
@@ -232,10 +248,15 @@ const ChartVision = () => {
 
         {/* النتائج */}
         {step === "results" && analysis && (
-          <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
+          <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
             {imagePreview && (
-              <div className="rounded-lg overflow-hidden border border-border/20">
-                <img src={imagePreview} alt="الشارت" className="w-full h-36 object-cover" />
+              <div className="rounded-xl overflow-hidden border border-primary/10 relative">
+                <img src={imagePreview} alt="الشارت" className="w-full h-40 object-cover" />
+                {/* Ghost chart overlay hint */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                <div className="absolute bottom-2 right-2 bg-background/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[9px] font-mono text-primary border border-primary/20">
+                  تحليل مؤسسي مُكتمل
+                </div>
               </div>
             )}
 
@@ -368,17 +389,42 @@ const ChartVision = () => {
               </div>
             )}
 
+            {/* Execution Shortcuts */}
+            <div className="intel-card rounded-xl p-4">
+              <h3 className="text-[11px] font-bold font-mono uppercase tracking-wider mb-3">اختصارات التنفيذ</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={`https://www.binance.com/en/trade/${(analysis.pair || "BTC_USDT").replace("/", "_")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-warning/10 border border-warning/20 text-[10px] font-mono font-bold text-warning hover:bg-warning/15 transition-all"
+                >
+                  فتح في Binance ↗
+                </a>
+                <button
+                  onClick={() => {
+                    const strategy = `${analysis.pair} | ${analysis.directionAr} | Entry: ${analysis.entry} | SL: ${analysis.stopLoss} | TP1: ${analysis.takeProfit1} | TP2: ${analysis.takeProfit2}`;
+                    navigator.clipboard.writeText(strategy);
+                    toast.success("تم نسخ الاستراتيجية");
+                  }}
+                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent/10 border border-accent/20 text-[10px] font-mono font-bold text-accent hover:bg-accent/15 transition-all"
+                >
+                  نسخ لـ MetaTrader
+                </button>
+              </div>
+            </div>
+
             {/* الإجراءات */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+            <div className="grid grid-cols-3 gap-2">
+              <motion.button whileTap={{ scale: 0.95 }} className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-primary/20 transition-all">
                 <Bookmark className="w-5 h-5 text-primary" />
                 حفظ
               </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+              <motion.button whileTap={{ scale: 0.95 }} className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-accent/20 transition-all">
                 <Share2 className="w-5 h-5 text-accent" />
                 مشاركة
               </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} className="glass rounded-lg p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono">
+              <motion.button whileTap={{ scale: 0.95 }} className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-warning/20 transition-all">
                 <Bell className="w-5 h-5 text-warning" />
                 تنبيه
               </motion.button>
@@ -388,7 +434,7 @@ const ChartVision = () => {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={resetAnalysis}
-              className="w-full glass rounded-lg p-3 flex items-center justify-center gap-2 border border-primary/10 hover:border-primary/20 transition-all"
+              className="w-full intel-card rounded-xl p-3.5 flex items-center justify-center gap-2 hover:border-primary/20 transition-all"
             >
               <RotateCcw className="w-4 h-4 text-primary" />
               <span className="font-mono text-xs font-medium">تحليل شارت آخر</span>
