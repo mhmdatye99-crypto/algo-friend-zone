@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Settings, ChevronLeft, Shield, Bell, Palette, HelpCircle, LogOut,
@@ -8,6 +8,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 // --- Types ---
 interface Trade {
@@ -135,9 +139,45 @@ const RiskCalculator = () => {
 };
 
 // --- Trade Form ---
-const TradeForm = ({ onClose }: { onClose: () => void }) => {
+const TradeForm = ({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) => {
+  const { user } = useAuth();
   const [direction, setDirection] = useState<"long" | "short">("long");
+  const [pair, setPair] = useState("");
+  const [entryPrice, setEntryPrice] = useState("");
+  const [stopLoss, setStopLoss] = useState("");
+  const [takeProfit, setTakeProfit] = useState("");
+  const [posSize, setPosSize] = useState("");
+  const [emotion, setEmotion] = useState("منضبط");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
   const inputClass = "w-full bg-secondary/40 rounded-xl px-3 py-2 text-xs font-mono border border-border/20 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all duration-200 placeholder:text-muted-foreground/30";
+
+  const handleSave = async () => {
+    if (!pair || !entryPrice) {
+      toast.error("أدخل الزوج وسعر الدخول على الأقل");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("trades").insert({
+      user_id: user!.id,
+      pair,
+      direction,
+      entry_price: parseFloat(entryPrice),
+      stop_loss: stopLoss ? parseFloat(stopLoss) : null,
+      take_profit: takeProfit ? parseFloat(takeProfit) : null,
+      position_size: posSize ? parseFloat(posSize) : null,
+      emotion,
+      notes,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error("فشل حفظ الصفقة");
+    } else {
+      toast.success("تم حفظ الصفقة بنجاح!");
+      onSaved();
+      onClose();
+    }
+  };
 
   return (
     <motion.div
@@ -157,21 +197,23 @@ const TradeForm = ({ onClose }: { onClose: () => void }) => {
 
         <div className="grid grid-cols-2 gap-2">
           <motion.button
+            type="button"
             onClick={() => setDirection("long")}
             whileTap={{ scale: 0.97 }}
             className={cn(
               "py-2 rounded-xl text-xs font-mono font-bold transition-all duration-200 flex items-center justify-center gap-1.5",
-              direction === "long" ? "bg-success/15 text-success border border-success/30 shadow-[0_0_12px_hsl(155_100%_45%/0.1)]" : "bg-secondary/30 text-muted-foreground border border-border/10"
+              direction === "long" ? "bg-success/15 text-success border border-success/30" : "bg-secondary/30 text-muted-foreground border border-border/10"
             )}
           >
             <TrendingUp className="w-3.5 h-3.5" />LONG
           </motion.button>
           <motion.button
+            type="button"
             onClick={() => setDirection("short")}
             whileTap={{ scale: 0.97 }}
             className={cn(
               "py-2 rounded-xl text-xs font-mono font-bold transition-all duration-200 flex items-center justify-center gap-1.5",
-              direction === "short" ? "bg-destructive/15 text-destructive border border-destructive/30 shadow-[0_0_12px_hsl(350_100%_50%/0.1)]" : "bg-secondary/30 text-muted-foreground border border-border/10"
+              direction === "short" ? "bg-destructive/15 text-destructive border border-destructive/30" : "bg-secondary/30 text-muted-foreground border border-border/10"
             )}
           >
             <TrendingDown className="w-3.5 h-3.5" />SHORT
@@ -179,21 +221,29 @@ const TradeForm = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
-          {[
-            { label: "الزوج / الأصل", placeholder: "BTC/USDT" },
-            { label: "حجم المركز", placeholder: "0.00" },
-            { label: "سعر الدخول", placeholder: "0.00" },
-            { label: "وقف الخسارة", placeholder: "0.00" },
-            { label: "جني الأرباح", placeholder: "0.00" },
-          ].map((f, i) => (
-            <div key={f.label}>
-              <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">{f.label}</label>
-              <input placeholder={f.placeholder} className={inputClass} />
-            </div>
-          ))}
+          <div>
+            <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">الزوج / الأصل</label>
+            <input placeholder="BTC/USDT" value={pair} onChange={e => setPair(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">حجم المركز</label>
+            <input placeholder="0.00" type="number" value={posSize} onChange={e => setPosSize(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">سعر الدخول</label>
+            <input placeholder="0.00" type="number" value={entryPrice} onChange={e => setEntryPrice(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">وقف الخسارة</label>
+            <input placeholder="0.00" type="number" value={stopLoss} onChange={e => setStopLoss(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">جني الأرباح</label>
+            <input placeholder="0.00" type="number" value={takeProfit} onChange={e => setTakeProfit(e.target.value)} className={inputClass} />
+          </div>
           <div>
             <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">الحالة النفسية</label>
-            <select className={inputClass}>
+            <select value={emotion} onChange={e => setEmotion(e.target.value)} className={inputClass}>
               <option value="منضبط">منضبط</option>
               <option value="واثق">واثق</option>
               <option value="متردد">متردد</option>
@@ -205,15 +255,17 @@ const TradeForm = ({ onClose }: { onClose: () => void }) => {
 
         <div>
           <label className="text-[9px] text-muted-foreground font-mono uppercase block mb-1 tracking-wider font-medium">ملاحظات التحليل</label>
-          <textarea placeholder="ما سبب دخولك هذه الصفقة؟" rows={2} className={cn(inputClass, "resize-none min-h-[56px]")} />
+          <textarea placeholder="ما سبب دخولك هذه الصفقة؟" rows={2} value={notes} onChange={e => setNotes(e.target.value)} className={cn(inputClass, "resize-none min-h-[56px]")} />
         </div>
 
         <motion.button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
           whileTap={{ scale: 0.97 }}
-          whileHover={{ scale: 1.01 }}
-          className="w-full py-2.5 rounded-xl bg-primary/15 text-primary text-xs font-mono font-bold border border-primary/25 hover:bg-primary/25 transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_16px_hsl(43_100%_50%/0.08)]"
+          className="w-full py-2.5 rounded-xl bg-primary/15 text-primary text-xs font-mono font-bold border border-primary/25 hover:bg-primary/25 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          <Check className="w-3.5 h-3.5" />
+          {saving ? <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
           حفظ الصفقة
         </motion.button>
       </div>
@@ -224,6 +276,33 @@ const TradeForm = ({ onClose }: { onClose: () => void }) => {
 // --- Main Profile ---
 const Profile = () => {
   const [showTradeForm, setShowTradeForm] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [trades, setTrades] = useState<any[]>([]);
+  const [tradesLoading, setTradesLoading] = useState(true);
+
+  const fetchTrades = async () => {
+    setTradesLoading(true);
+    const { data } = await supabase
+      .from("trades")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setTrades(data || []);
+    setTradesLoading(false);
+  };
+
+  useEffect(() => {
+    fetchTrades();
+  }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "محلل";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <motion.div
@@ -248,11 +327,11 @@ const Profile = () => {
 
       {/* Analyst Card */}
       <motion.div className="glass rounded-2xl p-5 text-center glow-gold" variants={fadeUp} custom={1}>
-        <div className="w-18 h-18 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center w-[72px] h-[72px]">
-          <span className="text-3xl font-bold font-mono text-primary">م</span>
+        <div className="mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center w-[72px] h-[72px]">
+          <span className="text-3xl font-bold font-mono text-primary">{initial}</span>
         </div>
-        <h2 className="text-lg font-bold tracking-tight">محلل أسواق أول</h2>
-        <p className="text-[11px] text-muted-foreground font-mono mb-4 tracking-wide">عضو منذ يناير 2025</p>
+        <h2 className="text-lg font-bold tracking-tight">{displayName}</h2>
+        <p className="text-[11px] text-muted-foreground font-mono mb-4 tracking-wide">{user?.email}</p>
         <div className="grid grid-cols-3 gap-2.5">
           {stats.map((s, i) => (
             <motion.div
@@ -305,11 +384,17 @@ const Profile = () => {
             </div>
 
             <AnimatePresence>
-              {showTradeForm && <TradeForm onClose={() => setShowTradeForm(false)} />}
+              {showTradeForm && <TradeForm onClose={() => setShowTradeForm(false)} onSaved={fetchTrades} />}
             </AnimatePresence>
 
             <div className="space-y-2.5">
-              {demoTrades.map((trade, i) => (
+              {tradesLoading ? (
+                <div className="text-center py-8">
+                  <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+                </div>
+              ) : trades.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-xs font-mono">لا توجد صفقات مسجلة بعد</div>
+              ) : trades.map((trade, i) => (
                 <motion.div
                   key={trade.id}
                   className="glass rounded-xl p-3.5 hover:border-border/40 transition-all duration-200"
@@ -330,21 +415,25 @@ const Profile = () => {
                       <span className="text-sm font-bold font-mono tracking-wide">{trade.pair}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-mono text-muted-foreground">{trade.date}</span>
-                      <span className={cn(
-                        "text-sm font-bold font-mono px-2 py-0.5 rounded-md",
-                        trade.pnl.startsWith("+") ? "text-success bg-success/5" : "text-destructive bg-destructive/5"
-                      )}>
-                        {trade.pnl}
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {new Date(trade.created_at).toLocaleDateString("ar-EG", { day: "numeric", month: "short" })}
                       </span>
+                      {trade.pnl != null && (
+                        <span className={cn(
+                          "text-sm font-bold font-mono px-2 py-0.5 rounded-md",
+                          trade.pnl >= 0 ? "text-success bg-success/5" : "text-destructive bg-destructive/5"
+                        )}>
+                          {trade.pnl >= 0 ? "+" : ""}{trade.pnl}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2 mb-2 bg-secondary/20 rounded-lg p-2">
                     {[
-                      { label: "دخول", value: trade.entry, color: "" },
-                      { label: "خروج", value: trade.exit, color: "" },
-                      { label: "SL", value: trade.sl, color: "text-destructive" },
-                      { label: "TP", value: trade.tp, color: "text-success" },
+                      { label: "دخول", value: trade.entry_price, color: "" },
+                      { label: "خروج", value: trade.exit_price ?? "—", color: "" },
+                      { label: "SL", value: trade.stop_loss ?? "—", color: "text-destructive" },
+                      { label: "TP", value: trade.take_profit ?? "—", color: "text-success" },
                     ].map((d) => (
                       <div key={d.label} className="text-center">
                         <p className="text-[8px] text-muted-foreground font-mono uppercase tracking-wider font-medium">{d.label}</p>
@@ -352,17 +441,19 @@ const Profile = () => {
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "text-[9px] font-mono font-medium px-2 py-0.5 rounded-md",
-                      trade.mood === "منضبط" ? "bg-success/10 text-success" :
-                      trade.mood === "واثق" ? "bg-primary/10 text-primary" :
-                      "bg-warning/10 text-warning"
-                    )}>
-                      {trade.mood}
-                    </span>
-                    <p className="text-[10px] font-mono text-muted-foreground leading-relaxed">{trade.note}</p>
-                  </div>
+                  {trade.emotion && (
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "text-[9px] font-mono font-medium px-2 py-0.5 rounded-md",
+                        trade.emotion === "منضبط" ? "bg-success/10 text-success" :
+                        trade.emotion === "واثق" ? "bg-primary/10 text-primary" :
+                        "bg-warning/10 text-warning"
+                      )}>
+                        {trade.emotion}
+                      </span>
+                      {trade.notes && <p className="text-[10px] font-mono text-muted-foreground leading-relaxed">{trade.notes}</p>}
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -466,6 +557,7 @@ const Profile = () => {
         variants={fadeUp}
         custom={4}
         whileTap={{ scale: 0.97 }}
+        onClick={handleSignOut}
         className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-destructive text-xs font-mono font-bold hover:bg-destructive/10 transition-all duration-200 border border-destructive/10 hover:border-destructive/20"
       >
         <LogOut className="w-4 h-4" />
