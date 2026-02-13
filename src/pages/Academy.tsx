@@ -449,57 +449,57 @@ const Academy = () => {
   // === MAIN CATALOG ===
   return (
     <motion.div
-      className="px-4 pt-10 pb-24 max-w-lg mx-auto"
+      className="px-4 pt-10 pb-28 max-w-lg mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">منصة المعرفة المؤسسية</p>
-      <h1 className="text-lg font-bold mb-1">الأكاديمية الكمّية</h1>
-      <p className="text-[10px] text-muted-foreground font-mono mb-1">أتقن منهجيات التداول المؤسسية وأُطر التحليل الاحترافية</p>
-      <p className="text-[9px] text-primary/70 font-mono mb-5 flex items-center gap-1">
+      <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">منصة المعرفة المؤسسية</p>
+      <h1 className="text-xl font-bold mb-1">الأكاديمية الكمّية</h1>
+      <p className="text-[11px] text-muted-foreground font-mono mb-1">أتقن منهجيات التداول المؤسسية وأُطر التحليل الاحترافية</p>
+      <p className="text-[10px] text-primary/70 font-mono mb-5 flex items-center gap-1">
         <Sparkles className="w-3 h-3" />
         كل المحتوى يُولّد فورياً بالذكاء الاصطناعي — بدون فيديوهات أو ملفات
       </p>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 mb-5">
+      <div className="grid grid-cols-3 gap-2.5 mb-5">
         {[
           { icon: BookOpen, label: "الوحدات", value: "42" },
           { icon: Sparkles, label: "مولّد بالـ AI", value: "100%" },
           { icon: Award, label: "اختبارات", value: "42" },
         ].map((s, i) => (
-          <div key={i} className="glass rounded-lg p-3 text-center">
-            <s.icon className="w-4 h-4 mx-auto mb-1 text-primary" />
-            <p className="text-base font-bold font-mono">{s.value}</p>
-            <p className="text-[8px] text-muted-foreground font-mono uppercase tracking-wider">{s.label}</p>
+          <div key={i} className="glass rounded-xl p-4 text-center">
+            <s.icon className="w-5 h-5 mx-auto mb-1.5 text-primary" />
+            <p className="text-lg font-bold font-mono">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Courses */}
-      <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-2 font-mono">كتالوج المنهج الكمّي</h3>
-      <div className="space-y-2">
+      <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">كتالوج المنهج الكمّي</h3>
+      <div className="space-y-2.5">
         {courses.map((course, i) => (
           <motion.button
             key={i}
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06 }}
+            transition={{ delay: i * 0.08 }}
             onClick={() => setSelectedCourse(i)}
-            className="w-full glass rounded-lg p-3 flex items-center gap-3 hover:bg-secondary/40 transition-colors text-right"
+            className="w-full glass rounded-xl p-4 flex items-center gap-3 hover:bg-secondary/40 transition-colors text-right"
           >
-            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 border border-border/20">
-              <course.icon className="w-4 h-4 text-primary" />
+            <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0 border border-border/20">
+              <course.icon className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold truncate">{course.title}</h4>
-              <p className="text-[9px] text-muted-foreground font-mono mt-0.5">{course.description}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[8px] font-mono bg-secondary px-1 py-0.5 rounded text-muted-foreground">{course.level}</span>
-                <span className="text-[8px] font-mono text-muted-foreground">{course.lessons} درس</span>
+              <h4 className="text-sm font-semibold truncate">{course.title}</h4>
+              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{course.description}</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-[10px] font-mono bg-secondary px-1.5 py-0.5 rounded-md text-muted-foreground">{course.level}</span>
+                <span className="text-[10px] font-mono text-muted-foreground">{course.lessons} درس</span>
               </div>
             </div>
-            <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            <ChevronLeft className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           </motion.button>
         ))}
       </div>
