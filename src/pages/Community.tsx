@@ -11,6 +11,7 @@ import WarRoomPost from "@/components/community/WarRoomPost";
 import HallOfFame from "@/components/community/HallOfFame";
 import CommunitySuccessRate from "@/components/community/CommunitySuccessRate";
 import CreatePostDialog from "@/components/community/CreatePostDialog";
+import CommentsSheet from "@/components/community/CommentsSheet";
 
 const stagger = {
   hidden: {},
@@ -142,6 +143,11 @@ const Community = () => {
         open={showCreate}
         onClose={() => setShowCreate(false)}
         onCreate={createPost}
+      />
+
+      <CommentsSheet
+        postId={commentPostId}
+        onClose={() => setCommentPostId(null)}
       />
     </motion.div>
   );
