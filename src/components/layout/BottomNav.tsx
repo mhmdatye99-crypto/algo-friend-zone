@@ -1,4 +1,4 @@
-import { Home, BarChart3, ScanLine, Zap, MoreHorizontal } from "lucide-react";
+import { Home, BarChart3, ScanLine, Zap, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -8,19 +8,14 @@ const tabs = [
   { path: "/markets", icon: BarChart3, label: "الأسواق" },
   { path: "/chart-vision", icon: ScanLine, label: "الشارت", center: true },
   { path: "/signals", icon: Zap, label: "الإشارات" },
-  { path: "/more", icon: MoreHorizontal, label: "المزيد" },
+  { path: "/community", icon: Users, label: "المجتمع" },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-    const isActive = (path: string) => {
-    if (path === "/more") {
-      return ["/more", "/community", "/academy", "/goal-planner", "/morning-brief", "/profile", "/risk-calculator", "/subscription", "/admin"].includes(location.pathname);
-    }
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className="fixed bottom-4 left-4 right-4 z-50 safe-area-bottom max-w-lg mx-auto">
