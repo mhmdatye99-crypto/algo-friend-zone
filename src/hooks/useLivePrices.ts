@@ -27,7 +27,7 @@ const generateSparkline = (base: number, points = 20): number[] => {
 };
 
 const initialAssets: Asset[] = [
-  // كريبتو
+  // كريبتو — Top 30
   { pair: "BTC/USDT", price: 67450.00, change: 2.34, up: true, vol: "$2.4B", rsi: 62, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "₿", sparkline: [] },
   { pair: "ETH/USDT", price: 3245.80, change: 1.87, up: true, vol: "$1.1B", rsi: 58, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "Ξ", sparkline: [] },
   { pair: "SOL/USDT", price: 148.32, change: -1.23, up: false, vol: "$380M", rsi: 38, macd: "هبوطي", signal: "محايد", category: "كريبتو", icon: "◎", sparkline: [] },
@@ -40,7 +40,25 @@ const initialAssets: Asset[] = [
   { pair: "LINK/USDT", price: 14.56, change: 0.78, up: true, vol: "$120M", rsi: 53, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "⬡", sparkline: [] },
   { pair: "MATIC/USDT", price: 0.7845, change: -1.56, up: false, vol: "$88M", rsi: 39, macd: "هبوطي", signal: "بيع", category: "كريبتو", icon: "⬠", sparkline: [] },
   { pair: "ATOM/USDT", price: 9.23, change: 0.34, up: true, vol: "$65M", rsi: 48, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "⚛", sparkline: [] },
-  // فوركس
+  { pair: "UNI/USDT", price: 7.45, change: 1.67, up: true, vol: "$92M", rsi: 55, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🦄", sparkline: [] },
+  { pair: "LTC/USDT", price: 84.32, change: -0.89, up: false, vol: "$110M", rsi: 44, macd: "هبوطي", signal: "محايد", category: "كريبتو", icon: "Ł", sparkline: [] },
+  { pair: "NEAR/USDT", price: 5.67, change: 2.45, up: true, vol: "$72M", rsi: 60, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "Ⓝ", sparkline: [] },
+  { pair: "APT/USDT", price: 9.12, change: -2.34, up: false, vol: "$68M", rsi: 35, macd: "هبوطي", signal: "بيع", category: "كريبتو", icon: "🅰", sparkline: [] },
+  { pair: "FIL/USDT", price: 5.89, change: 0.56, up: true, vol: "$45M", rsi: 49, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "⨏", sparkline: [] },
+  { pair: "ARB/USDT", price: 1.12, change: 1.89, up: true, vol: "$82M", rsi: 56, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🔵", sparkline: [] },
+  { pair: "OP/USDT", price: 2.34, change: -0.78, up: false, vol: "$55M", rsi: 42, macd: "هبوطي", signal: "محايد", category: "كريبتو", icon: "🔴", sparkline: [] },
+  { pair: "SUI/USDT", price: 1.78, change: 4.12, up: true, vol: "$98M", rsi: 68, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "💧", sparkline: [] },
+  { pair: "INJ/USDT", price: 24.56, change: 3.21, up: true, vol: "$76M", rsi: 63, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "💉", sparkline: [] },
+  { pair: "TIA/USDT", price: 12.34, change: -1.45, up: false, vol: "$42M", rsi: 40, macd: "هبوطي", signal: "بيع", category: "كريبتو", icon: "🌐", sparkline: [] },
+  { pair: "SEI/USDT", price: 0.5678, change: 2.67, up: true, vol: "$38M", rsi: 58, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🌊", sparkline: [] },
+  { pair: "PEPE/USDT", price: 0.00001234, change: 8.90, up: true, vol: "$320M", rsi: 72, macd: "صعودي", signal: "تشبع", category: "كريبتو", icon: "🐸", sparkline: [] },
+  { pair: "SHIB/USDT", price: 0.00002456, change: 5.67, up: true, vol: "$185M", rsi: 69, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🐕", sparkline: [] },
+  { pair: "WIF/USDT", price: 2.89, change: -3.45, up: false, vol: "$156M", rsi: 34, macd: "هبوطي", signal: "بيع", category: "كريبتو", icon: "🐶", sparkline: [] },
+  { pair: "RENDER/USDT", price: 7.23, change: 1.34, up: true, vol: "$48M", rsi: 52, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🎨", sparkline: [] },
+  { pair: "FET/USDT", price: 2.15, change: 2.89, up: true, vol: "$62M", rsi: 61, macd: "صعودي", signal: "شراء", category: "كريبتو", icon: "🤖", sparkline: [] },
+  { pair: "AAVE/USDT", price: 92.45, change: 0.45, up: true, vol: "$35M", rsi: 50, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "👻", sparkline: [] },
+  { pair: "TRX/USDT", price: 0.1089, change: 0.23, up: true, vol: "$78M", rsi: 47, macd: "محايد", signal: "محايد", category: "كريبتو", icon: "⚡", sparkline: [] },
+  // فوركس — All Major + Cross pairs
   { pair: "EUR/USD", price: 1.0845, change: -0.12, up: false, vol: "$890M", rsi: 44, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "€", sparkline: [] },
   { pair: "GBP/USD", price: 1.2634, change: 0.18, up: true, vol: "$620M", rsi: 52, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£", sparkline: [] },
   { pair: "USD/JPY", price: 154.82, change: 0.34, up: true, vol: "$780M", rsi: 71, macd: "صعودي", signal: "تشبع", category: "فوركس", icon: "¥", sparkline: [] },
@@ -51,6 +69,27 @@ const initialAssets: Asset[] = [
   { pair: "EUR/GBP", price: 0.8582, change: -0.22, up: false, vol: "$180M", rsi: 42, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "€£", sparkline: [] },
   { pair: "EUR/JPY", price: 167.95, change: 0.45, up: true, vol: "$220M", rsi: 63, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "€¥", sparkline: [] },
   { pair: "GBP/JPY", price: 195.62, change: 0.67, up: true, vol: "$165M", rsi: 68, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£¥", sparkline: [] },
+  { pair: "AUD/JPY", price: 101.23, change: 0.12, up: true, vol: "$85M", rsi: 54, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "A¥", sparkline: [] },
+  { pair: "CHF/JPY", price: 173.45, change: 0.28, up: true, vol: "$72M", rsi: 59, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "F¥", sparkline: [] },
+  { pair: "NZD/JPY", price: 93.12, change: -0.15, up: false, vol: "$48M", rsi: 46, macd: "هبوطي", signal: "محايد", category: "فوركس", icon: "N¥", sparkline: [] },
+  { pair: "CAD/JPY", price: 113.56, change: 0.34, up: true, vol: "$55M", rsi: 53, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "C¥", sparkline: [] },
+  { pair: "EUR/AUD", price: 1.6578, change: 0.23, up: true, vol: "$68M", rsi: 57, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "€A", sparkline: [] },
+  { pair: "GBP/AUD", price: 1.9312, change: 0.45, up: true, vol: "$52M", rsi: 61, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£A", sparkline: [] },
+  { pair: "EUR/CHF", price: 0.9665, change: -0.08, up: false, vol: "$92M", rsi: 45, macd: "هبوطي", signal: "محايد", category: "فوركس", icon: "€F", sparkline: [] },
+  { pair: "GBP/CHF", price: 1.1267, change: 0.12, up: true, vol: "$42M", rsi: 51, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£F", sparkline: [] },
+  { pair: "EUR/CAD", price: 1.4789, change: -0.18, up: false, vol: "$38M", rsi: 43, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "€C", sparkline: [] },
+  { pair: "GBP/CAD", price: 1.7234, change: 0.22, up: true, vol: "$35M", rsi: 55, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£C", sparkline: [] },
+  { pair: "AUD/CAD", price: 0.8923, change: -0.34, up: false, vol: "$28M", rsi: 40, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "AC", sparkline: [] },
+  { pair: "AUD/NZD", price: 1.0882, change: 0.08, up: true, vol: "$22M", rsi: 49, macd: "محايد", signal: "محايد", category: "فوركس", icon: "AN", sparkline: [] },
+  { pair: "EUR/NZD", price: 1.8034, change: 0.31, up: true, vol: "$25M", rsi: 56, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "€N", sparkline: [] },
+  { pair: "GBP/NZD", price: 2.1023, change: 0.42, up: true, vol: "$20M", rsi: 60, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "£N", sparkline: [] },
+  { pair: "USD/SGD", price: 1.3456, change: 0.05, up: true, vol: "$45M", rsi: 48, macd: "محايد", signal: "محايد", category: "فوركس", icon: "S$", sparkline: [] },
+  { pair: "USD/HKD", price: 7.8123, change: 0.01, up: true, vol: "$120M", rsi: 50, macd: "محايد", signal: "محايد", category: "فوركس", icon: "HK", sparkline: [] },
+  { pair: "USD/TRY", price: 32.45, change: 0.78, up: true, vol: "$65M", rsi: 72, macd: "صعودي", signal: "تشبع", category: "فوركس", icon: "₺", sparkline: [] },
+  { pair: "USD/ZAR", price: 18.67, change: -0.45, up: false, vol: "$38M", rsi: 41, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "ZA", sparkline: [] },
+  { pair: "USD/MXN", price: 17.23, change: -0.28, up: false, vol: "$52M", rsi: 39, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "MX", sparkline: [] },
+  { pair: "USD/SEK", price: 10.78, change: 0.15, up: true, vol: "$28M", rsi: 52, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "kr", sparkline: [] },
+  { pair: "USD/NOK", price: 10.45, change: -0.12, up: false, vol: "$25M", rsi: 46, macd: "هبوطي", signal: "محايد", category: "فوركس", icon: "NK", sparkline: [] },
   // سلع
   { pair: "GOLD", price: 2345.60, change: 0.45, up: true, vol: "$540M", rsi: 67, macd: "صعودي", signal: "شراء", category: "سلع", icon: "Au", sparkline: [] },
   { pair: "SILVER", price: 27.84, change: 1.12, up: true, vol: "$120M", rsi: 59, macd: "صعودي", signal: "شراء", category: "سلع", icon: "Ag", sparkline: [] },
@@ -100,5 +139,7 @@ export const formatPrice = (price: number): string => {
   if (price >= 10000) return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (price >= 100) return price.toFixed(2);
   if (price >= 1) return price.toFixed(4);
-  return price.toFixed(4);
+  if (price >= 0.01) return price.toFixed(4);
+  if (price >= 0.0001) return price.toFixed(6);
+  return price.toFixed(8);
 };
