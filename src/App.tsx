@@ -17,6 +17,8 @@ import GoalPlanner from "./pages/GoalPlanner";
 import Markets from "./pages/Markets";
 import More from "./pages/More";
 import RiskCalculator from "./pages/RiskCalculator";
+import Subscription from "./pages/Subscription";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +70,8 @@ const App = () => (
               <Route path="/markets" element={<Markets />} />
               <Route path="/more" element={<More />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
+              <Route path="/subscription" element={<Subscription />} />
+              <Route path="/admin" element={<AdminPanel />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
