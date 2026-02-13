@@ -1,4 +1,4 @@
-import { Bell, User, Sun, Brain, Shield, Target, Crown, Settings, MoreHorizontal } from "lucide-react";
+import { Bell, User, Sun, Brain, Shield, Target, Crown, Settings, MoreHorizontal, BookOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,9 +18,11 @@ const pageTitles: Record<string, string> = {
   "/subscription": "الاشتراك",
   "/admin": "لوحة الإدارة",
   "/more": "المزيد",
+  "/trade-journal": "سجل الصفقات",
 };
 
 const quickActions = [
+  { icon: BookOpen, label: "سجل الصفقات", path: "/trade-journal", color: "text-accent" },
   { icon: Sun, label: "الملخص الصباحي", path: "/morning-brief", color: "text-warning" },
   { icon: Brain, label: "الأكاديمية", path: "/academy", color: "text-primary" },
   { icon: Target, label: "الأوديسة المالية", path: "/goal-planner", color: "text-warning" },
