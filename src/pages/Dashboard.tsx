@@ -12,6 +12,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
 import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
+import WhaleTracker from "@/components/dashboard/WhaleTracker";
 import {
   DndContext,
   closestCenter,
@@ -45,17 +46,18 @@ const marketPulse = {
   ],
 };
 
-type SectionId = "morning" | "ticker" | "pulse" | "wealth" | "favorites";
+type SectionId = "morning" | "ticker" | "pulse" | "whale" | "wealth" | "favorites";
 
 const SECTION_LABELS: Record<SectionId, string> = {
   morning: "الملخص الصباحي",
   ticker: "شريط الأسعار",
   pulse: "نبض السوق",
+  whale: "متتبع الحيتان",
   wealth: "مسار الثروة",
   favorites: "المفضلة",
 };
 
-const DEFAULT_ORDER: SectionId[] = ["morning", "ticker", "pulse", "wealth", "favorites"];
+const DEFAULT_ORDER: SectionId[] = ["morning", "ticker", "pulse", "whale", "wealth", "favorites"];
 const STORAGE_KEY = "dashboard-section-order";
 
 function loadOrder(): SectionId[] {
@@ -181,6 +183,12 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
+      </motion.div>
+    ),
+
+    whale: (
+      <motion.div variants={fadeUp}>
+        <WhaleTracker />
       </motion.div>
     ),
 
