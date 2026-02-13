@@ -118,7 +118,7 @@ const ChartVision = () => {
 
   return (
     <motion.div
-      className="px-4 pt-10 pb-28 max-w-lg mx-auto space-y-6"
+      className="px-5 pt-10 pb-28 max-w-lg mx-auto space-y-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -128,43 +128,20 @@ const ChartVision = () => {
       <AnimatePresence mode="wait">
         {/* الحالة الأولية */}
         {step === "idle" && (
-          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
-              <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
-              <p className="text-[11px] text-muted-foreground font-mono">
-                ارفع أي صورة شارت للتعرف على الأنماط وتوليد إشارات ألفا بدقة مؤسسية
-              </p>
-            </div>
-
-            {/* الرفع — Camera shutter style */}
-            <div className="grid grid-cols-2 gap-3">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => cameraInputRef.current?.click()}
-                className="intel-card rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/20 transition-all group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:glow-gold transition-all">
-                  <Camera className="w-6 h-6 text-primary" />
-                </div>
-                <span className="text-[12px] font-mono font-medium">التقاط مباشر</span>
-                <span className="text-[9px] font-mono text-muted-foreground">كاميرا الجهاز</span>
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => fileInputRef.current?.click()}
-                className="intel-card rounded-xl p-6 flex flex-col items-center gap-3 hover:border-accent/20 transition-all group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:glow-cyan transition-all">
-                  <Upload className="w-6 h-6 text-accent" />
-                </div>
-                <span className="text-[12px] font-mono font-medium">رفع صورة</span>
-                <span className="text-[9px] font-mono text-muted-foreground">من المعرض</span>
-              </motion.button>
+          <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col min-h-[75vh]">
+            {/* Header with History */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">محرك التحليل العصبي</p>
+                <h1 className="text-xl font-bold mb-1">رؤية الشارت بالذكاء الاصطناعي</h1>
+              </div>
+              <button className="w-9 h-9 rounded-[10px] bg-secondary/60 border border-border/20 flex items-center justify-center hover:bg-secondary transition-colors">
+                <RotateCcw className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* القدرات */}
-            <div>
+            <div className="mb-4">
               <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">قدرات المحرك العصبي</h3>
               <div className="grid grid-cols-3 gap-2.5">
                 {[
@@ -180,7 +157,7 @@ const ChartVision = () => {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="intel-card rounded-xl p-3 flex flex-col items-center gap-2 text-center"
+                    className="intel-card rounded-[10px] p-3 flex flex-col items-center gap-2 text-center"
                   >
                     <cap.icon className="w-4 h-4 text-muted-foreground" />
                     <span className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-tight">{cap.label}</span>
@@ -190,12 +167,50 @@ const ChartVision = () => {
             </div>
 
             {/* الحالة الفارغة */}
-            <div className="intel-card rounded-xl p-8 text-center">
+            <div className="intel-card rounded-[10px] p-8 text-center mb-4 flex-1 flex flex-col items-center justify-center">
               <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40 animate-pulse" />
               <h4 className="text-xs font-semibold font-mono mb-1">المحرك العصبي في وضع الاستعداد</h4>
               <p className="text-[10px] text-muted-foreground font-mono">
                 ارفع صورة شارت لبدء التحليل المؤسسي بالذكاء الاصطناعي
               </p>
+            </div>
+
+            {/* Upload Buttons — Bottom of screen for thumb access */}
+            <div className="grid grid-cols-2 gap-3 mt-auto">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => cameraInputRef.current?.click()}
+                className="rounded-[10px] p-4 flex items-center gap-3 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, hsla(43,100%,50%,0.1) 0%, hsla(43,100%,50%,0.04) 100%)",
+                  border: "1px solid hsla(43,100%,50%,0.15)",
+                }}
+              >
+                <div className="w-11 h-11 rounded-[10px] bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-right">
+                  <span className="text-[12px] font-mono font-bold text-primary block">التقاط مباشر</span>
+                  <span className="text-[9px] font-mono text-muted-foreground">كاميرا الجهاز</span>
+                </div>
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-[10px] p-4 flex items-center gap-3 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, hsla(190,100%,50%,0.08) 0%, hsla(190,100%,50%,0.02) 100%)",
+                  border: "1px solid hsla(190,100%,50%,0.12)",
+                }}
+              >
+                <div className="w-11 h-11 rounded-[10px] bg-accent/10 border border-accent/20 flex items-center justify-center">
+                  <Upload className="w-5 h-5 text-accent" />
+                </div>
+                <div className="text-right">
+                  <span className="text-[12px] font-mono font-bold text-accent block">رفع صورة</span>
+                  <span className="text-[9px] font-mono text-muted-foreground">من المعرض</span>
+                </div>
+              </motion.button>
             </div>
           </motion.div>
         )}

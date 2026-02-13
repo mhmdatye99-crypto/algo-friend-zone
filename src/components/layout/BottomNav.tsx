@@ -1,16 +1,14 @@
-import { Home, Radar, Camera, GraduationCap, User, Network, Target } from "lucide-react";
+import { LayoutDashboard, Database, ScanLine, Users, Brain } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "القيادة" },
-  { path: "/signals", icon: Radar, label: "إشارات" },
-  { path: "/community", icon: Network, label: "المجتمع", glow: true },
-  { path: "/chart-vision", icon: Camera, label: "الشارت" },
-  { path: "/goal-planner", icon: Target, label: "الأوديسة", glow: true },
-  { path: "/academy", icon: GraduationCap, label: "الأكاديمية" },
-  { path: "/profile", icon: User, label: "المحلل" },
+  { path: "/", icon: LayoutDashboard, label: "القيادة" },
+  { path: "/signals", icon: Database, label: "الإشارات" },
+  { path: "/chart-vision", icon: ScanLine, label: "الشارت", center: true },
+  { path: "/community", icon: Users, label: "المجتمع" },
+  { path: "/academy", icon: Brain, label: "المحلل" },
 ];
 
 const BottomNav = () => {
@@ -18,37 +16,83 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t safe-area-bottom" style={{ background: "hsla(240, 15%, 3%, 0.75)", backdropFilter: "blur(30px)", borderColor: "hsla(43, 100%, 50%, 0.08)" }}>
-      <div className="flex items-center justify-around h-18 max-w-lg mx-auto px-2">
+    <nav className="fixed bottom-4 left-4 right-4 z-50 safe-area-bottom max-w-lg mx-auto">
+      <div
+        className="flex items-center justify-around h-16 rounded-[10px] px-2"
+        style={{
+          background: "hsla(240, 15%, 3%, 0.8)",
+          backdropFilter: "blur(30px)",
+          border: "1px solid hsla(43, 100%, 50%, 0.1)",
+          boxShadow: "0 -4px 30px hsla(0,0%,0%,0.4), inset 0 1px 0 hsla(43,100%,50%,0.06)",
+        }}
+      >
+        {/* Gold top-line */}
+        <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
+          const isCenter = tab.center;
+
+          if (isCenter) {
+            return (
+              <button
+                key={tab.path}
+                onClick={() => navigate(tab.path)}
+                className="relative flex flex-col items-center justify-center -mt-5"
+              >
+                <motion.div
+                  className={cn(
+                    "w-14 h-14 rounded-[10px] flex items-center justify-center transition-all duration-300",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary/15 text-primary border border-primary/30"
+                  )}
+                  style={{
+                    boxShadow: isActive
+                      ? "0 0 24px hsl(43 100% 50% / 0.4), 0 0 60px hsl(43 100% 50% / 0.15)"
+                      : "0 0 12px hsl(43 100% 50% / 0.15)",
+                  }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <Icon className="w-6 h-6" />
+                </motion.div>
+                <span className={cn(
+                  "text-[9px] font-mono font-medium mt-1",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}>{tab.label}</span>
+              </button>
+            );
+          }
+
           return (
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-xl transition-colors duration-300",
-                isActive ? "text-primary" : "text-muted-foreground"
+                "relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-[10px] transition-all duration-300"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-primary/10 rounded-xl glow-gold"
+                  className="absolute inset-0 rounded-[10px]"
+                  style={{
+                    background: "hsla(190, 100%, 50%, 0.08)",
+                    boxShadow: "0 0 16px hsl(190 100% 50% / 0.15), inset 0 0 8px hsl(190 100% 50% / 0.05)",
+                    border: "1px solid hsla(190, 100%, 50%, 0.15)",
+                  }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              {'glow' in tab && tab.glow && !isActive && (
-                <motion.div
-                  className="absolute inset-0 rounded-xl"
-                  style={{ boxShadow: "0 0 12px hsl(190 100% 50% / 0.2), 0 0 4px hsl(190 100% 50% / 0.1)" }}
-                  animate={{ opacity: [0.4, 0.8, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              )}
-              <Icon className={cn("w-[20px] h-[20px] relative z-10", 'glow' in tab && tab.glow && !isActive && "text-accent")} />
-              <span className="text-[9px] font-medium relative z-10">{tab.label}</span>
+              <Icon className={cn(
+                "w-5 h-5 relative z-10 transition-colors duration-300",
+                isActive ? "text-accent" : "text-muted-foreground"
+              )} />
+              <span className={cn(
+                "text-[9px] font-mono font-medium relative z-10 transition-colors duration-300",
+                isActive ? "text-accent" : "text-muted-foreground"
+              )}>{tab.label}</span>
             </button>
           );
         })}
