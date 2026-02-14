@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera, Upload, Sparkles, TrendingUp, Shield, Target, BarChart3,
   ArrowUp, ArrowDown, Minus, CheckCircle2, Loader2, RotateCcw,
-  Share2, Bookmark, Bell, Cpu, Layers, Crosshair
+  Share2, Bookmark, Bell, Cpu, Layers, Crosshair, Send
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/CreditModals";
+import { useCommunity } from "@/hooks/useCommunity";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AnalysisResult {
   pair?: string;
@@ -52,9 +54,30 @@ const ChartVision = () => {
   const [loadingStep, setLoadingStep] = useState(0);
   const [showInsufficient, setShowInsufficient] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { credits, spendCredits, canAfford, isFounder } = useCredits();
+  const { createPost } = useCommunity();
+  const { user } = useAuth();
+
+  const shareToFeed = async () => {
+    if (!analysis || !user) return;
+    setSharing(true);
+    try {
+      await createPost({
+        pair: analysis.pair || "UNKNOWN",
+        prediction: (analysis.direction === "bullish" ? "bullish" : "bearish") as "bullish" | "bearish",
+        ai_confidence: analysis.directionConfidence || 50,
+        analysis_summary: analysis.summary || analysis.strategy || "",
+        timeframe: analysis.timeframe || "4H",
+      });
+      toast.success("تم نشر تحليلك في غرفة العمليات! 🚀");
+    } catch {
+      toast.error("فشل النشر، حاول مرة أخرى");
+    }
+    setSharing(false);
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -451,9 +474,14 @@ const ChartVision = () => {
                 <Bookmark className="w-5 h-5 text-primary" />
                 حفظ
               </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-accent/20 transition-all">
-                <Share2 className="w-5 h-5 text-accent" />
-                مشاركة
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={shareToFeed}
+                disabled={sharing}
+                className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-accent/20 transition-all bg-gradient-to-b from-primary/10 to-transparent border-primary/20 glow-gold"
+              >
+                {sharing ? <Loader2 className="w-5 h-5 text-primary animate-spin" /> : <Send className="w-5 h-5 text-primary" />}
+                <span className="text-primary font-bold">نشر في المجتمع</span>
               </motion.button>
               <motion.button whileTap={{ scale: 0.95 }} className="intel-card rounded-xl p-3 flex flex-col items-center gap-1.5 text-[11px] font-mono hover:border-warning/20 transition-all">
                 <Bell className="w-5 h-5 text-warning" />

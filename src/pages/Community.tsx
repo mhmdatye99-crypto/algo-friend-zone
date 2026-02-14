@@ -12,6 +12,7 @@ import HallOfFame from "@/components/community/HallOfFame";
 import CommunitySuccessRate from "@/components/community/CommunitySuccessRate";
 import CreatePostDialog from "@/components/community/CreatePostDialog";
 import CommentsSheet from "@/components/community/CommentsSheet";
+import OracleInsight from "@/components/community/OracleInsight";
 import { useLivePrices } from "@/hooks/useLivePrices";
 
 const stagger = {
@@ -166,15 +167,20 @@ const Community = () => {
                 <p className="text-[11px] font-mono text-muted-foreground">كن أول من ينشر تحليلاً ويبدأ النقاش!</p>
               </div>
             ) : (
-              posts.map(post => (
-                <WarRoomPost
-                  key={post.id}
-                  post={post}
-                  onVote={vote}
-                  onSave={saveStrategy}
-                  onOpenComments={setCommentPostId}
-                />
-              ))
+              <>
+                {/* AI Oracle Insight Card */}
+                <OracleInsight posts={posts} />
+                
+                {posts.map(post => (
+                  <WarRoomPost
+                    key={post.id}
+                    post={post}
+                    onVote={vote}
+                    onSave={saveStrategy}
+                    onOpenComments={setCommentPostId}
+                  />
+                ))}
+              </>
             )}
           </motion.div>
         )}

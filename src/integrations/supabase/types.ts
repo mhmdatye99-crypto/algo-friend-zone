@@ -270,6 +270,7 @@ export type Database = {
           display_name: string | null
           experience_level: string | null
           id: string
+          reputation_points: number
           subscription_tier: string
           trading_style: string | null
           updated_at: string
@@ -283,6 +284,7 @@ export type Database = {
           display_name?: string | null
           experience_level?: string | null
           id?: string
+          reputation_points?: number
           subscription_tier?: string
           trading_style?: string | null
           updated_at?: string
@@ -296,6 +298,7 @@ export type Database = {
           display_name?: string | null
           experience_level?: string | null
           id?: string
+          reputation_points?: number
           subscription_tier?: string
           trading_style?: string | null
           updated_at?: string
