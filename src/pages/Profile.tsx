@@ -4,8 +4,9 @@ import {
   Settings, ChevronLeft, Shield, Bell, Palette, HelpCircle, LogOut,
   Star, Trophy, Flame, BarChart3, Pen, Brain, Plus,
   Calculator, BookOpen, TrendingUp, TrendingDown, Target, X, Check,
-  Wallet, Activity, Award, ChevronDown
+  Wallet, Activity, Award, ChevronDown, Crosshair
 } from "lucide-react";
+import PredictionAchievements from "@/components/profile/PredictionAchievements";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -338,10 +339,14 @@ const Profile = () => {
       {/* Tabs */}
       <motion.div variants={fadeUp} custom={2}>
         <Tabs defaultValue="journal" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 bg-secondary/30 border border-border/20 rounded-xl h-11 p-1 gap-1">
+          <TabsList className="w-full grid grid-cols-3 bg-secondary/30 border border-border/20 rounded-xl h-11 p-1 gap-1">
             <TabsTrigger value="journal" className="text-[10px] font-mono font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
-              سجل الصفقات
+              الصفقات
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="text-[10px] font-mono font-medium data-[state=active]:bg-success/10 data-[state=active]:text-success data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
+              <Crosshair className="w-3.5 h-3.5" />
+              الإنجازات
             </TabsTrigger>
             <TabsTrigger value="psychology" className="text-[10px] font-mono font-medium data-[state=active]:bg-accent/10 data-[state=active]:text-accent data-[state=active]:shadow-sm rounded-lg transition-all duration-200 flex items-center gap-1.5">
               <Brain className="w-3.5 h-3.5" />
@@ -442,6 +447,11 @@ const Profile = () => {
             </div>
           </TabsContent>
 
+
+          {/* Achievements */}
+          <TabsContent value="achievements" className="mt-3">
+            <PredictionAchievements />
+          </TabsContent>
 
           {/* Psychology */}
           <TabsContent value="psychology" className="mt-3 space-y-3">
