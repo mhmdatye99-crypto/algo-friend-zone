@@ -131,7 +131,7 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
             />
             <ActionBtn
               icon={Eye}
-              count={Math.floor(post.user_id.charCodeAt(2) * 47 + 200)}
+              count={totalVotes * 3 + post.comment_count * 2}
             />
           </div>
 

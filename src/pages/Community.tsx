@@ -261,10 +261,13 @@ const Community = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Create Button — Pulsing Gold Glow */}
+      {/* Floating Create Button — positioned above BottomNav */}
       <motion.button
         onClick={() => setShowCreate(true)}
-        className="fixed bottom-24 left-5 z-40 w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg animate-glow"
+        className="fixed bottom-28 right-5 z-30 w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
+        style={{
+          boxShadow: "0 0 20px hsl(43 100% 50% / 0.3), 0 0 50px hsl(43 100% 50% / 0.1)",
+        }}
         whileTap={{ scale: 0.9 }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
