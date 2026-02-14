@@ -1,10 +1,12 @@
-import { Bell, User, Sun } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
+import { useGoalPlanner } from "@/hooks/useGoalPlanner";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 
 const pageTitles: Record<string, string> = {
-  "/": "الرئيسية",
+  "/": "",
   "/markets": "الأسواق",
   "/chart-vision": "رؤية الشارت",
   "/signals": "الإشارات",
@@ -25,8 +27,18 @@ const TopBar = () => {
   const location = useLocation();
   const assets = useLivePrices();
   const topAssets = assets.slice(0, 8);
+  const { user } = useAuth();
+  const { stats } = useGoalPlanner();
 
+  const isHome = location.pathname === "/";
   const currentTitle = pageTitles[location.pathname] || "TradeJourney";
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "صباح الخير";
+    if (h < 17) return "مساء الخير";
+    return "مساء الخير";
+  };
 
   return (
     <header
@@ -37,37 +49,50 @@ const TopBar = () => {
         borderBottom: "1px solid hsla(43, 100%, 50%, 0.08)",
       }}
     >
-      {/* Main bar */}
-      <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[10px] bg-primary/15 flex items-center justify-center border border-primary/20">
-            <span className="text-primary font-bold text-sm font-mono">TJ</span>
-          </div>
-          <div>
-            <p className="text-[13px] font-bold text-foreground leading-tight">{currentTitle}</p>
-            <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">TradeJourney AI</p>
-          </div>
+      <div className="flex items-center justify-between px-5 py-3 max-w-lg mx-auto">
+        {/* Left: Profile */}
+        <button
+          onClick={() => navigate("/hub")}
+          className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center border border-primary/25 hover:bg-primary/25 transition-colors"
+          style={{ boxShadow: "0 0 12px hsl(43 100% 50% / 0.1)" }}
+        >
+          <User className="w-5 h-5 text-primary" />
+        </button>
+
+        {/* Center: Title or Growth */}
+        <div className="flex flex-col items-center">
+          {isHome ? (
+            <>
+              <p className="text-[15px] font-semibold text-foreground leading-tight">
+                {getGreeting()}، <span className="text-gradient-gold">متداول</span>
+              </p>
+              {stats && (
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))" }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(stats.progress, 100)}%` }}
+                      transition={{ duration: 1 }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-primary font-bold">{stats.progress.toFixed(0)}%</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-[14px] font-bold text-foreground">{currentTitle}</p>
+          )}
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => navigate("/morning-brief")}
-            className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
-            title="الملخص الصباحي"
-          >
-            <Sun className="w-4 h-4 text-warning" />
-          </button>
-          <button
-            className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
-          >
-            <Bell className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => navigate("/hub")}
-            className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
-          >
-            <User className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
+
+        {/* Right: Notification */}
+        <button
+          className="relative w-10 h-10 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
+        >
+          <Bell className="w-5 h-5 text-muted-foreground" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-destructive animate-pulse" />
+        </button>
       </div>
 
       {/* Ticker strip */}
