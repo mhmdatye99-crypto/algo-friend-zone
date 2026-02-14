@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { path: "/", icon: Home, label: "الرئيسية" },
   { path: "/markets", icon: BarChart3, label: "الأسواق" },
-  { path: "/chart-vision", icon: ScanLine, label: "الشارت", center: true },
+  { path: "/chart-vision", icon: ScanLine, label: "AI شارت", center: true },
   { path: "/signals", icon: Zap, label: "الإشارات" },
   { path: "/hub", icon: Menu, label: "المزيد" },
 ];
@@ -39,26 +39,37 @@ const BottomNav = () => {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="relative flex flex-col items-center justify-center -mt-5"
+                className="relative flex flex-col items-center justify-center -mt-7"
               >
+                {/* Outer glow ring */}
+                <div
+                  className="absolute w-[72px] h-[72px] rounded-full animate-pulse-slow pointer-events-none"
+                  style={{
+                    background: "radial-gradient(circle, hsla(43, 100%, 50%, 0.12) 0%, transparent 70%)",
+                  }}
+                />
                 <motion.div
                   className={cn(
-                    "w-14 h-14 rounded-[10px] flex items-center justify-center transition-all duration-300",
+                    "w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-300",
                     active
                       ? "bg-primary text-primary-foreground"
-                      : "bg-primary/15 text-primary border border-primary/30"
+                      : "text-primary border-2 border-primary/40"
                   )}
                   style={{
+                    background: active
+                      ? "linear-gradient(135deg, hsl(43 100% 55%), hsl(38 100% 45%))"
+                      : "hsla(240, 15%, 4%, 0.9)",
                     boxShadow: active
-                      ? "0 0 24px hsl(43 100% 50% / 0.4), 0 0 60px hsl(43 100% 50% / 0.15)"
-                      : "0 0 12px hsl(43 100% 50% / 0.15)",
+                      ? "0 0 28px hsl(43 100% 50% / 0.45), 0 0 60px hsl(43 100% 50% / 0.15), inset 0 1px 0 hsla(43, 100%, 80%, 0.3)"
+                      : "0 0 16px hsl(43 100% 50% / 0.15), inset 0 1px 0 hsla(43, 100%, 50%, 0.08)",
                   }}
-                  whileTap={{ scale: 0.92 }}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
                 >
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-7 h-7" />
                 </motion.div>
                 <span className={cn(
-                  "text-[10px] font-mono font-medium mt-1",
+                  "text-[9px] font-mono font-bold mt-1",
                   active ? "text-primary" : "text-muted-foreground"
                 )}>{tab.label}</span>
               </button>
