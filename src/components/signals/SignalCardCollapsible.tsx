@@ -69,20 +69,41 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono font-bold">ألفا+</span>
               )}
             </div>
-            <span className="text-[11px] font-mono text-muted-foreground">{signal.entry}</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[11px] font-mono text-muted-foreground">{signal.entry}</span>
+              <span className="text-[9px] font-mono text-muted-foreground/60">•</span>
+              <span className="text-[10px] font-mono text-muted-foreground">{signal.timeFrame}</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          {/* Confidence Score Badge */}
+          <div className="flex flex-col items-center">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-[13px] border",
+                signal.confidence >= 85
+                  ? "bg-success/10 text-success border-success/20"
+                  : signal.confidence >= 70
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "bg-warning/10 text-warning border-warning/20"
+              )}
+            >
+              {signal.confidence}
+            </div>
+            <span className="text-[8px] font-mono text-muted-foreground mt-0.5">ثقة%</span>
+          </div>
+
           <span
             className={cn(
-              "text-[12px] font-bold font-mono px-3 py-1.5 rounded-lg flex items-center gap-1.5",
+              "text-[11px] font-bold font-mono px-2.5 py-1.5 rounded-lg flex items-center gap-1",
               signal.direction === "صعودي"
                 ? "bg-success/10 text-success"
                 : "bg-destructive/10 text-destructive"
             )}
           >
-            {signal.direction === "صعودي" ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+            {signal.direction === "صعودي" ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             {signal.direction}
           </span>
           <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>

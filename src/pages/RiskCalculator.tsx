@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Shield, Target, AlertTriangle, TrendingUp, DollarSign, Percent, BarChart3 } from "lucide-react";
+import { Shield, Target, AlertTriangle, TrendingUp, DollarSign, Percent, BarChart3, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
 
 const stagger = {
   hidden: {},
@@ -12,23 +13,23 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 };
 
+const CAPITAL_PRESETS = [1000, 5000, 10000, 25000, 50000, 100000];
+
 const RiskCalculator = () => {
-  const [capital, setCapital] = useState("");
-  const [riskPercent, setRiskPercent] = useState("2");
+  const [capital, setCapital] = useState(10000);
+  const [riskPercent, setRiskPercent] = useState(2);
   const [entryPrice, setEntryPrice] = useState("");
   const [stopLoss, setStopLoss] = useState("");
   const [takeProfit, setTakeProfit] = useState("");
 
   const calc = useMemo(() => {
-    const cap = parseFloat(capital);
-    const risk = parseFloat(riskPercent);
     const entry = parseFloat(entryPrice);
     const sl = parseFloat(stopLoss);
     const tp = parseFloat(takeProfit);
 
-    if (!cap || !risk || !entry || !sl) return null;
+    if (!capital || !riskPercent || !entry || !sl) return null;
 
-    const riskAmount = cap * (risk / 100);
+    const riskAmount = capital * (riskPercent / 100);
     const slDistance = Math.abs(entry - sl);
     const slPercent = (slDistance / entry) * 100;
 
@@ -36,7 +37,7 @@ const RiskCalculator = () => {
 
     const positionSize = riskAmount / slDistance;
     const positionValue = positionSize * entry;
-    const leverage = positionValue / cap;
+    const leverage = positionValue / capital;
 
     let rrRatio = 0;
     let tpAmount = 0;
@@ -48,7 +49,6 @@ const RiskCalculator = () => {
       tpAmount = positionSize * tpDistance;
     }
 
-    // Win rate needed to break even at this RR
     const breakEvenWinRate = rrRatio > 0 ? (1 / (1 + rrRatio)) * 100 : 0;
 
     return {
@@ -74,28 +74,109 @@ const RiskCalculator = () => {
       animate="show"
       className="px-4 pt-4 pb-28 space-y-4 max-w-lg mx-auto"
     >
-      {/* Inputs */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+      {/* Capital Slider */}
+      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-4">
         <div className="flex items-center gap-2 mb-1">
-          <Shield className="w-4 h-4 text-primary" />
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">بيانات الصفقة</p>
+          <DollarSign className="w-4 h-4 text-primary" />
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">رأس المال</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <InputField
-            label="رأس المال"
-            icon={<DollarSign className="w-3.5 h-3.5" />}
-            value={capital}
-            onChange={setCapital}
-            placeholder="10000"
-          />
-          <InputField
-            label="نسبة المخاطرة %"
-            icon={<Percent className="w-3.5 h-3.5" />}
-            value={riskPercent}
-            onChange={setRiskPercent}
-            placeholder="2"
-          />
+        <div className="text-center">
+          <motion.p
+            key={capital}
+            initial={{ scale: 0.9, opacity: 0.5 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-3xl font-mono font-bold text-foreground tabular-nums"
+          >
+            ${capital.toLocaleString()}
+          </motion.p>
+        </div>
+
+        <Slider
+          value={[capital]}
+          onValueChange={([v]) => setCapital(v)}
+          min={100}
+          max={200000}
+          step={100}
+          className="w-full"
+        />
+
+        <div className="flex gap-1.5 flex-wrap justify-center">
+          {CAPITAL_PRESETS.map(p => (
+            <button
+              key={p}
+              onClick={() => setCapital(p)}
+              className={cn(
+                "px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-all",
+                capital === p
+                  ? "bg-primary/15 text-primary border border-primary/30"
+                  : "bg-secondary/50 text-muted-foreground border border-border/10 hover:text-foreground"
+              )}
+            >
+              ${p >= 1000 ? `${p / 1000}K` : p}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Risk % Slider */}
+      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Percent className="w-4 h-4 text-warning" />
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة</p>
+          </div>
+          <motion.span
+            key={riskPercent}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className={cn(
+              "text-lg font-mono font-bold tabular-nums",
+              riskPercent <= 1 ? "text-success" : riskPercent <= 3 ? "text-warning" : "text-destructive"
+            )}
+          >
+            {riskPercent}%
+          </motion.span>
+        </div>
+
+        <Slider
+          value={[riskPercent]}
+          onValueChange={([v]) => setRiskPercent(v)}
+          min={0.5}
+          max={10}
+          step={0.5}
+          className="w-full"
+        />
+
+        <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+          <span className="text-success">محافظ 0.5%</span>
+          <span className="text-warning">معتدل 2%</span>
+          <span className="text-destructive">عدواني 10%</span>
+        </div>
+
+        {/* Live risk amount */}
+        <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] bg-secondary/40 border border-border/10">
+          <Zap className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[12px] font-mono text-muted-foreground">المبلغ المُعرّض:</span>
+          <motion.span
+            key={`${capital}-${riskPercent}`}
+            initial={{ opacity: 0.5, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[14px] font-mono font-bold text-primary tabular-nums"
+          >
+            ${(capital * riskPercent / 100).toFixed(2)}
+          </motion.span>
+        </div>
+      </motion.div>
+
+      {/* Price Inputs */}
+      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Shield className="w-4 h-4 text-accent" />
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">مستويات الأسعار</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
           <InputField
             label="سعر الدخول"
             icon={<TrendingUp className="w-3.5 h-3.5" />}
@@ -110,16 +191,14 @@ const RiskCalculator = () => {
             onChange={setStopLoss}
             placeholder="65500"
           />
+          <InputField
+            label="هدف الربح"
+            icon={<Target className="w-3.5 h-3.5" />}
+            value={takeProfit}
+            onChange={setTakeProfit}
+            placeholder="70000"
+          />
         </div>
-
-        <InputField
-          label="هدف الربح (اختياري)"
-          icon={<Target className="w-3.5 h-3.5" />}
-          value={takeProfit}
-          onChange={setTakeProfit}
-          placeholder="70000"
-          full
-        />
       </motion.div>
 
       {/* Results */}
@@ -245,32 +324,31 @@ const RiskCalculator = () => {
       {!calc && (
         <motion.div variants={fadeUp} className="flex flex-col items-center justify-center py-12 text-center">
           <Shield className="w-10 h-10 text-muted-foreground/30 mb-3" />
-          <p className="text-[12px] font-mono text-muted-foreground">أدخل بيانات الصفقة لحساب المخاطر</p>
+          <p className="text-[12px] font-mono text-muted-foreground">أدخل مستويات الأسعار لحساب المخاطر</p>
         </motion.div>
       )}
     </motion.div>
   );
 };
 
-const InputField = ({ label, icon, value, onChange, placeholder, full }: {
+const InputField = ({ label, icon, value, onChange, placeholder }: {
   label: string;
   icon: React.ReactNode;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
-  full?: boolean;
 }) => (
-  <div className={full ? "col-span-2" : ""}>
+  <div>
     <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">{label}</label>
     <div className="relative">
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</div>
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</div>
       <input
         type="number"
         inputMode="decimal"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-secondary/60 border border-border/30 rounded-[10px] pr-8 pl-3 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
+        className="w-full bg-secondary/60 border border-border/30 rounded-[10px] pr-7 pl-2 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
       />
     </div>
   </div>

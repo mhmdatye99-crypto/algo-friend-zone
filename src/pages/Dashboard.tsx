@@ -13,6 +13,7 @@ import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
 import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
 import WhaleTracker from "@/components/dashboard/WhaleTracker";
+import AICoachTip from "@/components/dashboard/AICoachTip";
 import {
   DndContext,
   closestCenter,
@@ -46,9 +47,10 @@ const marketPulse = {
   ],
 };
 
-type SectionId = "morning" | "ticker" | "pulse" | "whale" | "wealth" | "favorites";
+type SectionId = "coach" | "morning" | "ticker" | "pulse" | "whale" | "wealth" | "favorites";
 
 const SECTION_LABELS: Record<SectionId, string> = {
+  coach: "المدرب الذكي",
   morning: "الملخص الصباحي",
   ticker: "شريط الأسعار",
   pulse: "نبض السوق",
@@ -57,7 +59,7 @@ const SECTION_LABELS: Record<SectionId, string> = {
   favorites: "المفضلة",
 };
 
-const DEFAULT_ORDER: SectionId[] = ["morning", "ticker", "pulse", "whale", "wealth", "favorites"];
+const DEFAULT_ORDER: SectionId[] = ["coach", "morning", "ticker", "pulse", "whale", "wealth", "favorites"];
 const STORAGE_KEY = "dashboard-section-order";
 
 function loadOrder(): SectionId[] {
@@ -135,6 +137,12 @@ const Dashboard = () => {
 
   /* ─── Section renderers ─── */
   const sections: Record<SectionId, React.ReactNode> = useMemo(() => ({
+    coach: (
+      <motion.div variants={fadeUp}>
+        <AICoachTip />
+      </motion.div>
+    ),
+
     morning: (
       <motion.div variants={fadeUp}>
         <MorningBriefCard />
