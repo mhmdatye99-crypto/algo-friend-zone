@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen, ChevronDown, Sparkles } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
@@ -286,6 +286,92 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
   );
 };
 
+const TimeframeCard = ({ tf }: { tf: TimeframeAnalysis }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <motion.div
+      className={cn(
+        "rounded-[12px] border cursor-pointer transition-all overflow-hidden",
+        expanded ? trendBg(tf.trend) : "bg-secondary/30 border-border/20 hover:border-primary/30"
+      )}
+      layout
+      onClick={() => setExpanded(!expanded)}
+    >
+      {/* Collapsed: Minimal info + CTA */}
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[14px] font-mono font-bold text-foreground">{tf.tf}</span>
+            <span className="text-[9px] font-mono text-muted-foreground">{tf.label}</span>
+          </div>
+          <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md border", signalBadge(tf.signal))}>
+            {tf.signal}
+          </span>
+        </div>
+
+        {!expanded && (
+          <div className="flex items-center justify-center gap-1 mt-2 py-1.5 rounded-lg bg-primary/8 border border-primary/15">
+            <Sparkles className="w-3 h-3 text-primary" />
+            <span className="text-[9px] font-mono font-bold text-primary">انقر للتحليل</span>
+          </div>
+        )}
+
+        {/* Expanded: Full analysis */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="flex items-center gap-1 mb-2 mt-1">
+                {tf.trend === "صعودي" ? <TrendingUp className="w-3.5 h-3.5 text-success" />
+                  : tf.trend === "هبوطي" ? <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                  : <Activity className="w-3.5 h-3.5 text-muted-foreground" />}
+                <span className={cn("text-[12px] font-mono font-bold", trendColor(tf.trend))}>{tf.trend}</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-muted-foreground">RSI</span>
+                  <span className={cn("text-[11px] font-mono font-bold",
+                    tf.rsi > 70 ? "text-destructive" : tf.rsi < 30 ? "text-success" : "text-foreground"
+                  )}>{tf.rsi}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-muted-foreground">MACD</span>
+                  <span className={cn("text-[11px] font-mono font-bold", trendColor(tf.macd))}>{tf.macd}</span>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      background: tf.trend === "صعودي"
+                        ? "linear-gradient(90deg, hsl(155 100% 35%), hsl(155 100% 50%))"
+                        : tf.trend === "هبوطي"
+                        ? "linear-gradient(90deg, hsl(350 80% 40%), hsl(350 100% 55%))"
+                        : "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
+                    }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${tf.strength}%` }}
+                    transition={{ duration: 0.8 }}
+                  />
+                </div>
+                <span className="text-[8px] font-mono text-muted-foreground mt-0.5 block text-left">{tf.strength}%</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
 const AssetDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -406,81 +492,32 @@ const AssetDetail = () => {
         <TradingViewChart pair={asset.pair} timeframe={timeframe} />
       </motion.div>
 
-      {/* ═══ Multi-Timeframe Analysis ═══ */}
-      <motion.div variants={fadeUp} className="glass rounded-[14px] p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-accent" />
-            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">تحليل متعدد الفريمات</p>
+      {/* ═══ Multi-Timeframe Analysis — Collapsed by Default ═══ */}
+      <motion.div variants={fadeUp} className="space-y-2">
+        {/* Header with CTA */}
+        <div className="glass rounded-[14px] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(43 100% 50% / 0.15), hsl(190 100% 50% / 0.15))", border: "1px solid hsl(43 100% 50% / 0.2)" }}>
+                <Clock className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-[12px] font-mono font-bold text-foreground">تحليل متعدد الفريمات</p>
+            </div>
+            <div className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border",
+              signalBadge(consensus.signal)
+            )}>
+              <Zap className="w-3 h-3" />
+              {consensus.signal === "محايد" ? "محايد" : `${consensus.signal} ${consensus.count}/${consensus.total}`}
+            </div>
           </div>
-          <div className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border",
-            signalBadge(consensus.signal)
-          )}>
-            <Zap className="w-3 h-3" />
-            {consensus.signal === "محايد" ? "محايد" : `${consensus.signal} ${consensus.count}/${consensus.total}`}
+
+          {/* Timeframe Cards — Each Expandable */}
+          <div className="grid grid-cols-2 gap-2">
+            {mtfAnalysis.map((tf) => (
+              <TimeframeCard key={tf.tf} tf={tf} />
+            ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          {mtfAnalysis.map((tf) => (
-            <motion.div
-              key={tf.tf}
-              className={cn("rounded-[12px] p-3 border transition-all", trendBg(tf.trend))}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-mono font-bold text-foreground">{tf.tf}</span>
-                  <span className="text-[9px] font-mono text-muted-foreground">{tf.label}</span>
-                </div>
-                <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md border", signalBadge(tf.signal))}>
-                  {tf.signal}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1 mb-1.5">
-                {tf.trend === "صعودي" ? <TrendingUp className="w-3 h-3 text-success" />
-                  : tf.trend === "هبوطي" ? <TrendingDown className="w-3 h-3 text-destructive" />
-                  : <Activity className="w-3 h-3 text-muted-foreground" />}
-                <span className={cn("text-[11px] font-mono font-bold", trendColor(tf.trend))}>{tf.trend}</span>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono text-muted-foreground">RSI</span>
-                  <span className={cn("text-[10px] font-mono font-bold",
-                    tf.rsi > 70 ? "text-destructive" : tf.rsi < 30 ? "text-success" : "text-foreground"
-                  )}>{tf.rsi}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono text-muted-foreground">MACD</span>
-                  <span className={cn("text-[10px] font-mono font-bold", trendColor(tf.macd))}>{tf.macd}</span>
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{
-                      background: tf.trend === "صعودي"
-                        ? "linear-gradient(90deg, hsl(155 100% 35%), hsl(155 100% 50%))"
-                        : tf.trend === "هبوطي"
-                        ? "linear-gradient(90deg, hsl(350 80% 40%), hsl(350 100% 55%))"
-                        : "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
-                    }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${tf.strength}%` }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                  />
-                </div>
-                <span className="text-[8px] font-mono text-muted-foreground mt-0.5 block text-left">{tf.strength}%</span>
-              </div>
-            </motion.div>
-          ))}
         </div>
       </motion.div>
 
