@@ -5,7 +5,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
-import Signals from "./pages/Signals";
+import NexusBrain from "./pages/NexusBrain";
+import TradeCenter from "./pages/TradeCenter";
 import ChartVision from "./pages/ChartVision";
 import Academy from "./pages/Academy";
 import Profile from "./pages/Profile";
@@ -15,7 +16,6 @@ import AssetDetail from "./pages/AssetDetail";
 import Community from "./pages/Community";
 import GoalPlanner from "./pages/GoalPlanner";
 import Markets from "./pages/Markets";
-import More from "./pages/More";
 import RiskCalculator from "./pages/RiskCalculator";
 import Subscription from "./pages/Subscription";
 import AdminPanel from "./pages/AdminPanel";
@@ -62,7 +62,8 @@ const App = () => (
             <Route path="/auth" element={<AuthRoute />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/signals" element={<Signals />} />
+              <Route path="/nexus-brain" element={<NexusBrain />} />
+              <Route path="/trade-center" element={<TradeCenter />} />
               <Route path="/chart-vision" element={<ChartVision />} />
               <Route path="/academy" element={<Academy />} />
               <Route path="/profile" element={<Profile />} />
@@ -71,13 +72,15 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
               <Route path="/markets" element={<Markets />} />
-              <Route path="/more" element={<Hub />} />
               <Route path="/hub" element={<Hub />} />
+              <Route path="/more" element={<Hub />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/trade-journal" element={<TradeJournal />} />
               <Route path="/my-analyses" element={<MyAnalyses />} />
               <Route path="/admin" element={<AdminPanel />} />
+              {/* Legacy redirects */}
+              <Route path="/signals" element={<Navigate to="/trade-center" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

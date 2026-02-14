@@ -1,14 +1,14 @@
-import { Home, BarChart3, ScanLine, Users, Menu } from "lucide-react";
+import { Home, Brain, Crosshair, Users, Crown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/", icon: Home, label: "الرئيسية" },
-  { path: "/signals", icon: BarChart3, label: "إشارات" },
-  { path: "/chart-vision", icon: ScanLine, label: "تحليل", center: true },
-  { path: "/community", icon: Users, label: "مجتمع" },
-  { path: "/hub", icon: Menu, label: "Nexus" },
+  { path: "/nexus-brain", icon: Brain, label: "الذكاء" },
+  { path: "/trade-center", icon: Crosshair, label: "التداول", center: true },
+  { path: "/community", icon: Users, label: "الساحة" },
+  { path: "/hub", icon: Crown, label: "المقر" },
 ];
 
 const BottomNav = () => {
@@ -35,7 +35,6 @@ const BottomNav = () => {
                 onClick={() => navigate(tab.path)}
                 className="relative flex flex-col items-center justify-center -mt-7"
               >
-                {/* Outer glow ring */}
                 <div
                   className="absolute w-[72px] h-[72px] rounded-full animate-pulse-slow pointer-events-none"
                   style={{
