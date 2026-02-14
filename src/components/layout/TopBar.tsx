@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Bell, User, Coins } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/hooks/useCredits";
+import { useNotifications } from "@/hooks/useNotifications";
 import { motion } from "framer-motion";
+import NotificationsSheet from "@/components/notifications/NotificationsSheet";
 
 const pageTitles: Record<string, string> = {
   "/": "",
@@ -32,6 +35,8 @@ const TopBar = () => {
   const { user } = useAuth();
   const { stats } = useGoalPlanner();
   const { credits } = useCredits();
+  const { unreadCount } = useNotifications();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const isHome = location.pathname === "/";
   const currentTitle = pageTitles[location.pathname] || "Nexus Trade AI";
@@ -99,10 +104,15 @@ const TopBar = () => {
             <span className="text-[11px] font-mono font-bold text-primary">{credits}</span>
           </button>
           <button
+            onClick={() => setShowNotifications(true)}
             className="relative w-9 h-9 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
           >
             <Bell className="w-4 h-4 text-muted-foreground" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive animate-pulse" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive flex items-center justify-center text-[9px] font-mono font-bold text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -126,6 +136,8 @@ const TopBar = () => {
           ))}
         </motion.div>
       </div>
+
+      <NotificationsSheet open={showNotifications} onClose={() => setShowNotifications(false)} />
     </header>
   );
 };

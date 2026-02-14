@@ -3,6 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
+const sendNotification = async (userId: string, fromUserId: string, type: string, message: string, postId: string) => {
+  if (userId === fromUserId) return; // Don't notify yourself
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    from_user_id: fromUserId,
+    type,
+    message,
+    post_id: postId,
+  });
+};
+
 export interface CommunityPost {
   id: string;
   user_id: string;
@@ -87,12 +98,17 @@ export function useCommunity() {
         { post_id: postId, user_id: user.id, vote: voteType },
         { onConflict: "post_id,user_id" }
       );
-      // Award +1 reputation to post author for receiving a vote (fire-and-forget)
+      // Award +1 reputation + send notification
       if (existing && existing.user_id !== user.id && !existing.user_vote) {
         supabase.from("profiles").select("reputation_points").eq("user_id", existing.user_id).single()
           .then(({ data }) => {
             if (data) supabase.from("profiles").update({ reputation_points: (data.reputation_points || 0) + 1 }).eq("user_id", existing.user_id).then(() => {});
           });
+        sendNotification(
+          existing.user_id, user.id, "vote",
+          `صوّت أحدهم ${voteType === "bullish" ? "صعودي 🟢" : "هبوطي 🔴"} على تحليلك لـ ${existing.pair}`,
+          postId
+        );
       }
     }
     fetchPosts();
