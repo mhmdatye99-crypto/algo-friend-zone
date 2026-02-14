@@ -1,8 +1,7 @@
-import { Bell, User, Sun, Brain, Shield, Target, Crown, Settings, MoreHorizontal, BookOpen } from "lucide-react";
+import { Bell, User, Sun } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const pageTitles: Record<string, string> = {
   "/": "الرئيسية",
@@ -17,38 +16,17 @@ const pageTitles: Record<string, string> = {
   "/risk-calculator": "حاسبة المخاطر",
   "/subscription": "الاشتراك",
   "/admin": "لوحة الإدارة",
-  "/more": "المزيد",
+  "/hub": "المزيد",
   "/trade-journal": "سجل الصفقات",
 };
-
-const quickActions = [
-  { icon: BookOpen, label: "سجل الصفقات", path: "/trade-journal", color: "text-accent" },
-  { icon: Sun, label: "الملخص الصباحي", path: "/morning-brief", color: "text-warning" },
-  { icon: Brain, label: "الأكاديمية", path: "/academy", color: "text-primary" },
-  { icon: Target, label: "الأوديسة المالية", path: "/goal-planner", color: "text-warning" },
-  { icon: Shield, label: "حاسبة المخاطر", path: "/risk-calculator", color: "text-success" },
-  { icon: Crown, label: "الاشتراك", path: "/subscription", color: "text-primary" },
-  { icon: Settings, label: "الإعدادات", path: "/more", color: "text-muted-foreground" },
-];
 
 const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const assets = useLivePrices();
   const topAssets = assets.slice(0, 8);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const currentTitle = pageTitles[location.pathname] || "TradeJourney";
-
-  // Close menu on click outside
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
-    if (menuOpen) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [menuOpen]);
 
   return (
     <header
@@ -70,8 +48,7 @@ const TopBar = () => {
             <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">TradeJourney AI</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 relative" ref={menuRef}>
-          {/* Quick access icons */}
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => navigate("/morning-brief")}
             className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
@@ -85,48 +62,11 @@ const TopBar = () => {
             <Bell className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/hub")}
             className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
           >
             <User className="w-4 h-4 text-muted-foreground" />
           </button>
-          {/* More menu */}
-          <button
-            onClick={() => setMenuOpen(prev => !prev)}
-            className="w-8 h-8 rounded-[10px] bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
-          >
-            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-          </button>
-
-          {/* Dropdown */}
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 mt-2 w-52 rounded-xl overflow-hidden z-50"
-                style={{
-                  background: "hsla(240, 15%, 4%, 0.95)",
-                  backdropFilter: "blur(30px)",
-                  border: "1px solid hsla(43, 100%, 50%, 0.12)",
-                  boxShadow: "0 10px 40px hsla(0, 0%, 0%, 0.5)",
-                }}
-              >
-                {quickActions.map(item => (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-secondary/40 transition-colors text-right"
-                  >
-                    <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
-                    <span className="text-[12px] font-mono text-foreground">{item.label}</span>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 

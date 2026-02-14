@@ -20,6 +20,7 @@ import RiskCalculator from "./pages/RiskCalculator";
 import Subscription from "./pages/Subscription";
 import AdminPanel from "./pages/AdminPanel";
 import TradeJournal from "./pages/TradeJournal";
+import Hub from "./pages/Hub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,7 +70,8 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
               <Route path="/markets" element={<Markets />} />
-              <Route path="/more" element={<More />} />
+              <Route path="/more" element={<Hub />} />
+              <Route path="/hub" element={<Hub />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/trade-journal" element={<TradeJournal />} />
