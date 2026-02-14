@@ -83,7 +83,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-lg glass-strong rounded-t-2xl p-5 space-y-4 safe-area-bottom max-h-[85vh] overflow-y-auto"
+            className="w-full max-w-lg glass-strong rounded-t-2xl p-5 pb-28 space-y-4 safe-area-bottom max-h-[85vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex items-center justify-between">
