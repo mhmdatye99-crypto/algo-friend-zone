@@ -6,14 +6,18 @@ import {
   Settings, Activity, Award, TrendingDown, Calculator, Wallet, Users,
   BarChart3, Coins
 } from "lucide-react";
+import { useThemeMode } from "@/hooks/useTheme";
+import { toast } from "sonner";
 import PerformanceSection from "@/components/hub/PerformanceSection";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCredits } from "@/hooks/useCredits";
 import { BuyCreditsModal } from "@/components/credits/CreditModals";
+import NotificationsSheet from "@/components/notifications/NotificationsSheet";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useTradePerformance } from "@/hooks/useTradePerformance";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -24,18 +28,8 @@ const stagger = {
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const stats = [
-  { icon: Trophy, label: "الرتبة", value: "محلل أول", color: "text-primary" },
-  { icon: Flame, label: "سلسلة التحليل", value: "14 يوم", color: "text-warning" },
-  { icon: Star, label: "نقاط XP", value: "3,250", color: "text-primary" },
-];
+// Stats will be computed dynamically in the component
 
-const performanceMetrics = [
-  { label: "دقة التحليل", value: "72%", icon: Target },
-  { label: "عامل الربح", value: "2.4", icon: Activity },
-  { label: "نسبة شارب", value: "1.8", icon: Award },
-  { label: "أقصى تراجع", value: "-8.2%", icon: TrendingDown },
-];
 
 interface MenuSection {
   title: string;
@@ -77,10 +71,10 @@ const menuSections: MenuSection[] = [
 ];
 
 const settingsItems = [
-  { icon: Bell, label: "التنبيهات", desc: "إشعارات الإشارات والتحليلات" },
-  { icon: Shield, label: "الأمان", desc: "كلمات المرور والمفاتيح" },
-  { icon: Palette, label: "المظهر", desc: "تخصيص الألوان والسمة" },
-  { icon: HelpCircle, label: "الدعم", desc: "المساعدة والأسئلة" },
+  { icon: Bell, label: "التنبيهات", desc: "إشعارات الإشارات والتحليلات", action: "notifications" },
+  { icon: Shield, label: "الأمان", desc: "كلمات المرور والمفاتيح", action: "security" },
+  { icon: Palette, label: "المظهر", desc: "تخصيص الألوان والسمة", action: "theme" },
+  { icon: HelpCircle, label: "الدعم", desc: "المساعدة والأسئلة", action: "support" },
 ];
 
 const Hub = () => {
@@ -91,6 +85,26 @@ const Hub = () => {
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPerf, setShowPerf] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { isDark, toggle: toggleTheme } = useThemeMode();
+
+  const handleSettingsAction = (action: string) => {
+    switch (action) {
+      case "notifications":
+        setShowNotifications(true);
+        break;
+      case "security":
+        toast.info("إعدادات الأمان — يمكنك تغيير كلمة المرور من خلال إعادة تعيينها عبر البريد الإلكتروني");
+        break;
+      case "theme":
+        toggleTheme();
+        toast.success(isDark ? "تم التبديل إلى الوضع الفاتح ☀️" : "تم التبديل إلى الوضع الداكن 🌙");
+        break;
+      case "support":
+        toast.info("للدعم والمساعدة تواصل معنا عبر البريد: support@nexustrade.ai");
+        break;
+    }
+  };
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -101,8 +115,27 @@ const Hub = () => {
     checkAdmin();
   }, [user]);
 
+  const { data: perf } = useTradePerformance();
+
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "محلل";
   const initial = displayName.charAt(0).toUpperCase();
+
+  // Dynamic stats from real data
+  const getRank = () => {
+    if (!perf || perf.closedTrades === 0) return "مبتدئ";
+    if (perf.winRate >= 60 && perf.closedTrades >= 50) return "محلل خبير";
+    if (perf.winRate >= 50 && perf.closedTrades >= 20) return "محلل أول";
+    if (perf.closedTrades >= 10) return "محلل";
+    return "متدرب";
+  };
+
+  const reputation = perf ? Math.round(perf.closedTrades * perf.winRate / 10) : 0;
+
+  const dynamicStats = [
+    { icon: Trophy, label: "الرتبة", value: getRank(), color: "text-primary" },
+    { icon: Flame, label: "صفقات مغلقة", value: `${perf?.closedTrades || 0}`, color: "text-warning" },
+    { icon: Star, label: "نقاط XP", value: reputation.toLocaleString(), color: "text-primary" },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -138,7 +171,7 @@ const Hub = () => {
         </span>
 
         <div className="grid grid-cols-3 gap-2 mt-4">
-          {stats.map((s, i) => (
+          {dynamicStats.map((s, i) => (
             <div key={i} className="bg-secondary/40 rounded-[10px] p-2 border border-border/10">
               <s.icon className={cn("w-3.5 h-3.5 mx-auto mb-0.5", s.color)} />
               <p className="text-[11px] font-bold font-mono">{s.value}</p>
@@ -260,6 +293,7 @@ const Hub = () => {
           {settingsItems.map((item, i) => (
             <button
               key={i}
+              onClick={() => handleSettingsAction(item.action)}
               className="w-full flex items-center gap-3 px-3.5 py-3 transition-all hover:bg-secondary/20 text-right"
             >
               <div className="w-9 h-9 rounded-[10px] bg-secondary/50 flex items-center justify-center border border-border/10 shrink-0">
@@ -310,6 +344,7 @@ const Hub = () => {
         onClose={() => setShowBuyCredits(false)}
         currentCredits={credits}
       />
+      <NotificationsSheet open={showNotifications} onClose={() => setShowNotifications(false)} />
     </motion.div>
   );
 };

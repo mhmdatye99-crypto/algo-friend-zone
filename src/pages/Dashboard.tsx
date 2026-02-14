@@ -19,11 +19,6 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-const marketPulse = {
-  index: 73,
-  label: "صعودي معتدل",
-};
-
 const analysisCards = [
   {
     id: "crypto",
@@ -59,6 +54,16 @@ const Dashboard = () => {
   const { signals } = useSignals();
 
   const activeSignalsCount = signals.filter(s => s.confidence >= 70).length;
+
+  // Dynamic market pulse from signals
+  const marketPulse = useMemo(() => {
+    if (signals.length === 0) return { index: 50, label: "محايد" };
+    const bullish = signals.filter(s => s.direction === "صعودي").length;
+    const index = Math.round((bullish / signals.length) * 100);
+    const label = index >= 70 ? "صعودي قوي" : index >= 55 ? "صعودي معتدل" : index >= 45 ? "محايد" : index >= 30 ? "هبوطي معتدل" : "هبوطي قوي";
+    return { index, label };
+  }, [signals]);
+
   const favoriteAssets = assets.filter(a => favorites.has(a.pair));
   const trendingUp = useMemo(() => [...assets].sort((a, b) => b.change - a.change).slice(0, 6), [assets]);
   const trendingDown = useMemo(() => [...assets].sort((a, b) => a.change - b.change).slice(0, 6), [assets]);
