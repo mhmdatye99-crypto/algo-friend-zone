@@ -1,31 +1,20 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  TrendingUp, TrendingDown, MessageCircle, Bookmark,
-  BookmarkCheck, Shield, Clock, Eye, Repeat2, Flame,
-  ThumbsUp, Heart, BarChart2, BadgeCheck
+  TrendingUp, TrendingDown, MessageCircle,
+  BookmarkCheck, Shield, ChevronDown, ChevronUp,
+  ThumbsUp, Eye, BadgeCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CommunityPost } from "@/hooks/useCommunity";
 
-const expertTags: Record<string, { label: string; color: string }> = {
-  top_forecaster: { label: "أفضل متنبئ", color: "text-primary bg-primary/10 border-primary/30" },
-  chart_master: { label: "أستاذ الشارت", color: "text-accent bg-accent/10 border-accent/30" },
-  whale_tracker: { label: "متتبع الحيتان", color: "text-success bg-success/10 border-success/30" },
-};
-
-const getRandomTag = (userId: string) => {
-  const tags = Object.values(expertTags);
-  const idx = userId.charCodeAt(0) % tags.length;
-  return tags[idx];
-};
-
 const timeAgo = (date: string) => {
   const diff = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}دقائق`;
+  if (mins < 60) return `${mins}د`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}ساعات`;
-  return `${Math.floor(hrs / 24)}أيام`;
+  if (hrs < 24) return `${hrs}س`;
+  return `${Math.floor(hrs / 24)}ي`;
 };
 
 interface Props {
@@ -36,215 +25,174 @@ interface Props {
 }
 
 const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
-  const tag = getRandomTag(post.user_id);
+  const [showDetails, setShowDetails] = useState(false);
   const totalVotes = post.bullish_count + post.bearish_count;
   const bullishPct = totalVotes > 0 ? Math.round((post.bullish_count / totalVotes) * 100) : 50;
-  const viewCount = Math.floor(post.user_id.charCodeAt(2) * 47 + 200);
-  const followerCount = Math.floor(post.user_id.charCodeAt(1) * 12 + 100);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="glass rounded-xl overflow-hidden"
+      style={{ borderColor: "hsla(43, 100%, 50%, 0.06)" }}
     >
       <div className="p-4 space-y-3">
-        {/* User Header - CMC Style */}
+        {/* User Row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
+          <div className="flex items-center gap-2.5">
             <div className="relative">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center text-[14px] font-bold font-mono text-primary border-2 border-primary/20">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/15 flex items-center justify-center text-[13px] font-bold font-mono text-primary border border-primary/15">
                 {(post.display_name || "M")[0].toUpperCase()}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent flex items-center justify-center">
-                <BadgeCheck className="w-3 h-3 text-background" />
-              </div>
+              <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 text-accent" />
             </div>
-            {/* Name & Meta */}
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[13px] font-mono font-bold">{post.display_name}</span>
+                <span className="text-[12px] font-mono font-bold">{post.display_name}</span>
                 <span className="text-[9px] text-muted-foreground font-mono">· {timeAgo(post.created_at)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-muted-foreground">
-                  {followerCount.toLocaleString()} متابعون
-                </span>
-                <span className={cn("text-[8px] font-mono px-1.5 py-0.5 rounded-md border", tag.color)}>
-                  {tag.label}
-                </span>
-              </div>
+              <span className="text-[9px] font-mono text-muted-foreground">{post.timeframe}</span>
             </div>
           </div>
 
-          {/* Follow Button */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => onSave(post.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] font-mono font-bold transition-all",
+              "px-3 py-1 rounded-lg text-[10px] font-mono font-bold transition-all border",
               post.is_saved
-                ? "bg-primary/15 text-primary border border-primary/25"
-                : "bg-primary text-primary-foreground"
+                ? "bg-primary/10 text-primary border-primary/20"
+                : "bg-secondary/60 text-muted-foreground border-border/10 hover:text-primary hover:border-primary/20"
             )}
           >
-            {post.is_saved ? (
-              <><BookmarkCheck className="w-3 h-3" /> متابَع</>
-            ) : (
-              <>+ متابعة</>
-            )}
-          </motion.button>
+            {post.is_saved ? <><BookmarkCheck className="w-3 h-3 inline mr-1" />محفوظ</> : "+ حفظ"}
+          </button>
         </div>
 
-        {/* Post Content */}
+        {/* Analysis Text */}
         {post.analysis_summary && (
-          <p className="text-[12px] font-mono text-foreground/85 leading-[1.7]">
+          <p className="text-[11px] font-mono text-foreground/80 leading-[1.8]">
             {post.analysis_summary}
           </p>
         )}
 
-        {/* Post Image */}
+        {/* Image */}
         {post.image_url && (
-          <div className="rounded-xl overflow-hidden border border-border/15">
-            <img src={post.image_url} alt="تحليل" className="w-full max-h-64 object-cover" loading="lazy" />
+          <div className="rounded-lg overflow-hidden border border-border/10">
+            <img src={post.image_url} alt="تحليل" className="w-full max-h-56 object-cover" loading="lazy" />
           </div>
         )}
 
-        {/* Asset Tag with Price */}
+        {/* Asset + Direction Tag */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className={cn(
             "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold border",
             post.prediction === "bullish"
-              ? "text-success bg-success/8 border-success/15"
-              : "text-destructive bg-destructive/8 border-destructive/15"
+              ? "text-success bg-success/5 border-success/12"
+              : "text-destructive bg-destructive/5 border-destructive/12"
           )}>
             {post.prediction === "bullish" ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             {post.pair}
-            <span className="text-[10px]">
-              {post.prediction === "bullish" ? `+${bullishPct}%` : `-${100 - bullishPct}%`}
-            </span>
           </div>
-          {post.timeframe && (
-            <span className="text-[9px] font-mono text-muted-foreground bg-secondary/60 px-2 py-1 rounded-md border border-border/10">
-              {post.timeframe}
-            </span>
-          )}
-          <div className="flex items-center gap-1 bg-accent/8 px-2 py-1 rounded-md border border-accent/15">
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md border border-accent/12 bg-accent/5">
             <Shield className="w-3 h-3 text-accent" />
             <span className="text-[9px] font-mono text-accent font-bold">AI {post.ai_confidence}%</span>
           </div>
         </div>
 
-        {/* Voting Bar */}
-        <div className="space-y-1.5">
-          <div className="h-2 rounded-full bg-muted overflow-hidden flex">
-            <motion.div
-              className="h-full bg-gradient-to-r from-success to-success/70"
-              initial={{ width: 0 }}
-              animate={{ width: `${bullishPct}%` }}
-              transition={{ duration: 0.8 }}
-            />
-            <motion.div
-              className="h-full bg-gradient-to-l from-destructive to-destructive/70"
-              initial={{ width: 0 }}
-              animate={{ width: `${100 - bullishPct}%` }}
-              transition={{ duration: 0.8 }}
-            />
-          </div>
-        </div>
-
-        {/* Reactions Row - CMC Style */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <ReactionChip
-            emoji="🔥"
-            count={post.bullish_count}
-            active={post.user_vote === "bullish"}
-            onClick={() => onVote(post.id, "bullish")}
+        {/* Sentiment Bar — thin */}
+        <div className="h-1 rounded-full bg-muted overflow-hidden flex">
+          <motion.div
+            className="h-full bg-success"
+            initial={{ width: 0 }}
+            animate={{ width: `${bullishPct}%` }}
+            transition={{ duration: 0.6 }}
           />
-          <ReactionChip
-            emoji="👍"
-            count={Math.floor(post.bullish_count * 0.7)}
-            active={false}
-            onClick={() => onVote(post.id, "bullish")}
-          />
-          <ReactionChip
-            emoji="❤️"
-            count={Math.floor(totalVotes * 0.4)}
-            active={false}
-            onClick={() => {}}
-          />
-          <ReactionChip
-            emoji="📈"
-            count={post.bearish_count}
-            active={post.user_vote === "bearish"}
-            onClick={() => onVote(post.id, "bearish")}
+          <motion.div
+            className="h-full bg-destructive"
+            initial={{ width: 0 }}
+            animate={{ width: `${100 - bullishPct}%` }}
+            transition={{ duration: 0.6 }}
           />
         </div>
 
-        {/* Action Bar - CMC Style */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/10">
-          <div className="flex items-center gap-4">
-            <ActionBtn icon={Eye} count={viewCount} label="مشاهدة" />
+        {/* Actions — Clean, minimal */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ActionBtn
+              icon={ThumbsUp}
+              count={post.bullish_count + post.bearish_count}
+              active={!!post.user_vote}
+              onClick={() => onVote(post.id, "bullish")}
+            />
             <ActionBtn
               icon={MessageCircle}
               count={post.comment_count}
-              label="تعليق"
               onClick={() => onOpenComments(post.id)}
             />
-            <ActionBtn icon={Repeat2} count={Math.floor(totalVotes * 0.2)} label="مشاركة" />
+            <ActionBtn
+              icon={Eye}
+              count={Math.floor(post.user_id.charCodeAt(2) * 47 + 200)}
+            />
           </div>
-          <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-            <span className="text-sm">•••</span>
+
+          {/* Details Toggle */}
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="flex items-center gap-1 text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+          >
+            تفاصيل
+            {showDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
         </div>
+
+        {/* Expandable Details */}
+        <AnimatePresence>
+          {showDetails && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 border-t border-border/10 grid grid-cols-3 gap-2 text-center">
+                <div className="bg-secondary/30 rounded-lg p-2">
+                  <p className="text-[8px] font-mono text-muted-foreground">صعودي</p>
+                  <p className="text-[13px] font-mono font-bold text-success">{post.bullish_count}</p>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-2">
+                  <p className="text-[8px] font-mono text-muted-foreground">هبوطي</p>
+                  <p className="text-[13px] font-mono font-bold text-destructive">{post.bearish_count}</p>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-2">
+                  <p className="text-[8px] font-mono text-muted-foreground">نسبة صعود</p>
+                  <p className="text-[13px] font-mono font-bold text-primary">{bullishPct}%</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
 };
 
-// Reaction Chip Component
-const ReactionChip = ({
-  emoji,
+const ActionBtn = ({
+  icon: Icon,
   count,
   active,
   onClick,
 }: {
-  emoji: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) => (
-  <motion.button
-    onClick={onClick}
-    whileTap={{ scale: 0.9 }}
-    className={cn(
-      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border transition-all",
-      active
-        ? "bg-primary/10 border-primary/25 text-foreground"
-        : "bg-secondary/40 border-border/10 text-muted-foreground hover:bg-secondary/60"
-    )}
-  >
-    <span className="text-[13px]">{emoji}</span>
-    {count > 0 && <span>{count}</span>}
-  </motion.button>
-);
-
-// Action Button Component
-const ActionBtn = ({
-  icon: Icon,
-  count,
-  label,
-  onClick,
-}: {
   icon: React.ElementType;
   count: number;
-  label: string;
+  active?: boolean;
   onClick?: () => void;
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+    className={cn(
+      "flex items-center gap-1 text-[10px] font-mono transition-colors",
+      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+    )}
   >
     <Icon className="w-3.5 h-3.5" />
     <span>{count > 999 ? `${(count / 1000).toFixed(1)}K` : count}</span>
