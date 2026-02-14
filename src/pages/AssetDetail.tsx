@@ -87,12 +87,16 @@ const TradingViewChart = ({ pair, timeframe }: { pair: string; timeframe: string
       theme: "dark",
       style: "1",
       locale: "ar",
-      hide_top_toolbar: true,
-      hide_legend: true,
+      hide_top_toolbar: false,
+      hide_legend: false,
       allow_symbol_change: false,
-      save_image: false,
+      save_image: true,
       calendar: false,
       hide_volume: false,
+      hide_side_toolbar: false,
+      details: false,
+      studies: ["RSI@tv-basicstudies"],
+      drawings_access: { type: "all" },
       support_host: "https://www.tradingview.com",
       backgroundColor: "rgba(0,0,0,0)",
       gridColor: "rgba(255,255,255,0.04)",
@@ -101,7 +105,7 @@ const TradingViewChart = ({ pair, timeframe }: { pair: string; timeframe: string
   }, [symbol, interval]);
 
   return (
-    <div className="tradingview-widget-container rounded-xl overflow-hidden" style={{ height: 260 }}>
+    <div className="tradingview-widget-container rounded-xl overflow-hidden" style={{ height: 380 }}>
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );
