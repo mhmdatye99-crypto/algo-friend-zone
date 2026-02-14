@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Bell, User, Coins } from "lucide-react";
+import { Bell, User, Coins, Moon, Sun } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/hooks/useCredits";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useThemeMode } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import NotificationsSheet from "@/components/notifications/NotificationsSheet";
 
@@ -37,32 +38,18 @@ const TopBar = () => {
   const { credits } = useCredits();
   const { unreadCount } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
+  const { isDark, toggle } = useThemeMode();
 
   const isHome = location.pathname === "/";
   const currentTitle = pageTitles[location.pathname] || "Nexus Trade AI";
 
-  const getGreeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return "صباح الخير";
-    if (h < 17) return "مساء الخير";
-    return "مساء الخير";
-  };
-
   return (
-    <header
-      className="sticky top-0 z-40 w-full"
-      style={{
-        background: "hsla(240, 15%, 2%, 0.85)",
-        backdropFilter: "blur(30px)",
-        borderBottom: "1px solid hsla(43, 100%, 50%, 0.08)",
-      }}
-    >
+    <header className="sticky top-0 z-40 w-full bg-background/85 backdrop-blur-[30px] border-b border-border/30">
       <div className="flex items-center justify-between px-5 py-3 max-w-lg mx-auto">
         {/* Left: Profile */}
         <button
           onClick={() => navigate("/hub")}
           className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center border border-primary/25 hover:bg-primary/25 transition-colors"
-          style={{ boxShadow: "0 0 12px hsl(43 100% 50% / 0.1)" }}
         >
           <User className="w-5 h-5 text-primary" />
         </button>
@@ -94,8 +81,21 @@ const TopBar = () => {
           )}
         </div>
 
-        {/* Right: Credits + Notification */}
-        <div className="flex items-center gap-2">
+        {/* Right: Theme + Credits + Notification */}
+        <div className="flex items-center gap-1.5">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggle}
+            className="w-9 h-9 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
+            aria-label="تبديل الوضع"
+          >
+            {isDark ? (
+              <Sun className="w-4 h-4 text-primary" />
+            ) : (
+              <Moon className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
+
           <button
             onClick={() => navigate("/subscription")}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20"

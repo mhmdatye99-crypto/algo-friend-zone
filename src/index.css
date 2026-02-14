@@ -5,7 +5,56 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light Theme (Default) */
   :root {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 43 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 92%;
+    --secondary-foreground: 240 10% 20%;
+
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 5% 45%;
+
+    --accent: 190 100% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 350 85% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 155 80% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 100% 50%;
+    --warning-foreground: 240 20% 10%;
+
+    --border: 240 5% 87%;
+    --input: 240 5% 92%;
+    --ring: 43 100% 45%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 43 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 94%;
+    --sidebar-accent-foreground: 240 10% 20%;
+    --sidebar-border: 240 5% 87%;
+    --sidebar-ring: 43 100% 45%;
+  }
+
+  /* Dark Theme */
+  .dark {
     --background: 240 25% 1.2%;
     --foreground: 210 40% 93%;
 
@@ -40,8 +89,6 @@
     --input: 240 12% 7%;
     --ring: 43 100% 50%;
 
-    --radius: 0.75rem;
-
     --sidebar-background: 240 15% 2.5%;
     --sidebar-foreground: 210 40% 88%;
     --sidebar-primary: 43 100% 50%;
@@ -61,9 +108,13 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+
+  .dark body,
+  body:is(.dark *) {
     background: linear-gradient(180deg, #020205 0%, #080810 50%, #050508 100%);
     background-attachment: fixed;
-    min-height: 100vh;
   }
 
   .font-mono {
@@ -84,6 +135,9 @@
     border: none;
     isolation: isolate;
   }
+  .dark .btn-nexus {
+    background: hsla(240, 15%, 4%, 0.9);
+  }
   .btn-nexus::before {
     content: '';
     position: absolute;
@@ -98,28 +152,41 @@
   }
 
   .glass {
-    @apply backdrop-blur-[30px] border;
+    @apply backdrop-blur-[30px] border bg-card/80 border-border/30;
+  }
+  .dark .glass {
     background: hsla(240, 15%, 3.5%, 0.45);
     border-color: hsla(43, 100%, 50%, 0.08);
   }
 
   .glass-strong {
-    @apply backdrop-blur-[40px] border;
+    @apply backdrop-blur-[40px] border bg-card/90 border-border/40;
+  }
+  .dark .glass-strong {
     background: hsla(240, 15%, 4%, 0.65);
     border-color: hsla(43, 100%, 50%, 0.12);
   }
 
   .glass-cyan {
-    @apply backdrop-blur-[30px] border;
+    @apply backdrop-blur-[30px] border bg-card/80;
+    border-color: hsla(190, 100%, 50%, 0.15);
+  }
+  .dark .glass-cyan {
     background: hsla(240, 15%, 3.5%, 0.45);
     border-color: hsla(190, 100%, 50%, 0.1);
   }
 
   .glow-gold {
+    box-shadow: 0 0 20px hsl(43 100% 50% / 0.1), 0 0 60px hsl(43 100% 50% / 0.03);
+  }
+  .dark .glow-gold {
     box-shadow: 0 0 20px hsl(43 100% 50% / 0.15), 0 0 60px hsl(43 100% 50% / 0.05);
   }
 
   .glow-cyan {
+    box-shadow: 0 0 20px hsl(190 100% 50% / 0.1), 0 0 60px hsl(190 100% 50% / 0.03);
+  }
+  .dark .glow-cyan {
     box-shadow: 0 0 20px hsl(190 100% 50% / 0.15), 0 0 60px hsl(190 100% 50% / 0.05);
   }
 
@@ -132,11 +199,17 @@
   }
 
   .text-gradient-gold {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500;
+  }
+  .dark .text-gradient-gold {
+    @apply from-amber-400 via-yellow-300 to-orange-400;
   }
 
   .text-gradient-cyan {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-600;
+  }
+  .dark .text-gradient-cyan {
+    @apply from-cyan-400 to-blue-500;
   }
 
   .animate-pulse-slow {
@@ -163,12 +236,15 @@
     display: none;
   }
 
-  /* Star-dust / data-grid overlay */
+  /* Star-dust / data-grid overlay — dark mode only */
   .deep-space-overlay {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
+    opacity: 0;
+  }
+  .dark .deep-space-overlay {
     opacity: 0.04;
     background-image:
       radial-gradient(1px 1px at 20% 30%, hsla(43, 100%, 70%, 0.8) 0%, transparent 100%),
@@ -186,7 +262,10 @@
 
   /* Intelligence card style */
   .intel-card {
-    @apply backdrop-blur-[30px] rounded-xl border;
+    @apply backdrop-blur-[30px] rounded-xl border bg-card/80 border-border/20;
+    box-shadow: 0 4px 24px hsla(0, 0%, 0%, 0.08);
+  }
+  .dark .intel-card {
     background: hsla(240, 15%, 3.5%, 0.5);
     border-color: hsla(43, 100%, 50%, 0.06);
     box-shadow: 0 4px 24px hsla(0, 0%, 0%, 0.3), inset 0 1px 0 hsla(43, 100%, 50%, 0.04);
@@ -235,13 +314,13 @@
   animation: priceFlash 0.6s ease-out;
 }
 
-/* Subtle ambient particles */
+/* Subtle ambient particles — dark only */
 @keyframes floatParticle {
   0%, 100% { transform: translateY(0) translateX(0); opacity: 0.03; }
   50% { transform: translateY(-30px) translateX(10px); opacity: 0.08; }
 }
 
-.deep-space-overlay::after {
+.dark .deep-space-overlay::after {
   content: '';
   position: absolute;
   inset: 0;

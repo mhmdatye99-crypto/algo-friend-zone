@@ -20,13 +20,7 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-4 left-4 right-4 z-50 safe-area-bottom max-w-lg mx-auto">
       <div
-        className="flex items-center justify-around h-16 rounded-[10px] px-2"
-        style={{
-          background: "hsla(240, 15%, 3%, 0.85)",
-          backdropFilter: "blur(30px)",
-          border: "1px solid hsla(43, 100%, 50%, 0.1)",
-          boxShadow: "0 -4px 30px hsla(0,0%,0%,0.4), inset 0 1px 0 hsla(43,100%,50%,0.06)",
-        }}
+        className="flex items-center justify-around h-16 rounded-[10px] px-2 bg-card/90 backdrop-blur-[30px] border border-border/30 shadow-lg dark:shadow-[0_-4px_30px_hsla(0,0%,0%,0.4)]"
       >
         <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
@@ -50,18 +44,15 @@ const BottomNav = () => {
                 />
                 <motion.div
                   className={cn(
-                    "w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-300",
+                    "w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-300 border-2",
                     active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-primary border-2 border-primary/40"
+                      ? "bg-primary text-primary-foreground border-primary/40"
+                      : "text-primary border-primary/40 bg-card"
                   )}
                   style={{
-                    background: active
-                      ? "linear-gradient(135deg, hsl(43 100% 55%), hsl(38 100% 45%))"
-                      : "hsla(240, 15%, 4%, 0.9)",
                     boxShadow: active
-                      ? "0 0 28px hsl(43 100% 50% / 0.45), 0 0 60px hsl(43 100% 50% / 0.15), inset 0 1px 0 hsla(43, 100%, 80%, 0.3)"
-                      : "0 0 16px hsl(43 100% 50% / 0.15), inset 0 1px 0 hsla(43, 100%, 50%, 0.08)",
+                      ? "0 0 28px hsl(43 100% 50% / 0.35)"
+                      : "0 0 16px hsl(43 100% 50% / 0.1)",
                   }}
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
@@ -85,11 +76,9 @@ const BottomNav = () => {
               {active && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 rounded-[10px]"
+                  className="absolute inset-0 rounded-[10px] bg-accent/10 border border-accent/15"
                   style={{
-                    background: "hsla(190, 100%, 50%, 0.08)",
-                    boxShadow: "0 0 16px hsl(190 100% 50% / 0.15), inset 0 0 8px hsl(190 100% 50% / 0.05)",
-                    border: "1px solid hsla(190, 100%, 50%, 0.15)",
+                    boxShadow: "0 0 16px hsl(190 100% 50% / 0.1)",
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
