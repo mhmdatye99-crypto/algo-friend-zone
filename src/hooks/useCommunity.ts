@@ -87,6 +87,13 @@ export function useCommunity() {
         { post_id: postId, user_id: user.id, vote: voteType },
         { onConflict: "post_id,user_id" }
       );
+      // Award +1 reputation to post author for receiving a vote (fire-and-forget)
+      if (existing && existing.user_id !== user.id && !existing.user_vote) {
+        supabase.from("profiles").select("reputation_points").eq("user_id", existing.user_id).single()
+          .then(({ data }) => {
+            if (data) supabase.from("profiles").update({ reputation_points: (data.reputation_points || 0) + 1 }).eq("user_id", existing.user_id).then(() => {});
+          });
+      }
     }
     fetchPosts();
   };
@@ -122,7 +129,14 @@ export function useCommunity() {
     }
     const { image, ...rest } = data;
     await supabase.from("community_posts").insert({ ...rest, user_id: user.id, image_url });
-    toast({ title: "✅ تم نشر التحليل في غرفة العمليات" });
+    
+    // Award reputation points for posting
+    await supabase
+      .from("profiles")
+      .update({ reputation_points: (await supabase.from("profiles").select("reputation_points").eq("user_id", user.id).single()).data?.reputation_points! + 5 })
+      .eq("user_id", user.id);
+    
+    toast({ title: "✅ تم نشر التحليل في غرفة العمليات (+5 سمعة)" });
     fetchPosts();
   };
 
