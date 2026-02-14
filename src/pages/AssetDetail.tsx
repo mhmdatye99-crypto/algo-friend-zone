@@ -286,6 +286,7 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
   );
 };
 
+// Expandable timeframe analysis card
 const TimeframeCard = ({ tf }: { tf: TimeframeAnalysis }) => {
   const [expanded, setExpanded] = useState(false);
 
