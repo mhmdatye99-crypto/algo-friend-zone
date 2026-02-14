@@ -2,11 +2,12 @@ import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, TrendingUp, TrendingDown, Send, Search, ImagePlus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLivePrices } from "@/hooks/useLivePrices";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null }) => void;
+  onCreate: (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null; price_at_post?: number }) => void;
 }
 
 const allPairs = [
@@ -17,7 +18,7 @@ const allPairs = [
 const timeframes = ["1H", "4H", "D1", "W1"];
 
 const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
-  const [step, setStep] = useState(1); // 1: asset, 2: details, 3: summary
+  const [step, setStep] = useState(1);
   const [pair, setPair] = useState("");
   const [pairSearch, setPairSearch] = useState("");
   const [prediction, setPrediction] = useState<"bullish" | "bearish">("bullish");
@@ -27,6 +28,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const assets = useLivePrices();
 
   const filteredPairs = useMemo(() => {
     if (!pairSearch.trim()) return allPairs;
@@ -49,7 +51,9 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
 
   const handleSubmit = () => {
     if (!summary.trim() || !pair) return;
-    onCreate({ pair, prediction, ai_confidence: confidence, analysis_summary: summary, timeframe, image: imageFile });
+    const currentAsset = assets.find(a => a.pair === pair);
+    const priceAtPost = currentAsset?.price;
+    onCreate({ pair, prediction, ai_confidence: confidence, analysis_summary: summary, timeframe, image: imageFile, price_at_post: priceAtPost });
     resetAndClose();
   };
 

@@ -30,6 +30,10 @@ export interface CommunityPost {
   user_vote?: "bullish" | "bearish" | null;
   comment_count: number;
   is_saved: boolean;
+  outcome: "pending" | "correct" | "incorrect";
+  price_at_post: number | null;
+  outcome_price: number | null;
+  outcome_checked_at: string | null;
 }
 
 export function useCommunity() {
@@ -73,6 +77,10 @@ export function useCommunity() {
       return {
         ...p,
         prediction: p.prediction as "bullish" | "bearish",
+        outcome: (p.outcome || "pending") as "pending" | "correct" | "incorrect",
+        price_at_post: p.price_at_post ? Number(p.price_at_post) : null,
+        outcome_price: p.outcome_price ? Number(p.outcome_price) : null,
+        outcome_checked_at: p.outcome_checked_at || null,
         display_name: profileMap.get(p.user_id) || "محلل مجهول",
         bullish_count: postVotes.filter(v => v.vote === "bullish").length,
         bearish_count: postVotes.filter(v => v.vote === "bearish").length,
@@ -137,14 +145,14 @@ export function useCommunity() {
     return urlData.publicUrl;
   };
 
-  const createPost = async (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null }) => {
+  const createPost = async (data: { pair: string; prediction: "bullish" | "bearish"; ai_confidence: number; analysis_summary: string; timeframe: string; image?: File | null; price_at_post?: number }) => {
     if (!user) return;
     let image_url: string | null = null;
     if (data.image) {
       image_url = await uploadImage(data.image);
     }
     const { image, ...rest } = data;
-    await supabase.from("community_posts").insert({ ...rest, user_id: user.id, image_url });
+    await supabase.from("community_posts").insert({ ...rest, user_id: user.id, image_url, price_at_post: data.price_at_post || null });
     
     // Award reputation points for posting
     await supabase
