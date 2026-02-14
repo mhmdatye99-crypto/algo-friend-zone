@@ -127,7 +127,7 @@ const FloatingAlpha = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-28 left-4 z-40 w-12 h-12 rounded-full flex items-center justify-center"
+            className="fixed bottom-28 right-20 z-30 w-12 h-12 rounded-full flex items-center justify-center"
             style={{
               background: "linear-gradient(135deg, hsl(190 100% 40%), hsl(190 100% 55%))",
               boxShadow: "0 4px 20px hsla(190, 100%, 50%, 0.35), 0 0 40px hsla(190, 100%, 50%, 0.15)",
