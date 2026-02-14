@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
@@ -101,10 +101,12 @@ const signalBadge = (s: string) => s === "شراء" ? "bg-success/15 text-succes
 
 const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtfAnalysis: TimeframeAnalysis[]; consensus: { signal: string; count: number; total: number } }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [notes, setNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
+  const [openingTrade, setOpeningTrade] = useState(false);
 
   const direction = consensus.signal === "شراء" ? "صعودي" : consensus.signal === "بيع" ? "هبوطي" : "محايد";
   const confidence = mtfAnalysis.length > 0 ? Math.round(mtfAnalysis.reduce((s, t) => s + t.strength, 0) / mtfAnalysis.length) : 50;
@@ -137,6 +139,52 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
     }
   };
 
+  const handleOpenTrade = async () => {
+    if (!user || openingTrade) return;
+    setOpeningTrade(true);
+    try {
+      // Save analysis first
+      const { data: analysisData, error: analysisError } = await supabase.from("saved_analyses").insert({
+        user_id: user.id,
+        pair: asset.pair,
+        icon: asset.icon,
+        price: asset.price,
+        direction,
+        confidence,
+        timeframe: "MTF",
+        rsi: asset.rsi,
+        macd: asset.macd,
+        signal: consensus.signal,
+        notes: notes.trim() || null,
+      }).select("id").single();
+      if (analysisError) throw analysisError;
+
+      // Create trade linked to this analysis
+      const tradeDirection = consensus.signal === "شراء" ? "buy" : consensus.signal === "بيع" ? "sell" : "buy";
+      const entryReason = `تحليل متعدد الفريمات: ${consensus.signal} (${consensus.count}/${consensus.total}) | RSI: ${asset.rsi} | MACD: ${asset.macd} | ثقة: ${confidence}%`;
+
+      const { error: tradeError } = await supabase.from("trades").insert({
+        user_id: user.id,
+        pair: asset.pair,
+        direction: tradeDirection,
+        entry_price: asset.price,
+        status: "open",
+        entry_reason: entryReason,
+        strategy: `MTF Analysis - ${direction}`,
+        analysis_id: analysisData.id,
+        notes: notes.trim() || null,
+      });
+      if (tradeError) throw tradeError;
+
+      toast.success("تم فتح الصفقة وحفظ التحليل");
+      navigate("/trade-journal");
+    } catch {
+      toast.error("فشل فتح الصفقة");
+    } finally {
+      setOpeningTrade(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -145,7 +193,7 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          placeholder="أضف ملاحظاتك على التحليل (اختياري)..."
+          placeholder="أضف ملاحظاتك على التحليل وسبب الدخول (اختياري)..."
           className="w-full bg-secondary/60 border border-border/30 rounded-[10px] px-3 py-2.5 text-[11px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 resize-none h-20"
           maxLength={500}
         />
@@ -153,22 +201,30 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
       <div className="flex gap-2">
         <button
           onClick={() => setShowNotes(!showNotes)}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/50 border border-border/20 text-muted-foreground font-mono text-[11px] font-bold hover:bg-secondary/80 transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-secondary/50 border border-border/20 text-muted-foreground font-mono text-[10px] font-bold hover:bg-secondary/80 transition-colors"
         >
-          ✏️ {showNotes ? "إخفاء الملاحظات" : "إضافة ملاحظة"}
+          ✏️
         </button>
         <button
           onClick={handleSave}
           disabled={saving || saved}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-[12px] font-bold transition-all",
+            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-[11px] font-bold transition-all",
             saved
               ? "bg-success/15 border border-success/25 text-success"
               : "bg-primary/15 border border-primary/25 text-primary hover:bg-primary/25"
           )}
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saving ? "جاري الحفظ..." : saved ? "تم الحفظ ✓" : "💾 حفظ التحليل"}
+          {saving ? "حفظ..." : saved ? "تم ✓" : "حفظ التحليل"}
+        </button>
+        <button
+          onClick={handleOpenTrade}
+          disabled={openingTrade}
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-[11px] font-bold transition-all bg-success/15 border border-success/25 text-success hover:bg-success/25"
+        >
+          {openingTrade ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+          {openingTrade ? "جاري..." : "فتح صفقة 📊"}
         </button>
       </div>
     </motion.div>
