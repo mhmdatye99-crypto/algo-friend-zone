@@ -1,18 +1,17 @@
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-// Full-width area chart component
 const FullChart = ({ data, up }: { data: number[]; up: boolean }) => {
   if (!data.length) return null;
   const w = 340;
@@ -37,7 +36,6 @@ const FullChart = ({ data, up }: { data: number[]; up: boolean }) => {
       </defs>
       <polygon points={area} fill="url(#chartGrad)" />
       <polyline points={points} fill="none" stroke={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Current price dot */}
       {data.length > 0 && (() => {
         const lastX = w;
         const lastY = h - ((data[data.length - 1] - min) / range) * (h - 10) - 5;
@@ -55,6 +53,49 @@ const FullChart = ({ data, up }: { data: number[]; up: boolean }) => {
   );
 };
 
+interface TimeframeAnalysis {
+  tf: string;
+  label: string;
+  trend: "صعودي" | "هبوطي" | "محايد";
+  rsi: number;
+  macd: "صعودي" | "هبوطي" | "محايد";
+  signal: "شراء" | "بيع" | "محايد";
+  strength: number;
+}
+
+function generateTimeframeAnalysis(price: number, baseRsi: number, baseChange: number, baseMacd: string): TimeframeAnalysis[] {
+  const seed = Math.round(price * 100);
+  const pseudoRand = (i: number) => ((seed * (i + 1) * 13) % 100) / 100;
+
+  const tfs = [
+    { tf: "D1", label: "يومي", weight: 1.0 },
+    { tf: "4H", label: "4 ساعات", weight: 0.85 },
+    { tf: "1H", label: "ساعة", weight: 0.7 },
+    { tf: "15M", label: "15 دقيقة", weight: 0.55 },
+  ];
+
+  return tfs.map((t, i) => {
+    const rsiNoise = (pseudoRand(i) - 0.5) * 20 * (1 - t.weight);
+    const rsi = Math.round(Math.min(Math.max(baseRsi + rsiNoise, 15), 88));
+    const trendBias = baseChange + (pseudoRand(i + 10) - 0.5) * 4 * (1 - t.weight);
+    const trend: "صعودي" | "هبوطي" | "محايد" = trendBias > 0.5 ? "صعودي" : trendBias < -0.5 ? "هبوطي" : "محايد";
+    const macdOptions: ("صعودي" | "هبوطي" | "محايد")[] = ["صعودي", "هبوطي", "محايد"];
+    const macdIdx = i === 0 ? (baseMacd === "صعودي" ? 0 : baseMacd === "هبوطي" ? 1 : 2) : Math.floor(pseudoRand(i + 20) * 3);
+    const macd = macdOptions[macdIdx];
+    const signal: "شراء" | "بيع" | "محايد" = trend === "صعودي" && rsi < 70 ? "شراء" : trend === "هبوطي" && rsi > 30 ? "بيع" : "محايد";
+    const strength = Math.min(Math.round(
+      50 + (trend !== "محايد" ? 15 : 0) + (macd === trend ? 12 : 0) +
+      (rsi > 50 && trend === "صعودي" ? 10 : 0) + (rsi < 50 && trend === "هبوطي" ? 10 : 0) +
+      pseudoRand(i + 30) * 8
+    ), 95);
+    return { tf: t.tf, label: t.label, trend, rsi, macd, signal, strength };
+  });
+}
+
+const trendColor = (t: string) => t === "صعودي" ? "text-success" : t === "هبوطي" ? "text-destructive" : "text-muted-foreground";
+const trendBg = (t: string) => t === "صعودي" ? "bg-success/10 border-success/20" : t === "هبوطي" ? "bg-destructive/10 border-destructive/20" : "bg-secondary/50 border-border/20";
+const signalBadge = (s: string) => s === "شراء" ? "bg-success/15 text-success border-success/25" : s === "بيع" ? "bg-destructive/15 text-destructive border-destructive/25" : "bg-secondary text-muted-foreground border-border/20";
+
 const AssetDetail = () => {
   const { pair } = useParams<{ pair: string }>();
   const navigate = useNavigate();
@@ -64,6 +105,20 @@ const AssetDetail = () => {
 
   const decodedPair = decodeURIComponent(pair || "");
   const asset = assets.find(a => a.pair === decodedPair);
+
+  const mtfAnalysis = useMemo(() => {
+    if (!asset) return [];
+    return generateTimeframeAnalysis(asset.price, asset.rsi, asset.change, asset.macd);
+  }, [asset?.pair, asset?.price]);
+
+  const consensus = useMemo(() => {
+    if (!mtfAnalysis.length) return { signal: "محايد", count: 0, total: 0 };
+    const buy = mtfAnalysis.filter(t => t.signal === "شراء").length;
+    const sell = mtfAnalysis.filter(t => t.signal === "بيع").length;
+    if (buy > sell) return { signal: "شراء", count: buy, total: mtfAnalysis.length };
+    if (sell > buy) return { signal: "بيع", count: sell, total: mtfAnalysis.length };
+    return { signal: "محايد", count: 0, total: mtfAnalysis.length };
+  }, [mtfAnalysis]);
 
   if (!asset) {
     return (
@@ -75,9 +130,8 @@ const AssetDetail = () => {
   }
 
   const isFav = favorites.has(asset.pair);
-  const timeframes = ["1H", "4H", "D1", "W1"];
+  const chartTimeframes = ["15M", "1H", "4H", "D1"];
 
-  // Generate mock extended data for chart
   const extendedData = asset.sparkline.length > 0
     ? [...Array.from({ length: 30 }, (_, i) => {
         const base = asset.sparkline[0] || asset.price;
@@ -145,7 +199,7 @@ const AssetDetail = () => {
         <div className="flex items-center justify-between mb-3">
           <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">الشارت</p>
           <div className="flex gap-1">
-            {timeframes.map(tf => (
+            {chartTimeframes.map(tf => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
@@ -162,6 +216,84 @@ const AssetDetail = () => {
         <FullChart data={extendedData} up={asset.up} />
       </motion.div>
 
+      {/* ═══ Multi-Timeframe Analysis ═══ */}
+      <motion.div variants={fadeUp} className="glass rounded-[14px] p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-accent" />
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">تحليل متعدد الفريمات</p>
+          </div>
+          <div className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border",
+            signalBadge(consensus.signal)
+          )}>
+            <Zap className="w-3 h-3" />
+            {consensus.signal === "محايد" ? "محايد" : `${consensus.signal} ${consensus.count}/${consensus.total}`}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {mtfAnalysis.map((tf) => (
+            <motion.div
+              key={tf.tf}
+              className={cn("rounded-[12px] p-3 border transition-all", trendBg(tf.trend))}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-mono font-bold text-foreground">{tf.tf}</span>
+                  <span className="text-[9px] font-mono text-muted-foreground">{tf.label}</span>
+                </div>
+                <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md border", signalBadge(tf.signal))}>
+                  {tf.signal}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1 mb-1.5">
+                {tf.trend === "صعودي" ? <TrendingUp className="w-3 h-3 text-success" />
+                  : tf.trend === "هبوطي" ? <TrendingDown className="w-3 h-3 text-destructive" />
+                  : <Activity className="w-3 h-3 text-muted-foreground" />}
+                <span className={cn("text-[11px] font-mono font-bold", trendColor(tf.trend))}>{tf.trend}</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-muted-foreground">RSI</span>
+                  <span className={cn("text-[10px] font-mono font-bold",
+                    tf.rsi > 70 ? "text-destructive" : tf.rsi < 30 ? "text-success" : "text-foreground"
+                  )}>{tf.rsi}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-muted-foreground">MACD</span>
+                  <span className={cn("text-[10px] font-mono font-bold", trendColor(tf.macd))}>{tf.macd}</span>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      background: tf.trend === "صعودي"
+                        ? "linear-gradient(90deg, hsl(155 100% 35%), hsl(155 100% 50%))"
+                        : tf.trend === "هبوطي"
+                        ? "linear-gradient(90deg, hsl(350 80% 40%), hsl(350 100% 55%))"
+                        : "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
+                    }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${tf.strength}%` }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  />
+                </div>
+                <span className="text-[8px] font-mono text-muted-foreground mt-0.5 block text-left">{tf.strength}%</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
       {/* Technical Indicators */}
       <motion.div variants={fadeUp} className="glass rounded-xl p-4">
         <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-3">المؤشرات الفنية</p>
@@ -171,8 +303,7 @@ const AssetDetail = () => {
               <Gauge className="w-3.5 h-3.5 text-accent" />
               <span className="text-[10px] font-mono text-muted-foreground">RSI (14)</span>
             </div>
-            <p className={cn(
-              "text-xl font-bold font-mono",
+            <p className={cn("text-xl font-bold font-mono",
               asset.rsi > 70 ? "text-destructive" : asset.rsi < 30 ? "text-success" : "text-foreground"
             )}>{asset.rsi}</p>
             <p className="text-[10px] font-mono text-muted-foreground">
@@ -184,8 +315,7 @@ const AssetDetail = () => {
               <Activity className="w-3.5 h-3.5 text-accent" />
               <span className="text-[10px] font-mono text-muted-foreground">MACD</span>
             </div>
-            <p className={cn(
-              "text-xl font-bold font-mono",
+            <p className={cn("text-xl font-bold font-mono",
               asset.macd === "صعودي" ? "text-success" : asset.macd === "هبوطي" ? "text-destructive" : "text-muted-foreground"
             )}>{asset.macd}</p>
             <p className="text-[10px] font-mono text-muted-foreground">
@@ -197,8 +327,7 @@ const AssetDetail = () => {
               <ArrowUpRight className="w-3.5 h-3.5 text-success" />
               <span className="text-[10px] font-mono text-muted-foreground">الإشارة</span>
             </div>
-            <p className={cn(
-              "text-lg font-bold font-mono",
+            <p className={cn("text-lg font-bold font-mono",
               asset.signal === "شراء" ? "text-success" : asset.signal === "بيع" ? "text-destructive" : "text-warning"
             )}>{asset.signal}</p>
             <p className="text-[10px] font-mono text-muted-foreground">توصية AI</p>
