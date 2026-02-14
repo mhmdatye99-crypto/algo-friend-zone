@@ -432,11 +432,13 @@ export type Database = {
       }
       trades: {
         Row: {
+          analysis_id: string | null
           closed_at: string | null
           created_at: string
           direction: string
           emotion: string | null
           entry_price: number
+          entry_reason: string | null
           exit_price: number | null
           id: string
           notes: string | null
@@ -445,15 +447,18 @@ export type Database = {
           position_size: number | null
           status: string
           stop_loss: number | null
+          strategy: string | null
           take_profit: number | null
           user_id: string
         }
         Insert: {
+          analysis_id?: string | null
           closed_at?: string | null
           created_at?: string
           direction: string
           emotion?: string | null
           entry_price: number
+          entry_reason?: string | null
           exit_price?: number | null
           id?: string
           notes?: string | null
@@ -462,15 +467,18 @@ export type Database = {
           position_size?: number | null
           status?: string
           stop_loss?: number | null
+          strategy?: string | null
           take_profit?: number | null
           user_id: string
         }
         Update: {
+          analysis_id?: string | null
           closed_at?: string | null
           created_at?: string
           direction?: string
           emotion?: string | null
           entry_price?: number
+          entry_reason?: string | null
           exit_price?: number | null
           id?: string
           notes?: string | null
@@ -479,10 +487,19 @@ export type Database = {
           position_size?: number | null
           status?: string
           stop_loss?: number | null
+          strategy?: string | null
           take_profit?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trades_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "saved_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

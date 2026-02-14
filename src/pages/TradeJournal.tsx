@@ -23,6 +23,9 @@ type Trade = {
   status: string;
   emotion: string | null;
   notes: string | null;
+  entry_reason: string | null;
+  strategy: string | null;
+  analysis_id: string | null;
   created_at: string;
   closed_at: string | null;
 };
@@ -62,6 +65,8 @@ const TradeJournal = () => {
   const [positionSize, setPositionSize] = useState("");
   const [emotion, setEmotion] = useState("");
   const [notes, setNotes] = useState("");
+  const [entryReason, setEntryReason] = useState("");
+  const [strategy, setStrategy] = useState("");
 
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ["trades", user?.id],
@@ -105,6 +110,8 @@ const TradeJournal = () => {
         status,
         emotion: emotion || null,
         notes: notes || null,
+        entry_reason: entryReason || null,
+        strategy: strategy || null,
         closed_at: status === "closed" ? new Date().toISOString() : null,
       });
       if (error) throw error;
@@ -162,6 +169,8 @@ const TradeJournal = () => {
     setPositionSize("");
     setEmotion("");
     setNotes("");
+    setEntryReason("");
+    setStrategy("");
   };
 
   const filtered = useMemo(() => {
@@ -398,14 +407,37 @@ const TradeJournal = () => {
                   </div>
                 </div>
 
+                {/* Entry Reason */}
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">سبب الدخول</label>
+                  <textarea
+                    value={entryReason}
+                    onChange={e => setEntryReason(e.target.value)}
+                    placeholder="لماذا دخلت هذه الصفقة؟ ما الإشارة التي رأيتها؟"
+                    className="w-full h-16 rounded-[10px] bg-secondary/40 border border-border/10 px-3 py-2 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/30"
+                  />
+                </div>
+
+                {/* Strategy */}
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">الاستراتيجية</label>
+                  <input
+                    type="text"
+                    value={strategy}
+                    onChange={e => setStrategy(e.target.value)}
+                    placeholder="مثال: كسر مقاومة، ارتداد دعم، MTF..."
+                    className="w-full h-10 rounded-[10px] bg-secondary/40 border border-border/10 px-3 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30"
+                  />
+                </div>
+
                 {/* Notes */}
                 <div>
-                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">ملاحظات</label>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">ملاحظات إضافية</label>
                   <textarea
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    placeholder="سبب الدخول، الاستراتيجية، الدروس..."
-                    className="w-full h-20 rounded-[10px] bg-secondary/40 border border-border/10 px-3 py-2 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/30"
+                    placeholder="ملاحظات، دروس مستفادة..."
+                    className="w-full h-16 rounded-[10px] bg-secondary/40 border border-border/10 px-3 py-2 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/30"
                   />
                 </div>
 
@@ -488,6 +520,20 @@ const TradeCard = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () =>
         <div className="grid grid-cols-2 gap-2">
           {trade.stop_loss && <MiniStat label="SL" value={trade.stop_loss.toFixed(2)} color="text-destructive" />}
           {trade.take_profit && <MiniStat label="TP" value={trade.take_profit.toFixed(2)} color="text-success" />}
+        </div>
+      )}
+
+      {trade.entry_reason && (
+        <div className="bg-primary/5 rounded-lg px-2.5 py-1.5 border border-primary/10">
+          <p className="text-[8px] font-mono text-primary/70 uppercase tracking-wider mb-0.5">سبب الدخول</p>
+          <p className="text-[10px] font-mono text-foreground/80">{trade.entry_reason}</p>
+        </div>
+      )}
+
+      {trade.strategy && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-mono text-muted-foreground">الاستراتيجية:</span>
+          <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md">{trade.strategy}</span>
         </div>
       )}
 
