@@ -82,7 +82,7 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
           </div>
         )}
 
-        {/* Asset + Direction Tag */}
+        {/* Asset + Direction Tag + Outcome Badge */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className={cn(
             "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold border",
@@ -97,6 +97,22 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
             <Shield className="w-3 h-3 text-accent" />
             <span className="text-[9px] font-mono text-accent font-bold">AI {post.ai_confidence}%</span>
           </div>
+          {/* Outcome Badge */}
+          {post.outcome === "correct" && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md border border-success/20 bg-success/10">
+              <span className="text-[9px] font-mono text-success font-bold">🎯 صحيح</span>
+            </div>
+          )}
+          {post.outcome === "incorrect" && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md border border-destructive/20 bg-destructive/10">
+              <span className="text-[9px] font-mono text-destructive font-bold">✗ خاطئ</span>
+            </div>
+          )}
+          {post.outcome === "pending" && post.price_at_post && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md border border-muted-foreground/15 bg-secondary/40">
+              <span className="text-[9px] font-mono text-muted-foreground">⏳ قيد التحقق</span>
+            </div>
+          )}
         </div>
 
         {/* Sentiment Bar — thin */}

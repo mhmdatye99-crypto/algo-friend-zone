@@ -63,8 +63,12 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          outcome: string
+          outcome_checked_at: string | null
+          outcome_price: number | null
           pair: string
           prediction: string
+          price_at_post: number | null
           timeframe: string | null
           updated_at: string
           user_id: string
@@ -75,8 +79,12 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          outcome?: string
+          outcome_checked_at?: string | null
+          outcome_price?: number | null
           pair: string
           prediction: string
+          price_at_post?: number | null
           timeframe?: string | null
           updated_at?: string
           user_id: string
@@ -87,8 +95,12 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          outcome?: string
+          outcome_checked_at?: string | null
+          outcome_price?: number | null
           pair?: string
           prediction?: string
+          price_at_post?: number | null
           timeframe?: string | null
           updated_at?: string
           user_id?: string
