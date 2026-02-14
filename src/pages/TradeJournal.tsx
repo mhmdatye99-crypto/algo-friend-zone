@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, TrendingUp, TrendingDown, X, BarChart3, Clock, DollarSign,
@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
+import { useLocation } from "react-router-dom";
 
 type Trade = {
   id: string;
@@ -53,6 +54,7 @@ const TradeJournal = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { goal, addEntry } = useGoalPlanner();
+  const location = useLocation();
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "closed">("all");
   const [tab, setTab] = useState<"trades" | "analytics">("trades");
@@ -69,6 +71,25 @@ const TradeJournal = () => {
   const [notes, setNotes] = useState("");
   const [entryReason, setEntryReason] = useState("");
   const [strategy, setStrategy] = useState("");
+
+  // Auto-prefill from signal "Execute & Log"
+  useEffect(() => {
+    const prefill = (location.state as any)?.prefill;
+    if (prefill) {
+      // Normalize pair name to match available pairs or add it
+      const matchedPair = pairs.find(p => prefill.pair.includes(p.split("/")[0])) || prefill.pair;
+      setPair(matchedPair);
+      setDirection(prefill.direction || "buy");
+      setEntryPrice(prefill.entry?.replace(/,/g, "") || "");
+      setTakeProfit(prefill.tp?.replace(/,/g, "") || "");
+      setStopLoss(prefill.sl?.replace(/,/g, "") || "");
+      setEntryReason(prefill.reason || "");
+      setStrategy(prefill.strategy || "");
+      setShowForm(true);
+      // Clear navigation state to prevent re-prefill
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ["trades", user?.id],

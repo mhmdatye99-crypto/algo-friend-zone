@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, User, Coins, Moon, Sun } from "lucide-react";
+import { Bell, User, Coins, Moon, Sun, Search } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
@@ -9,6 +9,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useThemeMode } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import NotificationsSheet from "@/components/notifications/NotificationsSheet";
+import UniversalSearch from "@/components/layout/UniversalSearch";
 
 const pageTitles: Record<string, string> = {
   "/": "",
@@ -38,6 +39,7 @@ const TopBar = () => {
   const { credits } = useCredits();
   const { unreadCount } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const { isDark, toggle } = useThemeMode();
 
   const isHome = location.pathname === "/";
@@ -81,8 +83,17 @@ const TopBar = () => {
           )}
         </div>
 
-        {/* Right: Theme + Credits + Notification */}
+        {/* Right: Search + Theme + Credits + Notification */}
         <div className="flex items-center gap-1.5">
+          {/* Search */}
+          <button
+            onClick={() => setShowSearch(true)}
+            className="w-9 h-9 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
+            aria-label="بحث"
+          >
+            <Search className="w-4 h-4 text-muted-foreground" />
+          </button>
+
           {/* Theme Toggle */}
           <button
             onClick={toggle}
@@ -138,6 +149,7 @@ const TopBar = () => {
       </div>
 
       <NotificationsSheet open={showNotifications} onClose={() => setShowNotifications(false)} />
+      <UniversalSearch open={showSearch} onClose={() => setShowSearch(false)} />
     </header>
   );
 };
