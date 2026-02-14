@@ -187,6 +187,42 @@ const CommentsSheet = ({ postId, onClose }: Props) => {
     if (error) {
       toast({ title: "خطأ في إرسال التعليق", variant: "destructive" });
     } else {
+      // Send notification to post author or parent comment author
+      try {
+        if (replyTo) {
+          // Notify the parent comment author
+          const { data: parentComment } = await supabase
+            .from("community_comments")
+            .select("user_id")
+            .eq("id", replyTo.id)
+            .maybeSingle();
+          if (parentComment && parentComment.user_id !== user.id) {
+            await supabase.from("notifications").insert({
+              user_id: parentComment.user_id,
+              from_user_id: user.id,
+              type: "reply",
+              message: `ردّ أحدهم على تعليقك: "${newComment.trim().slice(0, 50)}..."`,
+              post_id: postId,
+            });
+          }
+        } else {
+          // Notify the post author
+          const { data: post } = await supabase
+            .from("community_posts")
+            .select("user_id, pair")
+            .eq("id", postId)
+            .maybeSingle();
+          if (post && post.user_id !== user.id) {
+            await supabase.from("notifications").insert({
+              user_id: post.user_id,
+              from_user_id: user.id,
+              type: "comment",
+              message: `علّق أحدهم على تحليلك لـ ${post.pair}`,
+              post_id: postId,
+            });
+          }
+        }
+      } catch {}
       setNewComment("");
       setReplyTo(null);
       fetchComments();
