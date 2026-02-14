@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
@@ -72,16 +72,15 @@ const SignalCardCollapsible = ({ signal }: Props) => {
       <motion.div
         variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
         className={cn(
-          "glass rounded-xl overflow-hidden transition-all duration-300 cursor-pointer",
+          "glass rounded-xl overflow-hidden transition-all duration-300",
           signal.alphaScore >= 90 ? "border-primary/25 glow-gold" : "border-border/10"
         )}
-        onClick={() => setExpanded(!expanded)}
       >
-        {/* Header */}
-        <div className="px-4 py-3.5 flex items-center justify-between">
+        {/* Compact Header — always visible */}
+        <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {signal.icon && (
-              <span className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-base border border-border/20">
+              <span className="w-9 h-9 rounded-xl bg-secondary/60 flex items-center justify-center text-lg border border-border/20">
                 {signal.icon}
               </span>
             )}
@@ -89,36 +88,64 @@ const SignalCardCollapsible = ({ signal }: Props) => {
               <div className="flex items-center gap-2">
                 <span className="font-mono font-bold text-[14px]">{signal.pair}</span>
                 {signal.alphaScore >= 90 && (
-                  <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono font-bold">ألفا+</span>
+                  <span className="text-[8px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono font-bold animate-pulse">⚡ ألفا</span>
                 )}
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground">{signal.timeFrame}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-mono text-muted-foreground">{signal.timeFrame}</span>
+                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                <span className={cn(
+                  "text-[10px] font-mono font-bold",
+                  signal.direction === "صعودي" ? "text-success" : "text-destructive"
+                )}>
+                  {signal.direction}
+                </span>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Confidence badge */}
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-[13px] border",
+              "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border",
               signal.confidence >= 85 ? "bg-success/10 text-success border-success/20" :
               signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
               "bg-warning/10 text-warning border-warning/20"
             )}>
               {signal.confidence}
             </div>
-            <span className={cn(
-              "text-[11px] font-bold font-mono px-2.5 py-1.5 rounded-lg flex items-center gap-1",
-              signal.direction === "صعودي" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+
+            {/* Direction icon */}
+            <div className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center border",
+              signal.direction === "صعودي" ? "bg-success/10 border-success/20" : "bg-destructive/10 border-destructive/20"
             )}>
-              {signal.direction === "صعودي" ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-              {signal.direction}
-            </span>
-            <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            </motion.div>
+              {signal.direction === "صعودي" 
+                ? <TrendingUp className="w-4 h-4 text-success" /> 
+                : <TrendingDown className="w-4 h-4 text-destructive" />}
+            </div>
           </div>
         </div>
 
-        {/* Expanded — Default: Entry, Target, Risk, Summary */}
+        {/* "Tap to Analyze" button — shown when collapsed */}
+        {!expanded && (
+          <div className="px-4 pb-3">
+            <motion.button
+              onClick={() => setExpanded(true)}
+              whileTap={{ scale: 0.97 }}
+              className={cn(
+                "w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-[12px] font-mono font-bold transition-all border",
+                "bg-accent/5 text-accent border-accent/20 hover:bg-accent/10"
+              )}
+            >
+              <Eye className="w-4 h-4" />
+              اضغط للتحليل
+              <Zap className="w-3.5 h-3.5 text-primary" />
+            </motion.button>
+          </div>
+        )}
+
+        {/* Expanded analysis content */}
         <AnimatePresence>
           {expanded && (
             <motion.div
@@ -129,7 +156,18 @@ const SignalCardCollapsible = ({ signal }: Props) => {
               className="overflow-hidden"
             >
               <div className="px-4 pb-4 space-y-3 border-t border-border/10 pt-3">
-                {/* Default View: Entry, Target, Risk Score, AI Summary */}
+                {/* Collapse button */}
+                <button
+                  onClick={() => setExpanded(false)}
+                  className="w-full flex items-center justify-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <motion.div animate={{ rotate: 180 }}>
+                    <ChevronDown className="w-3 h-3" />
+                  </motion.div>
+                  إخفاء التحليل
+                </button>
+
+                {/* Reveal or show levels */}
                 {!revealed ? (
                   <motion.button
                     onClick={handleReveal}
@@ -151,7 +189,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                     <div className="flex items-center gap-1.5 text-[10px] font-mono text-success">
                       <Unlock className="w-3 h-3" /> تم كشف المستويات
                     </div>
-                    {/* Simple view: Entry, Target, Risk */}
                     <div className="grid grid-cols-3 gap-1.5">
                       <div className="bg-secondary/30 rounded-lg px-2 py-2 text-center">
                         <p className="text-[9px] font-mono text-muted-foreground">الدخول</p>
@@ -167,7 +204,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                       </div>
                     </div>
 
-                    {/* Risk Score + R:R */}
                     <div className="flex items-center justify-between text-[11px] font-mono">
                       <span className={cn(
                         "px-2 py-1 rounded-lg",
@@ -178,7 +214,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                       <span className="text-muted-foreground">R:R {signal.rr}</span>
                     </div>
 
-                    {/* Reasons as AI Summary */}
                     <div className="flex flex-wrap gap-1.5">
                       {signal.reasons.map((r, ri) => (
                         <span key={ri} className="text-[10px] font-mono bg-secondary px-2 py-1 rounded-md text-muted-foreground">{r}</span>
@@ -187,12 +222,11 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   </motion.div>
                 )}
 
-                {/* Deep Dive — Hidden Complexity */}
+                {/* Deep Dive */}
                 {revealed && (
                   <Collapsible open={deepDiveOpen} onOpenChange={setDeepDiveOpen}>
                     <CollapsibleTrigger asChild>
                       <button
-                        onClick={(e) => e.stopPropagation()}
                         className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-secondary/30 border border-border/10 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Layers className="w-3.5 h-3.5" />
@@ -203,7 +237,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                       </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="pt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="pt-3 space-y-2">
                         <div className="grid grid-cols-4 gap-1.5">
                           <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
                             <p className="text-[9px] font-mono text-muted-foreground">RSI</p>
@@ -227,8 +261,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                             <p className="text-[13px] font-mono font-bold">{signal.volume}</p>
                           </div>
                         </div>
-
-                        {/* Target 2 + Sentiment */}
                         <div className="grid grid-cols-2 gap-1.5">
                           <div className="bg-success/5 rounded-lg px-2 py-1.5 text-center">
                             <p className="text-[9px] font-mono text-muted-foreground">هدف 2</p>
@@ -247,7 +279,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 {/* Footer */}
                 <div className="flex items-center justify-end pt-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/asset/${encodeURIComponent(signal.pair)}`); }}
+                    onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
                     className="text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors"
                   >
                     تفاصيل الأصل

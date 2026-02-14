@@ -158,15 +158,27 @@ function assetToSignal(asset: Asset): DynamicSignal {
   };
 }
 
+// Priority order: major assets first
+const PRIORITY_PAIRS = [
+  "BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT",
+  "ADA/USDT", "DOGE/USDT", "DOT/USDT", "AVAX/USDT", "LINK/USDT",
+  "GOLD", "SILVER", "OIL",
+  "EUR/USD", "GBP/USD", "USD/JPY",
+];
+
 export const useSignals = () => {
   const assets = useLivePrices();
   
   const signals = useMemo(() => {
-    // Filter assets with strong enough signals (not neutral)
     return assets
       .filter(a => a.signal !== "محايد" || Math.abs(a.change) > 1.5)
       .sort((a, b) => {
-        // Sort by signal strength: buy/sell first, then by abs change
+        const idxA = PRIORITY_PAIRS.indexOf(a.pair);
+        const idxB = PRIORITY_PAIRS.indexOf(b.pair);
+        // Priority pairs come first, then by signal strength
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
         const scoreA = a.signal === "محايد" ? 0 : Math.abs(a.change) + (a.rsi > 60 || a.rsi < 40 ? 10 : 0);
         const scoreB = b.signal === "محايد" ? 0 : Math.abs(b.change) + (b.rsi > 60 || b.rsi < 40 ? 10 : 0);
         return scoreB - scoreA;
