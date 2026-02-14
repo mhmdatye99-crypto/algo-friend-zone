@@ -317,6 +317,54 @@ export type Database = {
           },
         ]
       }
+      saved_analyses: {
+        Row: {
+          confidence: number
+          created_at: string
+          direction: string
+          icon: string | null
+          id: string
+          macd: string | null
+          notes: string | null
+          pair: string
+          price: number
+          rsi: number | null
+          signal: string | null
+          timeframe: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          direction: string
+          icon?: string | null
+          id?: string
+          macd?: string | null
+          notes?: string | null
+          pair: string
+          price: number
+          rsi?: number | null
+          signal?: string | null
+          timeframe?: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          direction?: string
+          icon?: string | null
+          id?: string
+          macd?: string | null
+          notes?: string | null
+          pair?: string
+          price?: number
+          rsi?: number | null
+          signal?: string | null
+          timeframe?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_strategies: {
         Row: {
           created_at: string

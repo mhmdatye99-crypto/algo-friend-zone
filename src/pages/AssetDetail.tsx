@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -95,6 +98,82 @@ function generateTimeframeAnalysis(price: number, baseRsi: number, baseChange: n
 const trendColor = (t: string) => t === "صعودي" ? "text-success" : t === "هبوطي" ? "text-destructive" : "text-muted-foreground";
 const trendBg = (t: string) => t === "صعودي" ? "bg-success/10 border-success/20" : t === "هبوطي" ? "bg-destructive/10 border-destructive/20" : "bg-secondary/50 border-border/20";
 const signalBadge = (s: string) => s === "شراء" ? "bg-success/15 text-success border-success/25" : s === "بيع" ? "bg-destructive/15 text-destructive border-destructive/25" : "bg-secondary text-muted-foreground border-border/20";
+
+const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtfAnalysis: TimeframeAnalysis[]; consensus: { signal: string; count: number; total: number } }) => {
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [showNotes, setShowNotes] = useState(false);
+
+  const direction = consensus.signal === "شراء" ? "صعودي" : consensus.signal === "بيع" ? "هبوطي" : "محايد";
+  const confidence = mtfAnalysis.length > 0 ? Math.round(mtfAnalysis.reduce((s, t) => s + t.strength, 0) / mtfAnalysis.length) : 50;
+
+  const handleSave = async () => {
+    if (!user || saving) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("saved_analyses").insert({
+        user_id: user.id,
+        pair: asset.pair,
+        icon: asset.icon,
+        price: asset.price,
+        direction,
+        confidence,
+        timeframe: "MTF",
+        rsi: asset.rsi,
+        macd: asset.macd,
+        signal: consensus.signal,
+        notes: notes.trim() || null,
+      });
+      if (error) throw error;
+      setSaved(true);
+      toast.success("تم حفظ التحليل بنجاح");
+      setTimeout(() => setSaved(false), 3000);
+    } catch {
+      toast.error("فشل حفظ التحليل");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <motion.div variants={fadeUp} className="space-y-2">
+      {showNotes && (
+        <textarea
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          placeholder="أضف ملاحظاتك على التحليل (اختياري)..."
+          className="w-full bg-secondary/60 border border-border/30 rounded-[10px] px-3 py-2.5 text-[11px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 resize-none h-20"
+          maxLength={500}
+        />
+      )}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setShowNotes(!showNotes)}
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/50 border border-border/20 text-muted-foreground font-mono text-[11px] font-bold hover:bg-secondary/80 transition-colors"
+        >
+          ✏️ {showNotes ? "إخفاء الملاحظات" : "إضافة ملاحظة"}
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving || saved}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-[12px] font-bold transition-all",
+            saved
+              ? "bg-success/15 border border-success/25 text-success"
+              : "bg-primary/15 border border-primary/25 text-primary hover:bg-primary/25"
+          )}
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          {saving ? "جاري الحفظ..." : saved ? "تم الحفظ ✓" : "💾 حفظ التحليل"}
+        </button>
+      </div>
+    </motion.div>
+  );
+};
 
 const AssetDetail = () => {
   const { pair } = useParams<{ pair: string }>();
@@ -347,6 +426,9 @@ const AssetDetail = () => {
       <motion.div variants={fadeUp} className="flex justify-center">
         <AlphaConsultant asset={asset} />
       </motion.div>
+
+      {/* Save Analysis */}
+      <SaveAnalysisButton asset={asset} mtfAnalysis={mtfAnalysis} consensus={consensus} />
 
       {/* Quick Actions */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">

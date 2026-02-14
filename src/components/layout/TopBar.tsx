@@ -20,6 +20,7 @@ const pageTitles: Record<string, string> = {
   "/admin": "لوحة الإدارة",
   "/hub": "المزيد",
   "/trade-journal": "سجل الصفقات",
+  "/my-analyses": "سجل التحليلات",
 };
 
 const TopBar = () => {
