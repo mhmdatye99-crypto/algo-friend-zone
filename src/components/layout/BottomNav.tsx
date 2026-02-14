@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/", icon: Home, label: "الرئيسية" },
-  { path: "/markets", icon: BarChart3, label: "الأسواق" },
-  { path: "/chart-vision", icon: ScanLine, label: "AI شارت", center: true },
-  { path: "/community", icon: Users, label: "المجتمع" },
-  { path: "/hub", icon: Menu, label: "المزيد" },
+  { path: "/signals", icon: BarChart3, label: "إشارات" },
+  { path: "/chart-vision", icon: ScanLine, label: "تحليل", center: true },
+  { path: "/community", icon: Users, label: "مجتمع" },
+  { path: "/hub", icon: Menu, label: "Nexus" },
 ];
 
 const BottomNav = () => {

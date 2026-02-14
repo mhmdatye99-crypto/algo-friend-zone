@@ -97,7 +97,7 @@ const FloatingAlpha = () => {
     // Charge credits on first message of session
     if (!sessionCharged && !isFounder) {
       if (!canAfford(CREDIT_COSTS.chat_session)) {
-        toast.error("رصيد غير كافٍ — تحتاج 2 رصيد لجلسة Nexus Oracle");
+        toast.error("رصيد غير كافٍ — تحتاج 2 نقطة لجلسة Nexus Oracle");
         return;
       }
       const success = await spendCredits(CREDIT_COSTS.chat_session, "chat_session", "جلسة Nexus Oracle");

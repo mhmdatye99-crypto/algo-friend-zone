@@ -201,7 +201,10 @@ const ChartVision = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-[12px] font-mono font-bold text-primary block">التقاط مباشر</span>
-                  <span className="text-[9px] font-mono text-muted-foreground">كاميرا الجهاز</span>
+                  <span className="text-[9px] font-mono text-muted-foreground flex items-center gap-1">
+                    كاميرا الجهاز
+                    {!isFounder && <span className="bg-primary/15 text-primary px-1 rounded text-[8px]">{CREDIT_COSTS.chart_analysis}pt</span>}
+                  </span>
                 </div>
               </motion.button>
               <motion.button
@@ -218,7 +221,10 @@ const ChartVision = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-[12px] font-mono font-bold text-accent block">رفع صورة</span>
-                  <span className="text-[9px] font-mono text-muted-foreground">من المعرض</span>
+                  <span className="text-[9px] font-mono text-muted-foreground flex items-center gap-1">
+                    من المعرض
+                    {!isFounder && <span className="bg-accent/15 text-accent px-1 rounded text-[8px]">{CREDIT_COSTS.chart_analysis}pt</span>}
+                  </span>
                 </div>
               </motion.button>
             </div>

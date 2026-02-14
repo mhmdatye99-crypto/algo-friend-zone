@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import {
-  Zap, Brain, GraduationCap, Target, AlertTriangle,
-  TrendingUp, TrendingDown, Star, ChevronLeft, BarChart3, Gauge,
-  Bitcoin, DollarSign, LineChart,
+  Zap, Target, TrendingUp, TrendingDown, Star, ChevronLeft, Gauge,
+  Bitcoin, DollarSign, LineChart, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +12,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
 import AICoachTip from "@/components/dashboard/AICoachTip";
+import { useSignals } from "@/hooks/useSignals";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -22,12 +22,6 @@ const fadeUp = {
 const marketPulse = {
   index: 73,
   label: "صعودي معتدل",
-  subMetrics: [
-    { label: "تدفق المؤسسات", value: 81, color: "text-success" },
-    { label: "زخم التقنيات", value: 68, color: "text-primary" },
-    { label: "معنويات التجزئة", value: 55, color: "text-warning" },
-    { label: "تقلّب المخاطر", value: 42, color: "text-accent" },
-  ],
 };
 
 const analysisCards = [
@@ -57,39 +51,14 @@ const analysisCards = [
   },
 ];
 
-const hubCards = [
-  {
-    id: "intelligence",
-    title: "نبض السوق",
-    subtitle: "تحليلات وبيانات مباشرة",
-    icon: BarChart3,
-    path: "/markets",
-    glowColor: "190, 100%, 50%",
-    borderColor: "hsla(190, 100%, 50%, 0.15)",
-    bgGrad: "linear-gradient(135deg, hsla(190, 100%, 50%, 0.08) 0%, hsla(190, 80%, 30%, 0.04) 100%)",
-    iconBg: "bg-accent/15",
-    iconColor: "text-accent",
-  },
-  {
-    id: "academy",
-    title: "الأكاديمية الكمّية",
-    subtitle: "وحدات تعلم متقدمة",
-    icon: GraduationCap,
-    path: "/academy",
-    glowColor: "300, 80%, 50%",
-    borderColor: "hsla(300, 80%, 50%, 0.15)",
-    bgGrad: "linear-gradient(135deg, hsla(300, 80%, 50%, 0.08) 0%, hsla(300, 60%, 30%, 0.04) 100%)",
-    iconBg: "bg-fuchsia-500/15",
-    iconColor: "text-fuchsia-400",
-  },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const assets = useLivePrices();
   const { favorites, isLoggedIn } = useFavorites();
   const { goal, stats } = useGoalPlanner();
+  const { signals } = useSignals();
 
+  const activeSignalsCount = signals.filter(s => s.confidence >= 70).length;
   const favoriteAssets = assets.filter(a => favorites.has(a.pair));
   const trendingUp = useMemo(() => [...assets].sort((a, b) => b.change - a.change).slice(0, 6), [assets]);
   const trendingDown = useMemo(() => [...assets].sort((a, b) => a.change - b.change).slice(0, 6), [assets]);
@@ -101,7 +70,38 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.08 } } }}
       className="px-5 pt-4 pb-28 space-y-6 max-w-lg mx-auto"
     >
-      {/* ═══ Wealth Path (if active) ═══ */}
+      {/* ═══ ONE-GLANCE: 3 Key Metrics ═══ */}
+      <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2">
+        <div
+          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
+          style={{ background: "hsla(43, 100%, 50%, 0.06)", border: "1px solid hsla(43, 100%, 50%, 0.12)" }}
+          onClick={() => navigate("/markets")}
+        >
+          <Gauge className="w-4 h-4 text-primary mx-auto mb-1" />
+          <p className="text-lg font-mono font-bold text-primary">{marketPulse.index}%</p>
+          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">نبض السوق</p>
+        </div>
+        <div
+          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
+          style={{ background: "hsla(190, 100%, 50%, 0.06)", border: "1px solid hsla(190, 100%, 50%, 0.12)" }}
+          onClick={() => navigate("/goal-planner")}
+        >
+          <Target className="w-4 h-4 text-accent mx-auto mb-1" />
+          <p className="text-lg font-mono font-bold text-accent">{stats ? `${stats.progress.toFixed(0)}%` : "0%"}</p>
+          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">تقدّم الثروة</p>
+        </div>
+        <div
+          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
+          style={{ background: "hsla(120, 60%, 50%, 0.06)", border: "1px solid hsla(120, 60%, 50%, 0.12)" }}
+          onClick={() => navigate("/signals")}
+        >
+          <Activity className="w-4 h-4 text-success mx-auto mb-1" />
+          <p className="text-lg font-mono font-bold text-success">{activeSignalsCount}</p>
+          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">إشارات نشطة</p>
+        </div>
+      </motion.div>
+
+      {/* ═══ Wealth Path (compact) ═══ */}
       {goal && stats && (
         <motion.div variants={fadeUp}>
           <div
@@ -130,18 +130,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          {!stats.todayLogged && (
-            <motion.div
-              className="mt-2 flex items-center gap-2 px-3 py-2 rounded-[10px] bg-warning/10 border border-warning/20"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0" />
-              <span className="text-[10px] font-mono text-warning font-bold">
-                {stats.missedDays > 0 ? `⚠ فاتتك ${stats.missedDays} أيام — سجّل أرباحك` : "لم تسجّل أرباح اليوم"}
-              </span>
-            </motion.div>
-          )}
         </motion.div>
       )}
 
@@ -187,45 +175,6 @@ const Dashboard = () => {
             );
           })}
         </div>
-      </motion.div>
-
-      {/* ═══ Hub Cards ═══ */}
-      <motion.div variants={fadeUp} className="space-y-3">
-        {hubCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <motion.div
-              key={card.id}
-              onClick={() => navigate(card.path)}
-              className="relative rounded-[14px] p-4 cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] overflow-hidden"
-              style={{
-                background: card.bgGrad,
-                border: `1px solid ${card.borderColor}`,
-                boxShadow: `0 4px 24px hsla(${card.glowColor}, 0.08), inset 0 1px 0 hsla(${card.glowColor}, 0.06)`,
-              }}
-              initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.25 + idx * 0.1, duration: 0.4 }}
-            >
-              <div
-                className="absolute -top-8 -left-8 w-32 h-32 rounded-full opacity-20 blur-3xl pointer-events-none"
-                style={{ background: `radial-gradient(circle, hsla(${card.glowColor}, 0.4), transparent 70%)` }}
-              />
-              <div className="flex items-center gap-4 relative z-10">
-                <div className={cn("w-12 h-12 rounded-[12px] flex items-center justify-center", card.iconBg)}
-                  style={{ boxShadow: `0 0 16px hsla(${card.glowColor}, 0.15)` }}
-                >
-                  <Icon className={cn("w-6 h-6", card.iconColor)} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-[14px] font-bold text-foreground">{card.title}</h3>
-                  <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{card.subtitle}</p>
-                </div>
-                <ChevronLeft className="w-5 h-5 text-muted-foreground/40" />
-              </div>
-            </motion.div>
-          );
-        })}
       </motion.div>
 
       {/* ═══ AI Coach Tip ═══ */}
@@ -293,29 +242,6 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-        </div>
-      </motion.div>
-
-      {/* ═══ Market Pulse ═══ */}
-      <motion.div variants={fadeUp} className="glass rounded-[14px] p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Gauge className="w-4 h-4 text-primary" />
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-mono">نبض الذكاء السوقي</p>
-          </div>
-          <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-[10px] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-            مباشر
-          </span>
-        </div>
-        <GaugeChart value={marketPulse.index} label={marketPulse.label} />
-        <div className="grid grid-cols-4 gap-1.5 mt-4">
-          {marketPulse.subMetrics.map((m, i) => (
-            <div key={i} className="bg-secondary/40 rounded-[10px] px-2 py-1.5 text-center border border-border/10">
-              <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider leading-tight mb-0.5">{m.label}</p>
-              <p className={cn("text-sm font-bold font-mono", m.color)}>{m.value}</p>
-            </div>
-          ))}
         </div>
       </motion.div>
 
