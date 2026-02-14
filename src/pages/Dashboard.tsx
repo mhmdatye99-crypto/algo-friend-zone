@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import {
   Gauge, Target, AlertTriangle, Settings,
-  TrendingUp, TrendingDown, Star, ChevronLeft, GripVertical, Lock, Unlock
+  TrendingUp, TrendingDown, Star, ChevronLeft, GripVertical, Lock, Unlock, BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,8 @@ import GaugeChart from "@/components/dashboard/GaugeChart";
 import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
 import WhaleTracker from "@/components/dashboard/WhaleTracker";
 import AICoachTip from "@/components/dashboard/AICoachTip";
+import QuickAccessGrid from "@/components/dashboard/QuickAccessGrid";
+import PerformanceSection from "@/components/hub/PerformanceSection";
 import {
   DndContext,
   closestCenter,
@@ -47,19 +49,21 @@ const marketPulse = {
   ],
 };
 
-type SectionId = "coach" | "morning" | "ticker" | "pulse" | "whale" | "wealth" | "favorites";
+type SectionId = "quickaccess" | "coach" | "morning" | "ticker" | "pulse" | "whale" | "wealth" | "performance" | "favorites";
 
 const SECTION_LABELS: Record<SectionId, string> = {
+  quickaccess: "الوصول السريع",
   coach: "المدرب الذكي",
   morning: "الملخص الصباحي",
   ticker: "شريط الأسعار",
   pulse: "نبض السوق",
   whale: "متتبع الحيتان",
   wealth: "مسار الثروة",
+  performance: "إحصائيات الأداء",
   favorites: "المفضلة",
 };
 
-const DEFAULT_ORDER: SectionId[] = ["coach", "morning", "ticker", "pulse", "whale", "wealth", "favorites"];
+const DEFAULT_ORDER: SectionId[] = ["quickaccess", "coach", "morning", "ticker", "pulse", "whale", "wealth", "performance", "favorites"];
 const STORAGE_KEY = "dashboard-section-order";
 
 function loadOrder(): SectionId[] {
@@ -137,6 +141,12 @@ const Dashboard = () => {
 
   /* ─── Section renderers ─── */
   const sections: Record<SectionId, React.ReactNode> = useMemo(() => ({
+    quickaccess: (
+      <motion.div variants={fadeUp}>
+        <QuickAccessGrid />
+      </motion.div>
+    ),
+
     coach: (
       <motion.div variants={fadeUp}>
         <AICoachTip />
@@ -284,6 +294,17 @@ const Dashboard = () => {
         </div>
       </motion.div>
     ) : null,
+
+    performance: (
+      <motion.div variants={fadeUp}>
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 flex items-center gap-1">
+            <BarChart3 className="w-3 h-3" /> إحصائيات الأداء
+          </p>
+          <PerformanceSection />
+        </div>
+      </motion.div>
+    ),
   }), [trendingAssets, favoriteAssets, isLoggedIn, goal, stats, navigate]);
 
   return (
