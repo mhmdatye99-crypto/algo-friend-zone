@@ -12,7 +12,7 @@ const pageTitles: Record<string, string> = {
   "/signals": "الإشارات",
   "/community": "غرفة العمليات",
   "/academy": "الأكاديمية",
-  "/goal-planner": "الأوديسة المالية",
+  "/goal-planner": "Nexus Growth Path",
   "/morning-brief": "الملخص الصباحي",
   "/profile": "الملف الشخصي",
   "/risk-calculator": "حاسبة المخاطر",
@@ -32,7 +32,7 @@ const TopBar = () => {
   const { stats } = useGoalPlanner();
 
   const isHome = location.pathname === "/";
-  const currentTitle = pageTitles[location.pathname] || "TradeJourney";
+  const currentTitle = pageTitles[location.pathname] || "Nexus Trade AI";
 
   const getGreeting = () => {
     const h = new Date().getHours();
@@ -64,8 +64,8 @@ const TopBar = () => {
         <div className="flex flex-col items-center">
           {isHome ? (
             <>
-              <p className="text-[15px] font-semibold text-foreground leading-tight">
-                {getGreeting()}، <span className="text-gradient-gold">متداول</span>
+              <p className="text-[15px] font-display font-bold text-foreground leading-tight tracking-wide">
+                <span className="text-gradient-gold">NEXUS</span> <span className="text-foreground/80">TRADE AI</span>
               </p>
               {stats && (
                 <div className="flex items-center gap-1.5 mt-0.5">

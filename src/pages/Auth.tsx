@@ -66,10 +66,10 @@ const Auth = () => {
           >
             <Sparkles className="w-7 h-7 text-primary" />
           </motion.div>
-          <h1 className="text-2xl font-bold tracking-tight">محطة التداول الذكية</h1>
-          <p className="text-xs text-muted-foreground font-mono">
-            {mode === "login" ? "سجّل دخولك لمتابعة أداءك" : "أنشئ حسابك وابدأ رحلتك"}
-          </p>
+           <h1 className="text-2xl font-display font-bold tracking-wider">NEXUS TRADE AI</h1>
+           <p className="text-xs text-muted-foreground font-mono">
+             {mode === "login" ? "سجّل دخولك للاتصال بـ Nexus" : "أنشئ حسابك وانضم إلى Nexus"}
+           </p>
         </div>
 
         {/* Tabs */}
@@ -156,7 +156,7 @@ const Auth = () => {
             {loading ? (
               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             ) : mode === "login" ? (
-              "دخول المحطة"
+              "الاتصال بـ Nexus"
             ) : (
               "إنشاء الحساب"
             )}

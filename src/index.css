@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -73,6 +73,30 @@
 }
 
 @layer utilities {
+  .font-display {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+  }
+
+  .btn-nexus {
+    position: relative;
+    background: hsla(240, 15%, 4%, 0.9);
+    border: none;
+    isolation: isolate;
+  }
+  .btn-nexus::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(43, 100%, 50%), hsl(190, 100%, 50%));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
   .glass {
     @apply backdrop-blur-[30px] border;
     background: hsla(240, 15%, 3.5%, 0.45);
