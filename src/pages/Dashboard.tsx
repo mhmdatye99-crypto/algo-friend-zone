@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   Zap, Brain, GraduationCap, Target, AlertTriangle,
   TrendingUp, TrendingDown, Star, ChevronLeft, Waves, BarChart3, Gauge,
+  Bitcoin, DollarSign, LineChart, Gem,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -30,19 +31,34 @@ const marketPulse = {
   ],
 };
 
-const hubCards = [
+const analysisCards = [
   {
-    id: "signals",
-    title: "إشارات ألفا",
-    subtitle: "توصيات كريبتو وفوركس حية",
-    icon: Zap,
+    id: "crypto",
+    title: "تحليل كريبتو",
+    subtitle: "BTC · ETH · SOL",
+    icon: Bitcoin,
     path: "/signals",
     glowColor: "43, 100%, 50%",
-    borderColor: "hsla(43, 100%, 50%, 0.15)",
-    bgGrad: "linear-gradient(135deg, hsla(43, 100%, 50%, 0.08) 0%, hsla(43, 80%, 30%, 0.04) 100%)",
-    iconBg: "bg-primary/15",
+    borderColor: "hsla(43, 100%, 50%, 0.18)",
+    bgGrad: "linear-gradient(135deg, hsla(43, 100%, 50%, 0.1) 0%, hsla(30, 80%, 30%, 0.05) 100%)",
     iconColor: "text-primary",
+    badge: "🔥",
   },
+  {
+    id: "forex",
+    title: "تحليل فوركس",
+    subtitle: "EUR · GBP · JPY",
+    icon: DollarSign,
+    path: "/signals",
+    glowColor: "190, 100%, 50%",
+    borderColor: "hsla(190, 100%, 50%, 0.18)",
+    bgGrad: "linear-gradient(135deg, hsla(190, 100%, 50%, 0.1) 0%, hsla(200, 80%, 30%, 0.05) 100%)",
+    iconColor: "text-accent",
+    badge: "📊",
+  },
+];
+
+const hubCards = [
   {
     id: "intelligence",
     title: "مركز الاستخبارات",
@@ -130,7 +146,51 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* ═══ 3 Main Hub Cards ═══ */}
+      {/* ═══ Analysis Cards — 2 Columns ═══ */}
+      <motion.div variants={fadeUp}>
+        <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2 px-1 flex items-center gap-1.5">
+          <LineChart className="w-3.5 h-3.5 text-primary" /> ابدأ التحليل
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {analysisCards.map((card, idx) => {
+            const Icon = card.icon;
+            return (
+              <motion.div
+                key={card.id}
+                onClick={() => navigate(card.path)}
+                className="relative rounded-[14px] p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+                style={{
+                  background: card.bgGrad,
+                  border: `1px solid ${card.borderColor}`,
+                  boxShadow: `0 4px 20px hsla(${card.glowColor}, 0.1)`,
+                }}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + idx * 0.1, duration: 0.35 }}
+              >
+                <div
+                  className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-25 blur-2xl pointer-events-none"
+                  style={{ background: `radial-gradient(circle, hsla(${card.glowColor}, 0.5), transparent 70%)` }}
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={cn("w-10 h-10 rounded-[10px] flex items-center justify-center bg-secondary/60 border border-border/20")}
+                      style={{ boxShadow: `0 0 12px hsla(${card.glowColor}, 0.15)` }}
+                    >
+                      <Icon className={cn("w-5 h-5", card.iconColor)} />
+                    </div>
+                    <span className="text-lg">{card.badge}</span>
+                  </div>
+                  <h3 className="text-[13px] font-bold text-foreground">{card.title}</h3>
+                  <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{card.subtitle}</p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* ═══ Hub Cards ═══ */}
       <motion.div variants={fadeUp} className="space-y-3">
         {hubCards.map((card, idx) => {
           const Icon = card.icon;
@@ -146,9 +206,8 @@ const Dashboard = () => {
               }}
               initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 + idx * 0.1, duration: 0.4 }}
+              transition={{ delay: 0.25 + idx * 0.1, duration: 0.4 }}
             >
-              {/* Glow orb */}
               <div
                 className="absolute -top-8 -left-8 w-32 h-32 rounded-full opacity-20 blur-3xl pointer-events-none"
                 style={{ background: `radial-gradient(circle, hsla(${card.glowColor}, 0.4), transparent 70%)` }}
