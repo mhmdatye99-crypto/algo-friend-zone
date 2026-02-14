@@ -1,4 +1,4 @@
-import { Home, BarChart3, ScanLine, Zap, Users } from "lucide-react";
+import { Home, BarChart3, ScanLine, Zap, Menu } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,7 @@ const tabs = [
   { path: "/markets", icon: BarChart3, label: "الأسواق" },
   { path: "/chart-vision", icon: ScanLine, label: "الشارت", center: true },
   { path: "/signals", icon: Zap, label: "الإشارات" },
-  { path: "/community", icon: Users, label: "المجتمع" },
+  { path: "/hub", icon: Menu, label: "المزيد" },
 ];
 
 const BottomNav = () => {
