@@ -127,6 +127,33 @@ export type Database = {
           },
         ]
       }
+      credit_transactions: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorite_assets: {
         Row: {
           created_at: string
@@ -239,9 +266,11 @@ export type Database = {
           avatar_url: string | null
           capital: number | null
           created_at: string
+          credits: number
           display_name: string | null
           experience_level: string | null
           id: string
+          subscription_tier: string
           trading_style: string | null
           updated_at: string
           user_id: string
@@ -250,9 +279,11 @@ export type Database = {
           avatar_url?: string | null
           capital?: number | null
           created_at?: string
+          credits?: number
           display_name?: string | null
           experience_level?: string | null
           id?: string
+          subscription_tier?: string
           trading_style?: string | null
           updated_at?: string
           user_id: string
@@ -261,9 +292,11 @@ export type Database = {
           avatar_url?: string | null
           capital?: number | null
           created_at?: string
+          credits?: number
           display_name?: string | null
           experience_level?: string | null
           id?: string
+          subscription_tier?: string
           trading_style?: string | null
           updated_at?: string
           user_id?: string
@@ -571,10 +604,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          _action: string
+          _amount: number
+          _description?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      spend_credits: {
+        Args: {
+          _action: string
+          _amount: number
+          _description?: string
           _user_id: string
         }
         Returns: boolean
