@@ -53,6 +53,7 @@ const menuSections: MenuSection[] = [
     title: "أدوات التداول",
     items: [
       { icon: BookOpen, label: "سجل الصفقات", desc: "تتبع وتحليل صفقاتك", path: "/trade-journal", color: "text-accent", bg: "bg-accent/10", border: "border-accent/15" },
+      { icon: BarChart3, label: "سجل التحليلات", desc: "جميع تحليلاتك المحفوظة", path: "/my-analyses", color: "text-primary", bg: "bg-primary/10", border: "border-primary/15" },
       { icon: Calculator, label: "حاسبة المخاطر", desc: "حجم الصفقة ونسبة المخاطرة", path: "/risk-calculator", color: "text-success", bg: "bg-success/10", border: "border-success/15" },
       { icon: Target, label: "الأوديسة المالية", desc: "تتبع أهدافك ومسار الثروة", path: "/goal-planner", color: "text-warning", bg: "bg-warning/10", border: "border-warning/15" },
       { icon: Users, label: "غرفة العمليات", desc: "مجتمع المتداولين والتحليلات", path: "/community", color: "text-accent", bg: "bg-accent/10", border: "border-accent/15" },
