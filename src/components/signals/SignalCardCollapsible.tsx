@@ -277,10 +277,31 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 )}
 
                 {/* Footer */}
-                <div className="flex items-center justify-end pt-1">
+                <div className="flex items-center justify-between pt-1 gap-2">
+                  {revealed && (
+                    <button
+                      onClick={() => navigate("/trade-journal", {
+                        state: {
+                          prefill: {
+                            pair: signal.pair,
+                            direction: signal.direction === "صعودي" ? "buy" : "sell",
+                            entry: signal.entry,
+                            tp: signal.target1,
+                            sl: signal.sl,
+                            reason: signal.reasons.join(" • "),
+                            strategy: `${signal.timeFrame} | ${signal.direction} | ثقة ${signal.confidence}%`,
+                          }
+                        }
+                      })}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-success/10 text-success px-3 py-2 rounded-lg hover:bg-success/20 transition-colors border border-success/20"
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      نفّذ وسجّل
+                    </button>
+                  )}
                   <button
                     onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
-                    className="text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors"
+                    className="text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors"
                   >
                     تفاصيل الأصل
                   </button>
