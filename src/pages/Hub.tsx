@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Target, Sun, Shield, Crown, ChevronLeft, LogOut, ShieldCheck,
   User, Star, Trophy, Flame, BookOpen, Bell, Palette, HelpCircle,
-  Settings, Activity, Award, TrendingDown, Calculator, Wallet, Users
+  Settings, Activity, Award, TrendingDown, Calculator, Wallet, Users,
+  BarChart3
 } from "lucide-react";
+import PerformanceSection from "@/components/hub/PerformanceSection";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -145,8 +147,8 @@ const Hub = () => {
           onClick={() => setShowPerf(!showPerf)}
           className="mt-3 text-[10px] font-mono text-primary flex items-center gap-1 mx-auto hover:underline"
         >
-          <Activity className="w-3 h-3" />
-          {showPerf ? "إخفاء الأداء" : "عرض الأداء"}
+          <BarChart3 className="w-3 h-3" />
+          {showPerf ? "إخفاء الأداء" : "📊 عرض إحصائيات الأداء"}
         </button>
 
         <AnimatePresence>
@@ -157,14 +159,8 @@ const Hub = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-2 gap-2 mt-3">
-                {performanceMetrics.map((m, i) => (
-                  <div key={i} className="bg-secondary/30 rounded-[10px] p-2.5 border border-border/10">
-                    <m.icon className="w-3 h-3 text-muted-foreground mb-0.5" />
-                    <p className="text-[9px] text-muted-foreground font-mono uppercase">{m.label}</p>
-                    <p className="text-sm font-bold font-mono">{m.value}</p>
-                  </div>
-                ))}
+              <div className="mt-3">
+                <PerformanceSection />
               </div>
             </motion.div>
           )}
