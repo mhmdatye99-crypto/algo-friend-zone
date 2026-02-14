@@ -97,10 +97,12 @@ const TradeJournal = () => {
         status = "closed";
       }
 
+      const dbDirection = direction === "buy" ? "long" : "short";
+
       const { error } = await supabase.from("trades").insert({
         user_id: user.id,
         pair,
-        direction,
+        direction: dbDirection,
         entry_price: entry,
         exit_price: exit,
         stop_loss: sl,
