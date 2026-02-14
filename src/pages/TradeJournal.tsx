@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 
 type Trade = {
   id: string;
@@ -51,6 +52,7 @@ const fadeUp = {
 const TradeJournal = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { goal, addEntry } = useGoalPlanner();
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "closed">("all");
   const [tab, setTab] = useState<"trades" | "analytics">("trades");
@@ -143,7 +145,7 @@ const TradeJournal = () => {
       const trade = trades.find(t => t.id === id);
       if (!trade) throw new Error("Trade not found");
       const size = trade.position_size || 1;
-      const pnl = trade.direction === "buy"
+      const pnl = trade.direction === "long"
         ? (exitP - trade.entry_price) * size
         : (trade.entry_price - exitP) * size;
 
@@ -154,10 +156,19 @@ const TradeJournal = () => {
         closed_at: new Date().toISOString(),
       }).eq("id", id);
       if (error) throw error;
+
+      // Update financial goal with PnL
+      if (goal) {
+        try {
+          await addEntry.mutateAsync({ amount: pnl, note: `إغلاق صفقة ${trade.pair} | ${pnl >= 0 ? "ربح" : "خسارة"}` });
+        } catch (e) {
+          console.error("Failed to update goal:", e);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trades"] });
-      toast.success("تم إغلاق الصفقة");
+      toast.success("تم إغلاق الصفقة وتحديث المحفظة");
     },
   });
 
@@ -483,9 +494,9 @@ const TradeCard = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () =>
         <div className="flex items-center gap-2">
           <div className={cn(
             "w-7 h-7 rounded-lg flex items-center justify-center",
-            trade.direction === "buy" ? "bg-success/15" : "bg-destructive/15"
+            trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
           )}>
-            {trade.direction === "buy"
+            {trade.direction === "long"
               ? <TrendingUp className="w-3.5 h-3.5 text-success" />
               : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
           </div>
