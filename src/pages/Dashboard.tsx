@@ -112,7 +112,7 @@ const Dashboard = () => {
             <Target className="w-4 h-4 text-primary shrink-0" />
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">مسار الثروة</span>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">NEXUS GROWTH PATH</span>
                 <span className="text-[11px] font-mono font-bold text-primary">{stats.progress.toFixed(0)}%</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">

@@ -144,8 +144,8 @@ const FloatingAlpha = () => {
                     <Brain className="w-4 h-4 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">Alpha — المستشار العام</p>
-                    <p className="text-[10px] font-mono text-muted-foreground">اسأل عن أي أصل أو استراتيجية</p>
+                     <p className="text-sm font-display font-bold text-foreground tracking-wide">NEXUS ORACLE</p>
+                     <p className="text-[10px] font-mono text-muted-foreground">المستشار العصبي — اسأل عن أي أصل أو استراتيجية</p>
                   </div>
                 </div>
                 <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors">
@@ -160,8 +160,8 @@ const FloatingAlpha = () => {
                     <div className="w-14 h-14 mx-auto rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-3">
                       <Brain className="w-7 h-7 text-accent" />
                     </div>
-                    <p className="text-sm font-bold text-foreground">مرحباً، أنا Alpha</p>
-                    <p className="text-[11px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
+                     <p className="text-sm font-display font-bold text-foreground tracking-wide">NEXUS ORACLE</p>
+                     <p className="text-[11px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
                     <div className="flex flex-col gap-2 mt-4">
                       {["ما أفضل فرصة تداول اليوم؟", "حلل لي البيتكوين الآن", "اقترح استراتيجية منخفضة المخاطر"].map(q => (
                         <button key={q} onClick={() => send(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-[11px] font-mono text-foreground hover:bg-secondary/80 transition-all text-right">
@@ -211,7 +211,7 @@ const FloatingAlpha = () => {
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && send(input)}
-                    placeholder="اسأل Alpha..."
+                    placeholder="اسأل Nexus Oracle..."
                     className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
                     dir="rtl"
                   />

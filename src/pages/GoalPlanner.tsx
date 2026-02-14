@@ -56,9 +56,9 @@ const SetupWizard = ({ onComplete }: { onComplete: (data: any) => void }) => {
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
       <motion.div variants={fadeUp}>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">إعداد الأوديسة</p>
-        <h1 className="text-xl font-bold text-foreground">الأوديسة المالية</h1>
-        <p className="text-[12px] text-muted-foreground font-mono mt-1">صمّم خريطة رحلتك نحو الحرية المالية</p>
+         <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">إعداد المسار</p>
+         <h1 className="text-xl font-display font-bold text-foreground tracking-wide">NEXUS GROWTH PATH</h1>
+         <p className="text-[12px] text-muted-foreground font-mono mt-1">صمّم خريطة رحلتك نحو الحرية المالية</p>
       </motion.div>
 
       {/* Capital Input */}
@@ -170,7 +170,7 @@ const SetupWizard = ({ onComplete }: { onComplete: (data: any) => void }) => {
           )}
         >
           <Target className="w-4 h-4 inline-block ml-2" />
-          ابدأ الأوديسة المالية
+          ابدأ Nexus Growth Path
         </button>
       </motion.div>
     </motion.div>
@@ -200,8 +200,8 @@ const ProgressTracker = () => {
       {/* Header */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">الأوديسة المالية</p>
-          <h1 className="text-xl font-bold text-foreground">لوحة التقدم</h1>
+           <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">NEXUS GROWTH PATH</p>
+           <h1 className="text-xl font-display font-bold text-foreground tracking-wide">لوحة التقدم</h1>
         </div>
         <div className="flex items-center gap-2">
           <div className="bg-primary/15 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
