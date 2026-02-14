@@ -7,7 +7,7 @@ import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const fadeUp = {
@@ -15,44 +15,95 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-const FullChart = ({ data, up }: { data: number[]; up: boolean }) => {
-  if (!data.length) return null;
-  const w = 340;
-  const h = 160;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w;
-    const y = h - ((v - min) / range) * (h - 10) - 5;
-    return `${x},${y}`;
-  }).join(" ");
-  const area = `0,${h} ${points} ${w},${h}`;
+const TRADINGVIEW_SYMBOL_MAP: Record<string, string> = {
+  "BTC/USDT": "BINANCE:BTCUSDT",
+  "ETH/USDT": "BINANCE:ETHUSDT",
+  "BNB/USDT": "BINANCE:BNBUSDT",
+  "SOL/USDT": "BINANCE:SOLUSDT",
+  "XRP/USDT": "BINANCE:XRPUSDT",
+  "ADA/USDT": "BINANCE:ADAUSDT",
+  "DOGE/USDT": "BINANCE:DOGEUSDT",
+  "DOT/USDT": "BINANCE:DOTUSDT",
+  "AVAX/USDT": "BINANCE:AVAXUSDT",
+  "LINK/USDT": "BINANCE:LINKUSDT",
+  "MATIC/USDT": "BINANCE:MATICUSDT",
+  "SHIB/USDT": "BINANCE:SHIBUSDT",
+  "LTC/USDT": "BINANCE:LTCUSDT",
+  "UNI/USDT": "BINANCE:UNIUSDT",
+  "ATOM/USDT": "BINANCE:ATOMUSDT",
+  "FIL/USDT": "BINANCE:FILUSDT",
+  "APT/USDT": "BINANCE:APTUSDT",
+  "ARB/USDT": "BINANCE:ARBUSDT",
+  "OP/USDT": "BINANCE:OPUSDT",
+  "NEAR/USDT": "BINANCE:NEARUSDT",
+  "SUI/USDT": "BINANCE:SUIUSDT",
+  "INJ/USDT": "BINANCE:INJUSDT",
+  "TIA/USDT": "BINANCE:TIAUSDT",
+  "SEI/USDT": "BINANCE:SEIUSDT",
+  "GOLD": "TVC:GOLD",
+  "SILVER": "TVC:SILVER",
+  "OIL": "TVC:USOIL",
+  "EUR/USD": "FX:EURUSD",
+  "GBP/USD": "FX:GBPUSD",
+  "USD/JPY": "FX:USDJPY",
+  "AUD/USD": "FX:AUDUSD",
+  "USD/CHF": "FX:USDCHF",
+  "NZD/USD": "FX:NZDUSD",
+  "USD/CAD": "FX:USDCAD",
+  "EUR/GBP": "FX:EURGBP",
+  "EUR/JPY": "FX:EURJPY",
+  "GBP/JPY": "FX:GBPJPY",
+  "US30": "TVC:DJI",
+  "SPX500": "TVC:SPX",
+  "NASDAQ": "NASDAQ:NDX",
+  "DAX": "XETR:DAX",
+  "NIKKEI": "TVC:NI225",
+};
+
+const TF_MAP: Record<string, string> = {
+  "15M": "15",
+  "1H": "60",
+  "4H": "240",
+  "D1": "D",
+};
+
+const TradingViewChart = ({ pair, timeframe }: { pair: string; timeframe: string }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const symbol = TRADINGVIEW_SYMBOL_MAP[pair] || `BINANCE:${pair.replace("/", "")}`;
+  const interval = TF_MAP[timeframe] || "240";
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.innerHTML = "";
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol,
+      interval,
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "1",
+      locale: "ar",
+      hide_top_toolbar: true,
+      hide_legend: true,
+      allow_symbol_change: false,
+      save_image: false,
+      calendar: false,
+      hide_volume: false,
+      support_host: "https://www.tradingview.com",
+      backgroundColor: "rgba(0,0,0,0)",
+      gridColor: "rgba(255,255,255,0.04)",
+    });
+    containerRef.current.appendChild(script);
+  }, [symbol, interval]);
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-40 rounded-xl overflow-hidden">
-      <defs>
-        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={area} fill="url(#chartGrad)" />
-      <polyline points={points} fill="none" stroke={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      {data.length > 0 && (() => {
-        const lastX = w;
-        const lastY = h - ((data[data.length - 1] - min) / range) * (h - 10) - 5;
-        return (
-          <>
-            <circle cx={lastX} cy={lastY} r="4" fill={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} />
-            <circle cx={lastX} cy={lastY} r="8" fill={up ? "hsl(155 100% 45%)" : "hsl(350 100% 50%)"} opacity="0.3">
-              <animate attributeName="r" values="8;14;8" dur="2s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" />
-            </circle>
-          </>
-        );
-      })()}
-    </svg>
+    <div className="tradingview-widget-container rounded-xl overflow-hidden" style={{ height: 260 }}>
+      <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
+    </div>
   );
 };
 
@@ -348,7 +399,7 @@ const AssetDetail = () => {
             ))}
           </div>
         </div>
-        <FullChart data={extendedData} up={asset.up} />
+        <TradingViewChart pair={asset.pair} timeframe={timeframe} />
       </motion.div>
 
       {/* ═══ Multi-Timeframe Analysis ═══ */}
