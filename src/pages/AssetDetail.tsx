@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
@@ -160,7 +160,7 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
       if (analysisError) throw analysisError;
 
       // Create trade linked to this analysis
-      const tradeDirection = consensus.signal === "شراء" ? "buy" : consensus.signal === "بيع" ? "sell" : "buy";
+      const tradeDirection = consensus.signal === "شراء" ? "long" : consensus.signal === "بيع" ? "short" : "long";
       const entryReason = `تحليل متعدد الفريمات: ${consensus.signal} (${consensus.count}/${consensus.total}) | RSI: ${asset.rsi} | MACD: ${asset.macd} | ثقة: ${confidence}%`;
 
       const { error: tradeError } = await supabase.from("trades").insert({
@@ -232,13 +232,13 @@ const SaveAnalysisButton = ({ asset, mtfAnalysis, consensus }: { asset: any; mtf
 };
 
 const AssetDetail = () => {
-  const { pair } = useParams<{ pair: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const assets = useLivePrices();
   const { favorites, toggle, isLoggedIn } = useFavorites();
   const [timeframe, setTimeframe] = useState("4H");
 
-  const decodedPair = decodeURIComponent(pair || "");
+  const decodedPair = decodeURIComponent(location.pathname.replace("/asset/", ""));
   const asset = assets.find(a => a.pair === decodedPair);
 
   const mtfAnalysis = useMemo(() => {
