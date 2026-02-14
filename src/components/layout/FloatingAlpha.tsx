@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Send, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { toast } from "sonner";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -12,7 +14,9 @@ const FloatingAlpha = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionCharged, setSessionCharged] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { spendCredits, canAfford, isFounder } = useCredits();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -87,8 +91,23 @@ const FloatingAlpha = () => {
     setIsLoading(false);
   }, []);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     if (!text.trim() || isLoading) return;
+
+    // Charge credits on first message of session
+    if (!sessionCharged && !isFounder) {
+      if (!canAfford(CREDIT_COSTS.chat_session)) {
+        toast.error("رصيد غير كافٍ — تحتاج 2 رصيد لجلسة Nexus Oracle");
+        return;
+      }
+      const success = await spendCredits(CREDIT_COSTS.chat_session, "chat_session", "جلسة Nexus Oracle");
+      if (!success) {
+        toast.error("رصيد غير كافٍ");
+        return;
+      }
+      setSessionCharged(true);
+    }
+
     const userMsg: Msg = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);

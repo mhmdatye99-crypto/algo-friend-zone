@@ -1,8 +1,9 @@
-import { Bell, User } from "lucide-react";
+import { Bell, User, Coins } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCredits } from "@/hooks/useCredits";
 import { motion } from "framer-motion";
 
 const pageTitles: Record<string, string> = {
@@ -30,6 +31,7 @@ const TopBar = () => {
   const topAssets = assets.slice(0, 8);
   const { user } = useAuth();
   const { stats } = useGoalPlanner();
+  const { credits } = useCredits();
 
   const isHome = location.pathname === "/";
   const currentTitle = pageTitles[location.pathname] || "Nexus Trade AI";
@@ -87,13 +89,22 @@ const TopBar = () => {
           )}
         </div>
 
-        {/* Right: Notification */}
-        <button
-          className="relative w-10 h-10 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
-        >
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-destructive animate-pulse" />
-        </button>
+        {/* Right: Credits + Notification */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/subscription")}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20"
+          >
+            <Coins className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-mono font-bold text-primary">{credits}</span>
+          </button>
+          <button
+            className="relative w-9 h-9 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
+          >
+            <Bell className="w-4 h-4 text-muted-foreground" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive animate-pulse" />
+          </button>
+        </div>
       </div>
 
       {/* Ticker strip */}

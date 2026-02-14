@@ -8,6 +8,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/CreditModals";
 
 interface AnalysisResult {
   pair?: string;
@@ -48,8 +50,11 @@ const ChartVision = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [showInsufficient, setShowInsufficient] = useState(false);
+  const [showBuyCredits, setShowBuyCredits] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { credits, spendCredits, canAfford, isFounder } = useCredits();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,9 +63,25 @@ const ChartVision = () => {
       toast.error("يرجى اختيار ملف صورة صالح");
       return;
     }
+
+    // Credit check before analysis
+    if (!isFounder && !canAfford(CREDIT_COSTS.chart_analysis)) {
+      setShowInsufficient(true);
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const base64 = ev.target?.result as string;
+      // Spend credits
+      if (!isFounder) {
+        const success = await spendCredits(CREDIT_COSTS.chart_analysis, "chart_analysis", "تحليل شارت بالذكاء الاصطناعي");
+        if (!success) {
+          setShowInsufficient(true);
+          return;
+        }
+      }
       setImagePreview(base64);
       analyzeChart(base64);
     };
@@ -445,7 +466,20 @@ const ChartVision = () => {
             </motion.button>
           </motion.div>
         )}
-      </AnimatePresence>
+       </AnimatePresence>
+
+      <InsufficientCreditsPopup
+        open={showInsufficient}
+        onClose={() => setShowInsufficient(false)}
+        onBuyCredits={() => setShowBuyCredits(true)}
+        requiredCredits={CREDIT_COSTS.chart_analysis}
+        currentCredits={credits}
+      />
+      <BuyCreditsModal
+        open={showBuyCredits}
+        onClose={() => setShowBuyCredits(false)}
+        currentCredits={credits}
+      />
     </motion.div>
   );
 };

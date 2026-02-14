@@ -4,12 +4,14 @@ import {
   Brain, Target, Sun, Shield, Crown, ChevronLeft, LogOut, ShieldCheck,
   User, Star, Trophy, Flame, BookOpen, Bell, Palette, HelpCircle,
   Settings, Activity, Award, TrendingDown, Calculator, Wallet, Users,
-  BarChart3
+  BarChart3, Coins
 } from "lucide-react";
 import PerformanceSection from "@/components/hub/PerformanceSection";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useCredits } from "@/hooks/useCredits";
+import { BuyCreditsModal } from "@/components/credits/CreditModals";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +87,8 @@ const Hub = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isSubscribed: hasSubscription } = useSubscription();
+  const { credits, tier, transactions, isFounder } = useCredits();
+  const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPerf, setShowPerf] = useState(false);
 
@@ -166,6 +170,54 @@ const Hub = () => {
             </motion.div>
           )}
         </AnimatePresence>
+      </motion.div>
+
+      {/* Billing / Credits Section */}
+      <motion.div variants={fadeUp} className="space-y-1.5">
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 font-medium flex items-center gap-1">
+          <Coins className="w-3 h-3" /> NEXUS CREDITS
+        </p>
+        <div className="rounded-[12px] p-4 space-y-3"
+          style={{ background: "hsla(240, 15%, 3.5%, 0.5)", border: "1px solid hsla(43, 100%, 50%, 0.1)" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">الرصيد المتاح</p>
+              <p className="text-2xl font-mono font-bold text-primary">{credits}</p>
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">الخطة</p>
+              <p className={cn(
+                "text-[12px] font-display font-bold tracking-wider",
+                tier === "founder" ? "text-primary" : tier === "alpha" ? "text-accent" : "text-muted-foreground"
+              )}>
+                {tier === "founder" ? "FOUNDER" : tier === "alpha" ? "ALPHA" : "GUEST"}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowBuyCredits(true)}
+            className="w-full py-2.5 rounded-xl text-[11px] font-mono font-bold btn-nexus text-primary flex items-center justify-center gap-2"
+          >
+            <Wallet className="w-4 h-4" />
+            شراء رصيد
+          </button>
+
+          {/* Recent transactions */}
+          {transactions.length > 0 && (
+            <div className="space-y-1 pt-2 border-t border-border/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">آخر المعاملات</p>
+              {transactions.slice(0, 5).map((tx) => (
+                <div key={tx.id} className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-muted-foreground truncate max-w-[60%]">{tx.description || tx.action}</span>
+                  <span className={cn("font-bold", tx.amount >= 0 ? "text-success" : "text-destructive")}>
+                    {tx.amount >= 0 ? "+" : ""}{tx.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </motion.div>
 
       {/* أقسام القائمة */}
@@ -252,6 +304,12 @@ const Hub = () => {
         <LogOut className="w-4 h-4" />
         تسجيل الخروج
       </motion.button>
+
+      <BuyCreditsModal
+        open={showBuyCredits}
+        onClose={() => setShowBuyCredits(false)}
+        currentCredits={credits}
+      />
     </motion.div>
   );
 };
