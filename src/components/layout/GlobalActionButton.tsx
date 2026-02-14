@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, ScanLine, BookOpen, Brain, X } from "lucide-react";
+import { ScanLine, BookOpen, Brain, X, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -34,19 +34,19 @@ const GlobalActionButton = () => {
         )}
       </AnimatePresence>
 
-      {/* Action Items */}
+      {/* Action Items — appear above bottom nav */}
       <AnimatePresence>
         {open && (
-          <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2.5">
             {actions.map((action, i) => {
               const Icon = action.icon;
               return (
                 <motion.button
                   key={action.path}
-                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  initial={{ opacity: 0, y: 16, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                  transition={{ delay: i * 0.06, type: "spring", stiffness: 400, damping: 25 }}
+                  exit={{ opacity: 0, y: 16, scale: 0.9 }}
+                  transition={{ delay: i * 0.05, type: "spring", stiffness: 400, damping: 25 }}
                   onClick={() => handleAction(action.path)}
                   className={cn(
                     "flex items-center gap-3 px-5 py-3 rounded-2xl border backdrop-blur-xl shadow-lg",
@@ -61,23 +61,10 @@ const GlobalActionButton = () => {
           </div>
         )}
       </AnimatePresence>
-
-      {/* FAB */}
-      <motion.button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 w-14 h-14 rounded-full flex items-center justify-center border-2 border-primary/40 transition-colors"
-        style={{
-          background: open ? "hsl(var(--destructive))" : "hsl(var(--primary))",
-          boxShadow: "0 4px 24px hsl(43 100% 50% / 0.3)",
-        }}
-        whileTap={{ scale: 0.9 }}
-        animate={{ rotate: open ? 45 : 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      >
-        {open ? <X className="w-6 h-6 text-white" /> : <Plus className="w-6 h-6 text-primary-foreground" />}
-      </motion.button>
     </>
   );
 };
 
+// Export the open state setter for BottomNav integration
+export { GlobalActionButton };
 export default GlobalActionButton;

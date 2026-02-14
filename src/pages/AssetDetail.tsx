@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen, ChevronDown, Sparkles } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen, ChevronDown, Sparkles, HelpCircle, X } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
@@ -373,6 +373,93 @@ const TimeframeCard = ({ tf }: { tf: TimeframeAnalysis }) => {
   );
 };
 
+// Confidence "Why?" explainer block
+const ConfidenceWhyBlock = ({ mtfAnalysis, asset, consensus }: { mtfAnalysis: TimeframeAnalysis[]; asset: any; consensus: { signal: string; count: number; total: number } }) => {
+  const [showWhy, setShowWhy] = useState(false);
+  const confidence = mtfAnalysis.length > 0 ? Math.round(mtfAnalysis.reduce((s, t) => s + t.strength, 0) / mtfAnalysis.length) : 50;
+
+  // Generate 3 technical reasoning bullets
+  const reasons = useMemo(() => {
+    const bullets: string[] = [];
+    const rsi = asset.rsi;
+    if (rsi > 70) bullets.push(`RSI في منطقة تشبع شرائي (${rsi}) — احتمال تصحيح`);
+    else if (rsi < 30) bullets.push(`RSI في منطقة تشبع بيعي (${rsi}) — فرصة ارتداد`);
+    else if (rsi > 55) bullets.push(`RSI يظهر زخم صعودي (${rsi})`);
+    else bullets.push(`RSI في المنطقة المحايدة (${rsi})`);
+
+    const macdBull = mtfAnalysis.filter(t => t.macd === "صعودي").length;
+    if (macdBull >= 3) bullets.push(`MACD صعودي على ${macdBull} فريمات — تأكيد قوي`);
+    else if (macdBull === 0) bullets.push("MACD هبوطي على جميع الفريمات — ضغط بيعي");
+    else bullets.push(`MACD مختلط (${macdBull}/${mtfAnalysis.length} صعودي)`);
+
+    const trendAgree = mtfAnalysis.filter(t => t.trend === mtfAnalysis[0]?.trend).length;
+    if (trendAgree >= 3) bullets.push(`اتجاه متوافق على ${trendAgree} فريمات — إشارة مؤكدة`);
+    else bullets.push("تباين في الاتجاهات بين الفريمات — حذر مطلوب");
+
+    return bullets.slice(0, 3);
+  }, [mtfAnalysis, asset.rsi]);
+
+  return (
+    <div className="rounded-xl bg-secondary/30 border border-border/15 p-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-muted-foreground">الثقة</span>
+          <span className={cn(
+            "text-lg font-mono font-bold",
+            confidence >= 70 ? "text-success" : confidence >= 50 ? "text-primary" : "text-destructive"
+          )}>{confidence}%</span>
+        </div>
+        <button
+          onClick={() => setShowWhy(!showWhy)}
+          className={cn(
+            "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-all",
+            showWhy ? "bg-primary/15 text-primary border border-primary/25" : "bg-secondary/50 text-muted-foreground hover:text-foreground border border-border/20"
+          )}
+        >
+          <HelpCircle className="w-3 h-3" />
+          لماذا؟
+        </button>
+      </div>
+      {/* Progress bar */}
+      <div className="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
+        <motion.div
+          className="h-full rounded-full"
+          style={{
+            background: confidence >= 70
+              ? "linear-gradient(90deg, hsl(155 100% 35%), hsl(155 100% 50%))"
+              : confidence >= 50
+              ? "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))"
+              : "linear-gradient(90deg, hsl(350 80% 40%), hsl(350 100% 55%))",
+          }}
+          initial={{ width: 0 }}
+          animate={{ width: `${confidence}%` }}
+          transition={{ duration: 1 }}
+        />
+      </div>
+      <AnimatePresence>
+        {showWhy && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 space-y-1.5 border-t border-border/15 pt-3">
+              {reasons.map((r, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <span className="text-[10px] text-primary mt-0.5">●</span>
+                  <p className="text-[10px] font-mono text-foreground/80 leading-relaxed">{r}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const AssetDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -451,7 +538,7 @@ const AssetDetail = () => {
       </motion.div>
 
       {/* Price */}
-      <motion.div variants={fadeUp} className="glass rounded-xl p-4">
+      <motion.div variants={fadeUp} className="intel-card rounded-xl p-4">
         <div className="flex items-end justify-between mb-1">
           <div>
             <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">السعر الحالي</p>
@@ -472,7 +559,7 @@ const AssetDetail = () => {
       </motion.div>
 
       {/* Chart */}
-      <motion.div variants={fadeUp} className="glass rounded-xl p-4">
+      <motion.div variants={fadeUp} className="intel-card rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">الشارت</p>
           <div className="flex gap-1">
@@ -495,8 +582,7 @@ const AssetDetail = () => {
 
       {/* ═══ Multi-Timeframe Analysis — Collapsed by Default ═══ */}
       <motion.div variants={fadeUp} className="space-y-2">
-        {/* Header with CTA */}
-        <div className="glass rounded-[14px] p-4">
+        <div className="intel-card rounded-[14px] p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(43 100% 50% / 0.15), hsl(190 100% 50% / 0.15))", border: "1px solid hsl(43 100% 50% / 0.2)" }}>
@@ -513,8 +599,11 @@ const AssetDetail = () => {
             </div>
           </div>
 
+          {/* Confidence with "Why?" */}
+          <ConfidenceWhyBlock mtfAnalysis={mtfAnalysis} asset={asset} consensus={consensus} />
+
           {/* Timeframe Cards — Each Expandable */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 mt-3">
             {mtfAnalysis.map((tf) => (
               <TimeframeCard key={tf.tf} tf={tf} />
             ))}

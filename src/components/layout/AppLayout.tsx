@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { Outlet } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import TopBar from "./TopBar";
-import GlobalActionButton from "./GlobalActionButton";
 import NexusSplash from "./NexusSplash";
 
 const AppLayout = () => {
@@ -25,7 +24,6 @@ const AppLayout = () => {
         <Outlet />
       </main>
       <BottomNav />
-      <GlobalActionButton />
     </div>
   );
 };
