@@ -418,6 +418,16 @@ const TradeJournal = () => {
                   <FormInput label="جني الأرباح" value={takeProfit} onChange={setTakeProfit} placeholder="TP" />
                 </div>
 
+                {/* Smart Position Size Calculator */}
+                {entryPrice && stopLoss && (
+                  <SmartPositionSizer
+                    entryPrice={parseFloat(entryPrice)}
+                    stopLoss={parseFloat(stopLoss)}
+                    takeProfit={takeProfit ? parseFloat(takeProfit) : null}
+                    onApply={(size) => setPositionSize(size.toString())}
+                  />
+                )}
+
                 <FormInput label="حجم الصفقة (لوت / عقود)" value={positionSize} onChange={setPositionSize} placeholder="1.0" />
 
                 {/* Emotion */}
@@ -487,6 +497,104 @@ const TradeJournal = () => {
         )}
       </AnimatePresence>
     </motion.div>
+  );
+};
+
+/* ─── Smart Position Sizer ─── */
+const SmartPositionSizer = ({ entryPrice, stopLoss, takeProfit, onApply }: {
+  entryPrice: number; stopLoss: number; takeProfit: number | null; onApply: (size: number) => void;
+}) => {
+  const [capital, setCapital] = useState(1000);
+  const [riskPercent, setRiskPercent] = useState(2);
+
+  const riskPerUnit = Math.abs(entryPrice - stopLoss);
+  const riskAmount = capital * (riskPercent / 100);
+  const suggestedSize = riskPerUnit > 0 ? parseFloat((riskAmount / riskPerUnit).toFixed(4)) : 0;
+  const rrRatio = takeProfit && riskPerUnit > 0 ? parseFloat((Math.abs(takeProfit - entryPrice) / riskPerUnit).toFixed(2)) : null;
+
+  const riskPresets = [500, 1000, 5000, 10000];
+
+  return (
+    <div className="rounded-[12px] bg-accent/5 border border-accent/20 p-3 space-y-3">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="w-3.5 h-3.5 text-accent" />
+        <span className="text-[11px] font-mono font-bold text-accent">حاسبة الحجم الذكية</span>
+      </div>
+
+      {/* Capital presets */}
+      <div>
+        <label className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">رأس المال ($)</label>
+        <div className="flex gap-1.5 mb-1.5">
+          {riskPresets.map(p => (
+            <button
+              key={p}
+              onClick={() => setCapital(p)}
+              className={cn(
+                "px-2 py-1 rounded-md text-[9px] font-mono font-medium transition-all",
+                capital === p ? "bg-accent/15 text-accent border border-accent/30" : "bg-secondary/40 text-muted-foreground"
+              )}
+            >
+              ${p.toLocaleString()}
+            </button>
+          ))}
+        </div>
+        <input
+          type="number"
+          value={capital}
+          onChange={e => setCapital(parseFloat(e.target.value) || 0)}
+          className="w-full h-8 rounded-lg bg-secondary/40 border border-border/10 px-2 text-[11px] font-mono focus:outline-none focus:border-accent/30"
+        />
+      </div>
+
+      {/* Risk % slider */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">نسبة المخاطرة</label>
+          <span className="text-[11px] font-mono font-bold text-accent">{riskPercent}%</span>
+        </div>
+        <input
+          type="range"
+          min={0.5}
+          max={10}
+          step={0.5}
+          value={riskPercent}
+          onChange={e => setRiskPercent(parseFloat(e.target.value))}
+          className="w-full accent-accent h-1.5"
+        />
+        <div className="flex justify-between text-[8px] font-mono text-muted-foreground mt-0.5">
+          <span>0.5%</span>
+          <span>10%</span>
+        </div>
+      </div>
+
+      {/* Results */}
+      <div className="grid grid-cols-3 gap-1.5">
+        <div className="bg-secondary/40 rounded-lg px-2 py-2 text-center">
+          <p className="text-[8px] font-mono text-muted-foreground">مبلغ المخاطرة</p>
+          <p className="text-[12px] font-mono font-bold text-destructive">${riskAmount.toFixed(2)}</p>
+        </div>
+        <div className="bg-success/5 rounded-lg px-2 py-2 text-center">
+          <p className="text-[8px] font-mono text-muted-foreground">الحجم المقترح</p>
+          <p className="text-[12px] font-mono font-bold text-success">{suggestedSize}</p>
+        </div>
+        {rrRatio !== null && (
+          <div className="bg-primary/5 rounded-lg px-2 py-2 text-center">
+            <p className="text-[8px] font-mono text-muted-foreground">R:R</p>
+            <p className={cn("text-[12px] font-mono font-bold", rrRatio >= 2 ? "text-success" : rrRatio >= 1 ? "text-primary" : "text-destructive")}>
+              1:{rrRatio}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={() => onApply(suggestedSize)}
+        disabled={suggestedSize <= 0}
+        className="w-full py-2 rounded-lg bg-accent/15 text-accent text-[11px] font-mono font-bold border border-accent/25 hover:bg-accent/25 transition-colors disabled:opacity-50"
+      >
+        ✓ تطبيق الحجم المقترح ({suggestedSize})
+      </button>
+    </div>
   );
 };
 
