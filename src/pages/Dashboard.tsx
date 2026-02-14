@@ -59,8 +59,8 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  const trendingUp = useMemo(() => [...assets].sort((a, b) => b.change - a.change).slice(0, 6), [assets]);
-  const trendingDown = useMemo(() => [...assets].sort((a, b) => a.change - b.change).slice(0, 6), [assets]);
+  const cryptoAssets = useMemo(() => assets.filter(a => a.category === "كريبتو").slice(0, 8), [assets]);
+  const forexAssets = useMemo(() => assets.filter(a => a.category === "فوركس").slice(0, 8), [assets]);
   const favoriteAssets = assets.filter(a => favorites.has(a.pair));
 
   const tabs: { key: DashTab; label: string; icon: React.ReactNode }[] = [
@@ -139,11 +139,11 @@ const Dashboard = () => {
         {/* Markets Tab */}
         {activeTab === "markets" && (
           <div className="space-y-4">
-            {/* Trending Up */}
+            {/* Crypto Market */}
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-success" /> الأكثر صعوداً
+                  <Bitcoin className="w-3.5 h-3.5 text-amber-400" /> سوق الكريبتو
                 </p>
                 <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
                   عرض الكل <ChevronLeft className="w-3 h-3" />
@@ -151,7 +151,7 @@ const Dashboard = () => {
               </div>
               <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
                 <div className="flex gap-2.5 min-w-max">
-                  {trendingUp.map((asset) => (
+                  {cryptoAssets.map((asset) => (
                     <div
                       key={asset.pair}
                       onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
@@ -164,7 +164,9 @@ const Dashboard = () => {
                       <MiniChart data={asset.sparkline} up={asset.up} width={110} height={28} />
                       <div className="flex items-center justify-between mt-1.5">
                         <span className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
-                        <span className="text-[10px] font-mono font-bold text-success">+{asset.change}%</span>
+                        <span className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
+                          {asset.up ? "+" : ""}{asset.change}%
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -172,16 +174,19 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Trending Down */}
+            {/* Forex Market */}
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <TrendingDown className="w-3.5 h-3.5 text-destructive" /> الأكثر هبوطاً
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> سوق الفوركس
                 </p>
+                <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
+                  عرض الكل <ChevronLeft className="w-3 h-3" />
+                </button>
               </div>
               <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
                 <div className="flex gap-2.5 min-w-max">
-                  {trendingDown.map((asset) => (
+                  {forexAssets.map((asset) => (
                     <div
                       key={asset.pair}
                       onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
@@ -194,7 +199,9 @@ const Dashboard = () => {
                       <MiniChart data={asset.sparkline} up={asset.up} width={110} height={28} />
                       <div className="flex items-center justify-between mt-1.5">
                         <span className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
-                        <span className="text-[10px] font-mono font-bold text-destructive">{asset.change}%</span>
+                        <span className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
+                          {asset.up ? "+" : ""}{asset.change}%
+                        </span>
                       </div>
                     </div>
                   ))}
