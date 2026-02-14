@@ -328,10 +328,9 @@ const TradeJournal = () => {
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-lg rounded-t-[20px] max-h-[85vh] overflow-y-auto"
-              style={{ background: "hsl(240, 15%, 3.5%)", border: "1px solid hsla(43, 100%, 50%, 0.1)" }}
+              className="w-full max-w-lg rounded-t-[20px] max-h-[85vh] overflow-y-auto bg-card border border-border/30"
             >
-              <div className="p-4 space-y-4">
+              <div className="p-4 pb-32 space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold">تسجيل صفقة جديدة</h2>
                   <button onClick={() => setShowForm(false)} className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
