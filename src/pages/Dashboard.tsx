@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import {
   Zap, Brain, GraduationCap, Target, AlertTriangle,
-  TrendingUp, TrendingDown, Star, ChevronLeft, Waves, BarChart3, Gauge,
-  Bitcoin, DollarSign, LineChart, Gem,
+  TrendingUp, TrendingDown, Star, ChevronLeft, BarChart3, Gauge,
+  Bitcoin, DollarSign, LineChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import MiniChart from "@/components/MiniChart";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
-import WhaleTracker from "@/components/dashboard/WhaleTracker";
 import AICoachTip from "@/components/dashboard/AICoachTip";
 
 const fadeUp = {
@@ -61,9 +60,9 @@ const analysisCards = [
 const hubCards = [
   {
     id: "intelligence",
-    title: "مركز الاستخبارات",
-    subtitle: "تتبع الحيتان ونبض السوق",
-    icon: Waves,
+    title: "نبض السوق",
+    subtitle: "تحليلات وبيانات مباشرة",
+    icon: BarChart3,
     path: "/markets",
     glowColor: "190, 100%, 50%",
     borderColor: "hsla(190, 100%, 50%, 0.15)",
@@ -318,11 +317,6 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
-      </motion.div>
-
-      {/* ═══ Whale Tracker ═══ */}
-      <motion.div variants={fadeUp}>
-        <WhaleTracker />
       </motion.div>
 
       {/* ═══ Favorites ═══ */}
