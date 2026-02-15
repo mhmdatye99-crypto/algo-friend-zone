@@ -671,7 +671,7 @@ const AssetDetail = () => {
       {/* Quick Actions */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => navigate("/signals")}
+          onClick={() => navigate("/trade-center")}
           className="flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary font-mono text-[12px] font-bold hover:bg-primary/20 transition-colors"
         >
           <TrendingUp className="w-4 h-4" />

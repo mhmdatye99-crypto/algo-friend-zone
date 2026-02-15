@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import TopBar from "./TopBar";
 import NexusSplash from "./NexusSplash";
+import LiveTickerBar from "./LiveTickerBar";
 
 const AppLayout = () => {
   const [showSplash, setShowSplash] = useState(() => {
@@ -20,6 +21,9 @@ const AppLayout = () => {
       {showSplash && <NexusSplash onComplete={handleSplashComplete} />}
       <div className="deep-space-overlay" />
       <TopBar />
+      <div className="relative z-10 border-b border-border/10 bg-card/50 backdrop-blur-sm">
+        <LiveTickerBar />
+      </div>
       <main className="pb-24 relative z-10">
         <Outlet />
       </main>
