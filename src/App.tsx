@@ -9,7 +9,7 @@ import NexusBrain from "./pages/NexusBrain";
 import TradeCenter from "./pages/TradeCenter";
 import ChartVision from "./pages/ChartVision";
 import Academy from "./pages/Academy";
-import Profile from "./pages/Profile";
+
 import MorningBrief from "./pages/MorningBrief";
 import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
@@ -67,14 +67,12 @@ const App = () => (
               <Route path="/trade-center" element={<TradeCenter />} />
               <Route path="/chart-vision" element={<ChartVision />} />
               <Route path="/academy" element={<Academy />} />
-              <Route path="/profile" element={<Profile />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
               <Route path="/asset/*" element={<AssetDetail />} />
               <Route path="/community" element={<Community />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
               <Route path="/markets" element={<Markets />} />
               <Route path="/hub" element={<Hub />} />
-              <Route path="/more" element={<Hub />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/trade-journal" element={<TradeJournal />} />
@@ -83,6 +81,8 @@ const App = () => (
               <Route path="/admin" element={<AdminPanel />} />
               {/* Legacy redirects */}
               <Route path="/signals" element={<Navigate to="/trade-center" replace />} />
+              <Route path="/profile" element={<Navigate to="/hub" replace />} />
+              <Route path="/more" element={<Navigate to="/hub" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
