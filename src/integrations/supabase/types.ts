@@ -166,6 +166,45 @@ export type Database = {
         }
         Relationships: []
       }
+      discipline_scores: {
+        Row: {
+          consistency: number
+          created_at: string
+          id: string
+          no_overtrading: number
+          plan_following: number
+          risk_adherence: number
+          score: number
+          score_date: string
+          sl_respect: number
+          user_id: string
+        }
+        Insert: {
+          consistency?: number
+          created_at?: string
+          id?: string
+          no_overtrading?: number
+          plan_following?: number
+          risk_adherence?: number
+          score?: number
+          score_date?: string
+          sl_respect?: number
+          user_id: string
+        }
+        Update: {
+          consistency?: number
+          created_at?: string
+          id?: string
+          no_overtrading?: number
+          plan_following?: number
+          risk_adherence?: number
+          score?: number
+          score_date?: string
+          sl_respect?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorite_assets: {
         Row: {
           created_at: string
@@ -590,6 +629,172 @@ export type Database = {
           },
         ]
       }
+      trading_challenges: {
+        Row: {
+          badge_name: string
+          badge_name_ar: string
+          challenge_type: string
+          created_at: string
+          description: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          metric: string
+          name: string
+          name_ar: string
+          target_value: number
+        }
+        Insert: {
+          badge_name?: string
+          badge_name_ar?: string
+          challenge_type?: string
+          created_at?: string
+          description: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          metric?: string
+          name: string
+          name_ar: string
+          target_value?: number
+        }
+        Update: {
+          badge_name?: string
+          badge_name_ar?: string
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          metric?: string
+          name?: string
+          name_ar?: string
+          target_value?: number
+        }
+        Relationships: []
+      }
+      trading_plans: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          max_daily_loss_percent: number
+          max_daily_trades: number
+          min_rr_ratio: number
+          name: string
+          name_ar: string
+          plan_type: string
+          risk_per_trade: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          max_daily_loss_percent?: number
+          max_daily_trades?: number
+          min_rr_ratio?: number
+          name: string
+          name_ar: string
+          plan_type?: string
+          risk_per_trade?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          max_daily_loss_percent?: number
+          max_daily_trades?: number
+          min_rr_ratio?: number
+          name?: string
+          name_ar?: string
+          plan_type?: string
+          risk_per_trade?: number
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_icon: string | null
+          badge_name: string
+          badge_name_ar: string
+          challenge_id: string | null
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_icon?: string | null
+          badge_name: string
+          badge_name_ar: string
+          challenge_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_icon?: string | null
+          badge_name?: string
+          badge_name_ar?: string
+          challenge_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "trading_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: number
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "trading_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -651,6 +856,38 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_trading_plans: {
+        Row: {
+          id: string
+          is_active: boolean
+          plan_id: string
+          selected_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          plan_id: string
+          selected_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          plan_id?: string
+          selected_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_trading_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "trading_plans"
             referencedColumns: ["id"]
           },
         ]

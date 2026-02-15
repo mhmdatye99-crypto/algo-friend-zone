@@ -22,6 +22,7 @@ import AdminPanel from "./pages/AdminPanel";
 import TradeJournal from "./pages/TradeJournal";
 import Hub from "./pages/Hub";
 import MyAnalyses from "./pages/MyAnalyses";
+import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/trade-journal" element={<TradeJournal />} />
               <Route path="/my-analyses" element={<MyAnalyses />} />
+              <Route path="/challenges" element={<Challenges />} />
               <Route path="/admin" element={<AdminPanel />} />
               {/* Legacy redirects */}
               <Route path="/signals" element={<Navigate to="/trade-center" replace />} />

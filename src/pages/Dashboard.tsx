@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import {
   Zap, Target, TrendingUp, TrendingDown, Star, ChevronLeft, Gauge,
-  Bitcoin, DollarSign, LineChart, Activity, Brain, Briefcase,
+  Bitcoin, DollarSign, LineChart, Activity, Brain, Briefcase, Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useChallenges } from "@/hooks/useChallenges";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const { goal, stats } = useGoalPlanner();
   const { signals } = useSignals();
   const { user } = useAuth();
+  const { latestScore } = useChallenges();
   const [activeTab, setActiveTab] = useState<DashTab>("markets");
 
   const activeSignalsCount = signals.filter(s => s.confidence >= 70).length;
@@ -152,6 +154,31 @@ const Dashboard = () => {
           <p className="text-lg font-mono font-bold text-success">{activeSignalsCount}</p>
           <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">إشارات نشطة</p>
         </div>
+      </motion.div>
+
+      {/* ═══ Discipline Score Widget ═══ */}
+      <motion.div
+        variants={fadeUp}
+        onClick={() => navigate("/challenges")}
+        className="rounded-[12px] p-3 cursor-pointer hover:brightness-110 transition-all flex items-center gap-3"
+        style={{ background: "hsla(190, 100%, 50%, 0.04)", border: "1px solid hsla(190, 100%, 50%, 0.1)" }}
+      >
+        <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+          <Shield className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">درجة الانضباط</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className={cn(
+              "text-lg font-mono font-bold",
+              (latestScore?.score ?? 50) >= 70 ? "text-success" : (latestScore?.score ?? 50) >= 40 ? "text-warning" : "text-destructive"
+            )}>
+              {latestScore?.score ?? 50}/100
+            </span>
+            <span className="text-[9px] font-mono text-muted-foreground">التحديات والخطط →</span>
+          </div>
+        </div>
+        <ChevronLeft className="w-4 h-4 text-muted-foreground/30 shrink-0" />
       </motion.div>
 
       {/* ═══ Intelligence Center — AI Coach + Morning Brief ═══ */}
