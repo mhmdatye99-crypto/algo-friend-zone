@@ -1,27 +1,29 @@
 import { useState } from "react";
-import { Home, Brain, Users, Crown, Plus, ScanLine, BookOpen, X } from "lucide-react";
+import { Home, TrendingUp, Users, Crown, Plus, ScanLine, BookOpen, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const tabs = [
   { path: "/", icon: Home, label: "الرئيسية" },
-  { path: "/nexus-brain", icon: Brain, label: "الذكاء" },
+  { path: "/trade-center", icon: TrendingUp, label: "التوصيات" },
   { path: "action", icon: Plus, label: "إجراء", center: true },
-  { path: "/community", icon: Users, label: "الساحة" },
+  { path: "/community", icon: Users, label: "الساحة", hasBadge: true },
   { path: "/hub", icon: Crown, label: "المقر" },
 ];
 
 const quickActions = [
-  { icon: ScanLine, label: "مسح شارت", path: "/chart-vision", color: "text-primary", bg: "bg-primary/15 border-primary/25" },
+  { icon: ScanLine, label: "ابحث عن توصية", path: "/trade-center", color: "text-primary", bg: "bg-primary/15 border-primary/25" },
   { icon: BookOpen, label: "سجّل صفقة", path: "/trade-journal", color: "text-success", bg: "bg-success/15 border-success/25" },
-  { icon: Brain, label: "اسأل الذكاء", path: "/nexus-brain", color: "text-accent", bg: "bg-accent/15 border-accent/25" },
+  { icon: TrendingUp, label: "مسح شارت", path: "/chart-vision", color: "text-accent", bg: "bg-accent/15 border-accent/25" },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
+  const { unreadCount } = useNotifications();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -101,7 +103,7 @@ const BottomNav = () => {
                     {showActions ? <X className="w-7 h-7" /> : <Plus className="w-7 h-7" />}
                   </motion.div>
                   <span className="text-[9px] font-mono font-bold mt-1 text-muted-foreground">
-                    {showActions ? "إغلاق" : tab.label}
+                    {showActions ? "إغلاق" : "اكتشف صفقتك"}
                   </span>
                 </button>
               );
@@ -122,10 +124,17 @@ const BottomNav = () => {
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <Icon className={cn(
-                  "w-5 h-5 relative z-10 transition-colors duration-300",
-                  active ? "text-accent" : "text-muted-foreground"
-                )} />
+                <div className="relative">
+                  <Icon className={cn(
+                    "w-5 h-5 relative z-10 transition-colors duration-300",
+                    active ? "text-accent" : "text-muted-foreground"
+                  )} />
+                  {tab.hasBadge && unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-destructive flex items-center justify-center text-[8px] font-mono font-bold text-white z-20">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span className={cn(
                   "text-[10px] font-mono font-medium relative z-10 transition-colors duration-300",
                   active ? "text-accent" : "text-muted-foreground"
