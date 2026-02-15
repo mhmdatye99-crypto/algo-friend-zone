@@ -76,6 +76,43 @@ export function useGoalPlanner() {
     },
   });
 
+  // Fetch closed trades P&L to sync with goal
+  const { data: tradePnl } = useQuery({
+    queryKey: ["trades-pnl-total", user?.id],
+    enabled: !!user && !!goal,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trades")
+        .select("pnl, closed_at, pair, direction")
+        .eq("user_id", user!.id)
+        .eq("status", "closed")
+        .not("pnl", "is", null)
+        .order("closed_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Compute the real balance from trades
+  const tradeStats = useMemo(() => {
+    if (!tradePnl || !goal) return null;
+    const totalPnl = tradePnl.reduce((s, t) => s + (t.pnl ?? 0), 0);
+    const realBalance = goal.initial_capital + totalPnl;
+    const wins = tradePnl.filter(t => (t.pnl ?? 0) > 0).length;
+    const losses = tradePnl.filter(t => (t.pnl ?? 0) < 0).length;
+    const recentTrades = tradePnl.slice(-5);
+    
+    return {
+      totalPnl: Math.round(totalPnl * 100) / 100,
+      realBalance: Math.round(realBalance * 100) / 100,
+      tradeCount: tradePnl.length,
+      wins,
+      losses,
+      winRate: tradePnl.length > 0 ? Math.round((wins / tradePnl.length) * 100) : 0,
+      recentTrades,
+    };
+  }, [tradePnl, goal]);
+
   const createGoal = useMutation({
     mutationFn: async (params: { initial_capital: number; target_goal: number; risk_appetite: RiskAppetite; target_date?: string }) => {
       const { data, error } = await supabase
@@ -140,11 +177,14 @@ export function useGoalPlanner() {
 
   const stats = useMemo(() => {
     if (!goal) return null;
+    
+    // Use trade-linked balance if available
+    const effectiveBalance = tradeStats ? tradeStats.realBalance : goal.current_balance;
+    
     const totalNeeded = goal.target_goal - goal.initial_capital;
-    const achieved = (goal.current_balance || goal.initial_capital) - goal.initial_capital;
+    const achieved = effectiveBalance - goal.initial_capital;
     const progress = totalNeeded > 0 ? Math.max(0, Math.min(100, (achieved / totalNeeded) * 100)) : 0;
 
-    // Days calculation
     const startDate = new Date(goal.started_at);
     const now = new Date();
     const daysPassed = Math.max(1, Math.floor((now.getTime() - startDate.getTime()) / 86400000));
@@ -158,11 +198,11 @@ export function useGoalPlanner() {
     const remaining = Math.max(0, totalNeeded - achieved);
     const dailyRequired = daysRemaining > 0 ? remaining / daysRemaining : remaining;
 
-    // Losing streak detection
+    // Losing streak from trades
     const recentEntries = entries.slice(-5);
     const losingStreak = recentEntries.filter(e => e.amount < 0).length >= 3;
 
-    // Missed days detection
+    // Missed days
     const today = new Date().toISOString().split("T")[0];
     const todayLogged = entries.some(e => e.entry_date === today);
     const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
@@ -175,7 +215,7 @@ export function useGoalPlanner() {
       missedDays = Math.max(0, daysPassed - 1);
     }
 
-    // Growth path projection
+    // Growth path
     const avgDailyProfit = daysPassed > 0 ? achieved / daysPassed : 0;
     const projectionDays = daysRemaining > 0 ? daysRemaining : 90;
     const growthPath = Array.from({ length: Math.min(projectionDays, 90) }, (_, i) => ({
@@ -186,8 +226,9 @@ export function useGoalPlanner() {
 
     return {
       progress,
-      achieved,
-      remaining,
+      achieved: Math.round(achieved * 100) / 100,
+      remaining: Math.round(remaining * 100) / 100,
+      effectiveBalance: Math.round(effectiveBalance * 100) / 100,
       daysPassed,
       daysRemaining,
       dailyRequired,
@@ -195,15 +236,16 @@ export function useGoalPlanner() {
       todayLogged,
       missedDays,
       growthPath,
-      level: goal.current_level,
-      title: goal.expert_title,
+      level: getLevelForProgress(progress),
+      title: EXPERT_TITLES[getLevelForProgress(progress) - 1],
     };
-  }, [goal, entries]);
+  }, [goal, entries, tradeStats]);
 
   return {
     goal,
     entries,
     stats,
+    tradeStats,
     loading: goalLoading || entriesLoading,
     createGoal,
     addEntry,

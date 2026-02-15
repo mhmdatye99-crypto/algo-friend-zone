@@ -422,32 +422,48 @@ const Dashboard = () => {
           <div className="space-y-3">
             {goal && stats ? (
               <>
+                {/* Live P&L Card */}
                 <div
                   onClick={() => navigate("/goal-planner")}
-                  className="glass rounded-[14px] p-4 cursor-pointer hover:brightness-105 transition-all"
+                  className="rounded-[14px] p-4 bg-card border border-border/30 cursor-pointer hover:brightness-105 transition-all"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-primary" />
-                      <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">المستوى {stats.level}/10</span>
+                      <div className="live-dot" />
+                      <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">رصيد فعلي من الصفقات</span>
                     </div>
-                    <span className="text-[13px] font-mono font-bold text-primary">{stats.progress.toFixed(1)}%</span>
+                    <span className={cn(
+                      "text-[11px] font-mono font-bold px-2 py-0.5 rounded-md",
+                      stats.achieved >= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                    )}>
+                      {stats.achieved >= 0 ? "+" : ""}${stats.achieved.toLocaleString()}
+                    </span>
                   </div>
-                  <div className="h-3 rounded-full bg-muted overflow-hidden">
+                  
+                  <div className="flex items-end justify-between mb-2">
+                    <div>
+                      <p className="text-[9px] font-mono text-muted-foreground">الرصيد الحالي</p>
+                      <p className="text-2xl font-mono font-bold text-foreground">${(stats as any).effectiveBalance?.toLocaleString()}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[9px] font-mono text-muted-foreground">الهدف</p>
+                      <p className="text-lg font-mono font-bold text-primary">${goal.target_goal.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="h-2.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full"
-                      style={{
-                        background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%))",
-                        boxShadow: "0 0 12px hsl(43 100% 50% / 0.5)",
-                      }}
+                      className="h-full rounded-full bg-primary"
+                      style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.5)" }}
                       initial={{ width: 0 }}
-                      animate={{ width: `${stats.progress}%` }}
+                      animate={{ width: `${Math.min(stats.progress, 100)}%` }}
                       transition={{ duration: 1.5 }}
                     />
                   </div>
-                  <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground">
-                    <span>${goal.current_balance.toLocaleString()}</span>
-                    <span className="text-primary font-bold">${goal.target_goal.toLocaleString()}</span>
+                  <div className="flex justify-between mt-1.5 text-[9px] font-mono text-muted-foreground">
+                    <span>{stats.progress.toFixed(1)}% مكتمل</span>
+                    <span>{stats.daysRemaining} يوم متبقي</span>
                   </div>
                 </div>
 
@@ -473,6 +489,7 @@ const Dashboard = () => {
               <div className="glass rounded-[14px] p-8 text-center">
                 <Target className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground font-mono">لم تبدأ مسار النمو بعد</p>
+                <p className="text-[10px] text-muted-foreground/60 font-mono mt-1">ضع هدفاً مالياً وابدأ تتبع أرباحك من الصفقات</p>
                 <button
                   onClick={() => navigate("/goal-planner")}
                   className="mt-3 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[11px] font-mono font-bold"
