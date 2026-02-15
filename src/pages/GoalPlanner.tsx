@@ -179,7 +179,7 @@ const SetupWizard = ({ onComplete }: { onComplete: (data: any) => void }) => {
 
 // ─── PROGRESS TRACKER ───
 const ProgressTracker = () => {
-  const { goal, entries, stats, addEntry, EXPERT_TITLES } = useGoalPlanner();
+  const { goal, entries, stats, tradeStats, addEntry, EXPERT_TITLES } = useGoalPlanner();
   const [profitInput, setProfitInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
   const [showAddEntry, setShowAddEntry] = useState(false);
@@ -196,63 +196,43 @@ const ProgressTracker = () => {
   };
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 pt-10 pb-28 space-y-5 max-w-lg mx-auto">
+    <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 pt-6 pb-28 space-y-4 max-w-lg mx-auto">
       {/* Header */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">NEXUS GROWTH PATH</p>
            <h1 className="text-xl font-display font-bold text-foreground tracking-wide">لوحة التقدم</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/15 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
-            <span className="text-[11px] font-mono font-bold">{stats.title}</span>
-          </div>
+        <div className="bg-primary/15 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
+          <span className="text-[11px] font-mono font-bold">{stats.title}</span>
         </div>
       </motion.div>
 
-      {/* Smart Notification: Not logged today */}
-      {!stats.todayLogged && (
-        <motion.div
-          variants={fadeUp}
-          className="relative overflow-hidden rounded-xl border border-warning/30"
-        >
-          <motion.div
-            className="absolute inset-0 bg-warning/5"
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-          <div className="relative flex items-center gap-3 px-4 py-3">
-            <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-            </div>
-            <div className="flex-1">
-              <p className="text-[12px] font-mono font-bold text-warning">لم تسجّل أرباح اليوم بعد!</p>
-              <p className="text-[10px] font-mono text-muted-foreground">
-                {stats.missedDays > 0
-                  ? `فاتتك ${stats.missedDays} أيام — المسار يحتاج $${stats.dailyRequired.toFixed(0)}/يوم للتعويض`
-                  : `سجّل الآن للبقاء على مسار الهدف — المطلوب: $${stats.dailyRequired.toFixed(0)}`}
+      {/* Live P&L from Trades */}
+      {tradeStats && (
+        <motion.div variants={fadeUp} className="rounded-[14px] p-4 bg-card border border-border/30">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="live-dot" />
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">الأداء الحي من الصفقات</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl bg-secondary/30 p-3 text-center border border-border/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase">إجمالي P&L</p>
+              <p className={cn("text-lg font-mono font-bold", tradeStats.totalPnl >= 0 ? "text-success" : "text-destructive")}>
+                {tradeStats.totalPnl >= 0 ? "+" : ""}${tradeStats.totalPnl.toLocaleString()}
               </p>
             </div>
-            <button
-              onClick={() => setShowAddEntry(true)}
-              className="shrink-0 px-3 py-2 rounded-lg bg-warning text-warning-foreground text-[10px] font-mono font-bold hover:brightness-110 transition-all"
-            >
-              سجّل الآن
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Missed Days Alert */}
-      {stats.missedDays >= 3 && (
-        <motion.div
-          variants={fadeUp}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20"
-        >
-          <Flame className="w-5 h-5 text-destructive shrink-0" />
-          <div>
-            <p className="text-[12px] font-mono font-bold text-destructive">تنبيه حرج: {stats.missedDays} أيام بدون تسجيل</p>
-            <p className="text-[10px] font-mono text-muted-foreground">الانتظام في التسجيل أساسي لنجاح الأوديسة — المدرب الذكي يعيد حساب المسار تلقائياً</p>
+            <div className="rounded-xl bg-secondary/30 p-3 text-center border border-border/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase">نسبة الفوز</p>
+              <p className="text-lg font-mono font-bold text-primary">{tradeStats.winRate}%</p>
+            </div>
+            <div className="rounded-xl bg-secondary/30 p-3 text-center border border-border/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase">صفقات</p>
+              <p className="text-lg font-mono font-bold text-foreground">{tradeStats.tradeCount}</p>
+              <p className="text-[8px] font-mono text-muted-foreground">
+                <span className="text-success">{tradeStats.wins}W</span> / <span className="text-destructive">{tradeStats.losses}L</span>
+              </p>
+            </div>
           </div>
         </motion.div>
       )}
@@ -266,22 +246,15 @@ const ProgressTracker = () => {
           </div>
           <span className="text-[13px] font-mono font-bold text-primary">{stats.progress.toFixed(1)}%</span>
         </div>
-
-        {/* Neon gold progress bar */}
         <div className="h-3 rounded-full bg-muted overflow-hidden relative">
           <motion.div
-            className="h-full rounded-full"
-            style={{
-              background: "linear-gradient(90deg, hsl(43 100% 40%), hsl(43 100% 55%), hsl(38 100% 50%))",
-              boxShadow: "0 0 12px hsl(43 100% 50% / 0.5), 0 0 30px hsl(43 100% 50% / 0.2)",
-            }}
+            className="h-full rounded-full bg-primary"
+            style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.5)" }}
             initial={{ width: 0 }}
-            animate={{ width: `${stats.progress}%` }}
+            animate={{ width: `${Math.min(stats.progress, 100)}%` }}
             transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
           />
         </div>
-
-        {/* Level milestones */}
         <div className="flex justify-between mt-3">
           {EXPERT_TITLES.map((title, i) => (
             <div key={i} className="flex flex-col items-center">
@@ -300,8 +273,8 @@ const ProgressTracker = () => {
       {/* Stats Grid */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
         <div className="glass rounded-xl p-4">
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1">الرصيد الحالي</p>
-          <p className="text-lg font-mono font-bold text-foreground">${goal.current_balance.toLocaleString()}</p>
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1">الرصيد الفعلي</p>
+          <p className="text-lg font-mono font-bold text-foreground">${(stats as any).effectiveBalance?.toLocaleString()}</p>
           <p className={cn("text-[10px] font-mono mt-1", stats.achieved >= 0 ? "text-success" : "text-destructive")}>
             {stats.achieved >= 0 ? "+" : ""}${stats.achieved.toLocaleString()}
           </p>
@@ -317,25 +290,11 @@ const ProgressTracker = () => {
           <p className="text-[10px] font-mono text-muted-foreground mt-1">للبقاء على المسار</p>
         </div>
         <div className="glass rounded-xl p-4">
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1">أيام التداول</p>
-          <p className="text-lg font-mono font-bold text-foreground">{stats.daysPassed}</p>
-          <p className="text-[10px] font-mono text-muted-foreground mt-1">{entries.length} تسجيل</p>
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1">الهدف</p>
+          <p className="text-lg font-mono font-bold text-primary">${goal.target_goal.toLocaleString()}</p>
+          <p className="text-[10px] font-mono text-muted-foreground mt-1">{stats.daysPassed} يوم مضى</p>
         </div>
       </motion.div>
-
-      {/* Losing Streak Warning */}
-      {stats.losingStreak && (
-        <motion.div
-          variants={fadeUp}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20"
-        >
-          <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
-          <div>
-            <p className="text-[12px] font-mono font-bold text-destructive">تحذير: سلسلة خسائر مكتشفة</p>
-            <p className="text-[10px] font-mono text-muted-foreground">المدرب الذكي يقترح فترة تهدئة لحماية هدفك طويل المدى</p>
-          </div>
-        </motion.div>
-      )}
 
       {/* Growth Path Chart */}
       {stats.growthPath.length > 0 && (
@@ -350,11 +309,11 @@ const ProgressTracker = () => {
                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "hsl(215 15% 50%)" }} axisLine={false} tickLine={false} interval={Math.floor(stats.growthPath.length / 5)} />
                 <YAxis tick={{ fontSize: 9, fill: "hsl(215 15% 50%)" }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(240 12% 4%)", border: "1px solid hsl(240 10% 10%)", borderRadius: 12, fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, fontFamily: "JetBrains Mono" }}
                   formatter={(v: number) => [`$${v.toLocaleString()}`, ""]}
                 />
-                <Line type="monotone" dataKey="projected" stroke="hsl(43 100% 50%)" strokeWidth={2} dot={false} name="الأداء المتوقع" />
-                <Line type="monotone" dataKey="target" stroke="hsl(215 15% 50%)" strokeWidth={1} strokeDasharray="4 4" dot={false} name="المسار المطلوب" />
+                <Line type="monotone" dataKey="projected" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="الأداء المتوقع" />
+                <Line type="monotone" dataKey="target" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="4 4" dot={false} name="المسار المطلوب" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -438,14 +397,6 @@ const ProgressTracker = () => {
           </div>
         </motion.div>
       )}
-
-      {/* Psychology Link */}
-      <motion.div variants={fadeUp} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-accent/5 border border-accent/20">
-        <Zap className="w-4 h-4 text-accent shrink-0" />
-        <p className="text-[10px] text-muted-foreground font-mono">
-          يرتبط تقدمك بقسم سيكولوجية المتداول — سجّل حالتك النفسية لتحليل أعمق
-        </p>
-      </motion.div>
     </motion.div>
   );
 };
