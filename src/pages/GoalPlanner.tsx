@@ -2,13 +2,17 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Target, TrendingUp, Clock, Flame, Shield, Zap,
-  Plus, Trophy, AlertTriangle, ChevronLeft, Sparkles
+  Plus, Trophy, AlertTriangle, ChevronLeft, Sparkles,
+  Settings, RotateCcw, Pencil
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGoalPlanner, type RiskAppetite } from "@/hooks/useGoalPlanner";
 import {
   LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart
 } from "recharts";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+} from "@/components/ui/dialog";
 
 const stagger = {
   hidden: {},
@@ -179,12 +183,58 @@ const SetupWizard = ({ onComplete }: { onComplete: (data: any) => void }) => {
 
 // ─── PROGRESS TRACKER ───
 const ProgressTracker = () => {
-  const { goal, entries, stats, tradeStats, addEntry, EXPERT_TITLES } = useGoalPlanner();
+  const { goal, entries, stats, tradeStats, addEntry, updateGoal, resetGoal, EXPERT_TITLES } = useGoalPlanner();
   const [profitInput, setProfitInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // Edit form state
+  const [editTarget, setEditTarget] = useState("");
+  const [editCapital, setEditCapital] = useState("");
+  const [editMonths, setEditMonths] = useState("");
+  const [editRisk, setEditRisk] = useState<RiskAppetite>("conservative");
 
   if (!goal || !stats) return null;
+
+  const openEditDialog = () => {
+    setEditTarget(goal.target_goal.toString());
+    setEditCapital(goal.initial_capital.toString());
+    setEditRisk(goal.risk_appetite as RiskAppetite);
+    if (goal.target_date) {
+      const now = new Date();
+      const target = new Date(goal.target_date);
+      const diffMonths = Math.max(1, Math.round((target.getTime() - now.getTime()) / (30 * 86400000)));
+      setEditMonths(diffMonths.toString());
+    } else {
+      setEditMonths("");
+    }
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = () => {
+    const updates: any = {};
+    const newTarget = parseFloat(editTarget);
+    const newCapital = parseFloat(editCapital);
+    if (!isNaN(newTarget) && newTarget > 0) updates.target_goal = newTarget;
+    if (!isNaN(newCapital) && newCapital > 0) updates.initial_capital = newCapital;
+    updates.risk_appetite = editRisk;
+    if (editMonths) {
+      const d = new Date();
+      d.setMonth(d.getMonth() + parseInt(editMonths));
+      updates.target_date = d.toISOString();
+    }
+    if (Object.keys(updates).length > 0) {
+      updateGoal.mutate(updates);
+    }
+    setShowEditDialog(false);
+  };
+
+  const handleReset = () => {
+    resetGoal.mutate();
+    setShowResetConfirm(false);
+  };
 
   const handleAddEntry = () => {
     const amount = parseFloat(profitInput);
@@ -203,10 +253,128 @@ const ProgressTracker = () => {
            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">NEXUS GROWTH PATH</p>
            <h1 className="text-xl font-display font-bold text-foreground tracking-wide">لوحة التقدم</h1>
         </div>
-        <div className="bg-primary/15 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
-          <span className="text-[11px] font-mono font-bold">{stats.title}</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openEditDialog}
+            className="p-2 rounded-lg bg-secondary/60 border border-border/30 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <div className="bg-primary/15 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
+            <span className="text-[11px] font-mono font-bold">{stats.title}</span>
+          </div>
         </div>
       </motion.div>
+
+      {/* Edit Goal Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-2xl bg-card border-border/30">
+          <DialogHeader>
+            <DialogTitle className="text-foreground font-display text-lg">تعديل الهدف المالي</DialogTitle>
+            <DialogDescription className="text-[12px] font-mono text-muted-foreground">
+              عدّل الهدف مع الحفاظ على سجل صفقاتك السابق
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <label className="block">
+              <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">رأس المال ($)</span>
+              <input
+                type="number"
+                value={editCapital}
+                onChange={e => setEditCapital(e.target.value)}
+                className="mt-1.5 w-full bg-secondary/60 border border-border/30 rounded-xl px-4 py-3 text-base font-mono font-bold text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">الهدف المالي ($)</span>
+              <input
+                type="number"
+                value={editTarget}
+                onChange={e => setEditTarget(e.target.value)}
+                className="mt-1.5 w-full bg-secondary/60 border border-border/30 rounded-xl px-4 py-3 text-base font-mono font-bold text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">الإطار الزمني المتبقي (أشهر)</span>
+              <input
+                type="number"
+                value={editMonths}
+                onChange={e => setEditMonths(e.target.value)}
+                placeholder="اتركه فارغاً لعدم التغيير"
+                className="mt-1.5 w-full bg-secondary/60 border border-border/30 rounded-xl px-4 py-3 text-base font-mono font-bold text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+              />
+            </label>
+            <div>
+              <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider block mb-2">شهية المخاطر</span>
+              <div className="grid grid-cols-2 gap-3">
+                {([
+                  { value: "conservative" as const, label: "محافظ", icon: Shield },
+                  { value: "aggressive" as const, label: "مغامر", icon: Flame },
+                ]).map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setEditRisk(opt.value)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 p-3 rounded-xl border transition-all",
+                      editRisk === opt.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/30 bg-secondary/40 text-muted-foreground hover:bg-secondary/60"
+                    )}
+                  >
+                    <opt.icon className="w-4 h-4" />
+                    <span className="text-[12px] font-mono font-bold">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={updateGoal.isPending}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-[12px] glow-gold disabled:opacity-50"
+              >
+                حفظ التعديلات
+              </button>
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive font-mono text-[12px] hover:bg-destructive/20 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-[85vw] sm:max-w-sm rounded-2xl bg-card border-border/30">
+          <DialogHeader>
+            <DialogTitle className="text-foreground font-display text-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              إعادة تعيين الهدف
+            </DialogTitle>
+            <DialogDescription className="text-[12px] font-mono text-muted-foreground">
+              سيتم إلغاء الهدف الحالي ويمكنك إنشاء هدف جديد. سجل صفقاتك لن يتأثر.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={handleReset}
+              disabled={resetGoal.isPending}
+              className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground font-mono font-bold text-[12px] disabled:opacity-50"
+            >
+              تأكيد الإعادة
+            </button>
+            <button
+              onClick={() => setShowResetConfirm(false)}
+              className="flex-1 py-3 rounded-xl bg-secondary text-muted-foreground font-mono text-[12px]"
+            >
+              إلغاء
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Live P&L from Trades */}
       {tradeStats && (
