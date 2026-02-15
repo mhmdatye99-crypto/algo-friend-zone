@@ -212,8 +212,7 @@ const Hub = () => {
         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 font-medium flex items-center gap-1">
           <Coins className="w-3 h-3" /> NEXUS CREDITS
         </p>
-        <div className="rounded-[12px] p-4 space-y-3"
-          style={{ background: "hsla(240, 15%, 3.5%, 0.5)", border: "1px solid hsla(43, 100%, 50%, 0.1)" }}
+        <div className="rounded-[12px] p-4 space-y-3 bg-card border border-border/30"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -261,8 +260,7 @@ const Hub = () => {
           <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 font-medium">
             {section.title}
           </p>
-          <div className="rounded-[12px] overflow-hidden divide-y divide-border/5"
-            style={{ background: "hsla(240, 15%, 3.5%, 0.5)", border: "1px solid hsla(43, 100%, 50%, 0.06)" }}
+          <div className="rounded-[12px] overflow-hidden divide-y divide-border/5 bg-card border border-border/20"
           >
             {section.items.map((item) => (
               <button
@@ -289,8 +287,7 @@ const Hub = () => {
         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 font-medium flex items-center gap-1">
           <Settings className="w-3 h-3" /> الإعدادات
         </p>
-        <div className="rounded-[12px] overflow-hidden divide-y divide-border/5"
-          style={{ background: "hsla(240, 15%, 3.5%, 0.5)", border: "1px solid hsla(43, 100%, 50%, 0.06)" }}
+        <div className="rounded-[12px] overflow-hidden divide-y divide-border/5 bg-card border border-border/20"
         >
           {settingsItems.map((item, i) => (
             <button

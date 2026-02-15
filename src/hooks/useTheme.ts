@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 export function useThemeMode() {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem("nexus-theme");
+    if (saved === null) return true; // default to dark
     return saved === "dark";
   });
 
