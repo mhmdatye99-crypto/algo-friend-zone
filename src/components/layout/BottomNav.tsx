@@ -67,7 +67,7 @@ const BottomNav = () => {
       </AnimatePresence>
 
       <nav className="fixed bottom-4 left-4 right-4 z-50 safe-area-bottom max-w-lg mx-auto">
-        <div className="flex items-center justify-around h-16 rounded-[10px] px-2 bg-card/90 backdrop-blur-[30px] border border-border/30 shadow-lg dark:shadow-[0_-4px_30px_hsla(0,0%,0%,0.4)]">
+        <div className="flex items-center justify-around h-16 rounded-[10px] px-2 bg-card/95 backdrop-blur-[30px] border border-border/30 shadow-lg dark:shadow-[0_-4px_30px_hsla(0,0%,0%,0.5)]">
           <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
           {tabs.map((tab) => {
