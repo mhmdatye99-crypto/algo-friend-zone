@@ -74,9 +74,9 @@ const TradeCenter = () => {
     >
       {/* Header */}
       <motion.div variants={fadeUp}>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">COMMAND CENTER</p>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">LIVE SIGNALS</p>
         <h1 className="text-xl font-display font-bold text-foreground tracking-wide">
-          <span className="text-gradient-gold">TRADE</span> CENTER
+          <span className="text-gradient-gold">توصيات</span> حية
         </h1>
       </motion.div>
 

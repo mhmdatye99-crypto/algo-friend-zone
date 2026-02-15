@@ -15,7 +15,7 @@ const pageTitles: Record<string, string> = {
   "/": "",
   "/markets": "الأسواق",
   "/nexus-brain": "مركز الذكاء",
-  "/trade-center": "مركز التداول",
+  "/trade-center": "توصيات حية",
   "/chart-vision": "رؤية الشارت",
   "/signals": "الإشارات",
   "/community": "الساحة",

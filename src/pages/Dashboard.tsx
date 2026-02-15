@@ -69,6 +69,8 @@ const Dashboard = () => {
     { key: "growth", label: "مسار النمو", icon: <Target className="w-3.5 h-3.5" /> },
   ];
 
+  const hotSignals = useMemo(() => signals.slice(0, 3), [signals]);
+
   return (
     <motion.div
       initial="hidden"
@@ -76,6 +78,51 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.08 } } }}
       className="px-5 pt-4 pb-28 space-y-5 max-w-lg mx-auto"
     >
+      {/* ═══ HOT AI SIGNALS — Hero Section ═══ */}
+      {hotSignals.length > 0 && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-primary" /> توصيات حية
+            </p>
+            <button onClick={() => navigate("/trade-center")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
+              عرض الكل <ChevronLeft className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {hotSignals.map((signal) => (
+              <div
+                key={signal.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
+                className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-colors border border-border/20"
+                style={{ borderImage: "linear-gradient(135deg, hsla(43,100%,50%,0.15), hsla(190,100%,50%,0.1)) 1" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-lg">{signal.icon}</span>
+                    <div>
+                      <p className="text-[12px] font-mono font-bold">{signal.pair}</p>
+                      <p className="text-[9px] font-mono text-muted-foreground">{signal.timeFrame} • {signal.risk}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-2 py-0.5 rounded-md text-[10px] font-mono font-bold",
+                      signal.direction === "صعودي"
+                        ? "bg-success/15 text-success"
+                        : "bg-destructive/15 text-destructive"
+                    )}>
+                      {signal.direction === "صعودي" ? "شراء ↑" : "بيع ↓"}
+                    </span>
+                    <span className="text-[12px] font-mono font-bold text-primary">{signal.confidence}%</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* ═══ ONE-GLANCE: 3 Key Metrics ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2">
         <div
@@ -99,7 +146,7 @@ const Dashboard = () => {
         <div
           className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
           style={{ background: "hsla(120, 60%, 50%, 0.06)", border: "1px solid hsla(120, 60%, 50%, 0.12)" }}
-          onClick={() => navigate("/signals")}
+          onClick={() => navigate("/trade-center")}
         >
           <Activity className="w-4 h-4 text-success mx-auto mb-1" />
           <p className="text-lg font-mono font-bold text-success">{activeSignalsCount}</p>
