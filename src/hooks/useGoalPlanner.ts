@@ -137,6 +137,38 @@ export function useGoalPlanner() {
     onError: () => toast.error("فشل إنشاء الهدف"),
   });
 
+  const updateGoal = useMutation({
+    mutationFn: async (params: { target_goal?: number; initial_capital?: number; target_date?: string | null; risk_appetite?: RiskAppetite }) => {
+      if (!goal) throw new Error("No goal");
+      const { error } = await supabase
+        .from("financial_goals")
+        .update(params)
+        .eq("id", goal.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["financial-goal"] });
+      toast.success("تم تحديث الهدف بنجاح");
+    },
+    onError: () => toast.error("فشل تحديث الهدف"),
+  });
+
+  const resetGoal = useMutation({
+    mutationFn: async () => {
+      if (!goal) throw new Error("No goal");
+      const { error } = await supabase
+        .from("financial_goals")
+        .update({ is_active: false })
+        .eq("id", goal.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["financial-goal"] });
+      toast.success("تم إعادة تعيين الهدف — يمكنك إنشاء هدف جديد");
+    },
+    onError: () => toast.error("فشل إعادة التعيين"),
+  });
+
   const addEntry = useMutation({
     mutationFn: async (params: { amount: number; note?: string }) => {
       if (!goal) throw new Error("No goal");
@@ -248,6 +280,8 @@ export function useGoalPlanner() {
     tradeStats,
     loading: goalLoading || entriesLoading,
     createGoal,
+    updateGoal,
+    resetGoal,
     addEntry,
     EXPERT_TITLES,
   };
