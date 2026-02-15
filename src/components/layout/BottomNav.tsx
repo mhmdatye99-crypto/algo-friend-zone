@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, TrendingUp, Users, Crown, Plus, ScanLine, BookOpen, X } from "lucide-react";
+import { Home, TrendingUp, Users, User, Plus, ScanLine, BookOpen, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -10,13 +10,13 @@ const tabs = [
   { path: "/trade-center", icon: TrendingUp, label: "التوصيات" },
   { path: "action", icon: Plus, label: "إجراء", center: true },
   { path: "/community", icon: Users, label: "الساحة", hasBadge: true },
-  { path: "/hub", icon: Crown, label: "المقر" },
+  { path: "/profile", icon: User, label: "الملف" },
 ];
 
 const quickActions = [
-  { icon: ScanLine, label: "ابحث عن توصية", path: "/trade-center", color: "text-primary", bg: "bg-primary/15 border-primary/25" },
-  { icon: BookOpen, label: "سجّل صفقة", path: "/trade-journal", color: "text-success", bg: "bg-success/15 border-success/25" },
-  { icon: TrendingUp, label: "مسح شارت", path: "/chart-vision", color: "text-accent", bg: "bg-accent/15 border-accent/25" },
+  { icon: ScanLine, label: "مسح السوق — AI Scan", path: "/trade-center", color: "text-primary", bg: "bg-primary/15 border-primary/25" },
+  { icon: BookOpen, label: "سجّل صفقة", path: "/trade-journal", color: "text-accent", bg: "bg-accent/15 border-accent/25" },
+  { icon: TrendingUp, label: "تحليل شارت", path: "/chart-vision", color: "text-success", bg: "bg-success/15 border-success/25" },
 ];
 
 const BottomNav = () => {
@@ -83,7 +83,7 @@ const BottomNav = () => {
                   <div
                     className="absolute w-[72px] h-[72px] rounded-full animate-pulse-slow pointer-events-none"
                     style={{
-                      background: "radial-gradient(circle, hsla(43, 100%, 50%, 0.12) 0%, transparent 70%)",
+                      background: "radial-gradient(circle, hsla(135, 100%, 55%, 0.12) 0%, transparent 70%)",
                     }}
                   />
                   <motion.div
@@ -94,7 +94,7 @@ const BottomNav = () => {
                         : "bg-primary text-primary-foreground border-primary/40"
                     )}
                     style={{
-                      boxShadow: "0 0 28px hsl(43 100% 50% / 0.35)",
+                      boxShadow: "0 0 28px hsl(135 100% 55% / 0.35)",
                     }}
                     whileTap={{ scale: 0.9 }}
                     whileHover={{ scale: 1.05 }}
@@ -103,7 +103,7 @@ const BottomNav = () => {
                     {showActions ? <X className="w-7 h-7" /> : <Plus className="w-7 h-7" />}
                   </motion.div>
                   <span className="text-[9px] font-mono font-bold mt-1 text-muted-foreground">
-                    {showActions ? "إغلاق" : "اكتشف صفقتك"}
+                    {showActions ? "إغلاق" : "AI Scan"}
                   </span>
                 </button>
               );
@@ -119,15 +119,15 @@ const BottomNav = () => {
                 {active && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 rounded-[10px] bg-accent/10 border border-accent/15"
-                    style={{ boxShadow: "0 0 16px hsl(190 100% 50% / 0.1)" }}
+                    className="absolute inset-0 rounded-[10px] bg-primary/8 border border-primary/15"
+                    style={{ boxShadow: "0 0 16px hsl(135 100% 55% / 0.08)" }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
                 <div className="relative">
                   <Icon className={cn(
                     "w-5 h-5 relative z-10 transition-colors duration-300",
-                    active ? "text-accent" : "text-muted-foreground"
+                    active ? "text-primary" : "text-muted-foreground"
                   )} />
                   {tab.hasBadge && unreadCount > 0 && (
                     <span className="absolute -top-1.5 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-destructive flex items-center justify-center text-[8px] font-mono font-bold text-white z-20">
@@ -137,7 +137,7 @@ const BottomNav = () => {
                 </div>
                 <span className={cn(
                   "text-[10px] font-mono font-medium relative z-10 transition-colors duration-300",
-                  active ? "text-accent" : "text-muted-foreground"
+                  active ? "text-primary" : "text-muted-foreground"
                 )}>{tab.label}</span>
               </button>
             );

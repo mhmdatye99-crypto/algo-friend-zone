@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Crosshair, TrendingUp, TrendingDown, Briefcase, BarChart3, Plus, Zap,
+  Crosshair, TrendingUp, TrendingDown, Briefcase, BarChart3, Plus, Zap, AlertTriangle,
+  Brain, Shield, BarChart, Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +18,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
-type CenterTab = "signals" | "trades" | "quick";
+type CenterTab = "signals" | "performance" | "how-it-works";
 
 const filters = ["الكل", "فوركس", "كريبتو", "سلع", "مؤشرات"];
 
@@ -32,37 +33,33 @@ const TradeCenter = () => {
     ? signals
     : signals.filter(s => s.category === activeFilter);
 
-  const { data: activeTrades = [] } = useQuery({
-    queryKey: ["trades-open", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("trades")
-        .select("*")
-        .eq("status", "open")
-        .order("created_at", { ascending: false });
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  const { data: recentTrades = [] } = useQuery({
-    queryKey: ["trades-recent", user?.id],
+  // Performance data from trades
+  const { data: closedTrades = [] } = useQuery({
+    queryKey: ["trades-closed-all", user?.id],
     queryFn: async () => {
       const { data } = await supabase
         .from("trades")
         .select("*")
         .eq("status", "closed")
         .order("closed_at", { ascending: false })
-        .limit(5);
+        .limit(20);
       return data || [];
     },
     enabled: !!user,
   });
 
-  const tabs: { key: CenterTab; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { key: "signals", label: "الإشارات", icon: <Zap className="w-3.5 h-3.5" />, badge: signals.filter(s => s.confidence >= 80).length },
-    { key: "trades", label: "صفقاتي", icon: <Briefcase className="w-3.5 h-3.5" />, badge: activeTrades.length },
-    { key: "quick", label: "سريع", icon: <Plus className="w-3.5 h-3.5" /> },
+  const perfStats = useMemo(() => {
+    if (closedTrades.length === 0) return null;
+    const wins = closedTrades.filter((t: any) => (t.pnl ?? 0) > 0).length;
+    const totalPnl = closedTrades.reduce((sum: number, t: any) => sum + (t.pnl ?? 0), 0);
+    const winRate = (wins / closedTrades.length) * 100;
+    return { winRate, totalPnl, total: closedTrades.length, wins };
+  }, [closedTrades]);
+
+  const tabs: { key: CenterTab; label: string; icon: React.ReactNode }[] = [
+    { key: "signals", label: "التوصيات", icon: <Zap className="w-3.5 h-3.5" /> },
+    { key: "performance", label: "الأداء", icon: <BarChart className="w-3.5 h-3.5" /> },
+    { key: "how-it-works", label: "كيف يعمل", icon: <Brain className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -95,11 +92,6 @@ const TradeCenter = () => {
           >
             {t.icon}
             {t.label}
-            {t.badge && t.badge > 0 && (
-              <span className="absolute -top-1 -left-1 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[8px] font-bold flex items-center justify-center">
-                {t.badge}
-              </span>
-            )}
           </button>
         ))}
       </motion.div>
@@ -107,7 +99,6 @@ const TradeCenter = () => {
       {/* Signals Tab */}
       {activeTab === "signals" && (
         <div className="space-y-3">
-          {/* Category Filters */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
             {filters.map((f) => (
               <button
@@ -152,127 +143,135 @@ const TradeCenter = () => {
         </div>
       )}
 
-      {/* Active Trades Tab */}
-      {activeTab === "trades" && (
-        <div className="space-y-3">
-          {/* Open Trades */}
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider px-1">
-            صفقات مفتوحة ({activeTrades.length})
-          </p>
-          {activeTrades.length === 0 ? (
-            <div className="glass rounded-[14px] p-6 text-center">
-              <Briefcase className="w-7 h-7 text-muted-foreground mx-auto mb-2" />
-              <p className="text-[12px] text-muted-foreground font-mono">لا توجد صفقات مفتوحة</p>
+      {/* Performance Tab */}
+      {activeTab === "performance" && (
+        <div className="space-y-4">
+          {/* KPIs */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="glass rounded-xl p-4 text-center">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Win Rate</p>
+              <p className="text-2xl font-mono font-bold text-primary">{perfStats ? `${perfStats.winRate.toFixed(0)}%` : "—"}</p>
             </div>
-          ) : (
-            activeTrades.map((trade: any) => (
-              <div
-                key={trade.id}
-                onClick={() => navigate("/trade-journal")}
-                className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-colors"
-              >
+            <div className="glass rounded-xl p-4 text-center">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Total P&L</p>
+              <p className={cn("text-2xl font-mono font-bold", (perfStats?.totalPnl ?? 0) >= 0 ? "text-primary" : "text-destructive")}>
+                {perfStats ? `${perfStats.totalPnl >= 0 ? "+" : ""}$${perfStats.totalPnl.toFixed(2)}` : "—"}
+              </p>
+            </div>
+          </div>
+
+          {/* Equity curve placeholder */}
+          <div className="glass rounded-xl p-4">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5" /> Equity Curve
+            </p>
+            {closedTrades.length > 0 ? (
+              <div className="h-32 flex items-end gap-1">
+                {closedTrades.slice(0, 20).reverse().map((t: any, i: number) => {
+                  const pnl = t.pnl ?? 0;
+                  const maxPnl = Math.max(...closedTrades.map((tt: any) => Math.abs(tt.pnl ?? 0)), 1);
+                  const height = Math.max((Math.abs(pnl) / maxPnl) * 100, 8);
+                  return (
+                    <div
+                      key={i}
+                      className={cn("flex-1 rounded-t-sm transition-all", pnl >= 0 ? "bg-primary/60" : "bg-destructive/60")}
+                      style={{ height: `${height}%` }}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-32 flex items-center justify-center">
+                <p className="text-[11px] font-mono text-muted-foreground">سجّل صفقات لعرض منحنى الأداء</p>
+              </div>
+            )}
+          </div>
+
+          {/* Last 20 trades */}
+          <div className="space-y-2">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider px-1">
+              آخر {closedTrades.length} صفقة
+            </p>
+            {closedTrades.length === 0 ? (
+              <div className="glass rounded-xl p-6 text-center">
+                <p className="text-[11px] font-mono text-muted-foreground">لا توجد صفقات مغلقة بعد</p>
+              </div>
+            ) : closedTrades.map((trade: any) => (
+              <div key={trade.id} className="glass rounded-xl p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={cn(
                       "w-7 h-7 rounded-lg flex items-center justify-center",
-                      trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
+                      trade.direction === "long" ? "bg-primary/15" : "bg-destructive/15"
                     )}>
                       {trade.direction === "long"
-                        ? <TrendingUp className="w-3.5 h-3.5 text-success" />
+                        ? <TrendingUp className="w-3.5 h-3.5 text-primary" />
                         : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
                     </div>
                     <div>
                       <p className="text-[12px] font-mono font-bold">{trade.pair}</p>
                       <p className="text-[9px] font-mono text-muted-foreground">
-                        {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
+                        {trade.closed_at ? new Date(trade.closed_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" }) : ""}
                       </p>
                     </div>
                   </div>
                   <div className="text-left">
-                    <p className="text-[12px] font-mono font-bold">{trade.entry_price}</p>
-                    <p className="text-[9px] font-mono text-warning">مفتوحة</p>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-
-          {/* Recent Closed */}
-          {recentTrades.length > 0 && (
-            <>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider px-1 mt-4">
-                آخر الصفقات المغلقة
-              </p>
-              {recentTrades.map((trade: any) => (
-                <div key={trade.id} className="glass rounded-[12px] p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-7 h-7 rounded-lg flex items-center justify-center",
-                        trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
-                      )}>
-                        {trade.direction === "long"
-                          ? <TrendingUp className="w-3.5 h-3.5 text-success" />
-                          : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                      </div>
-                      <p className="text-[12px] font-mono font-bold">{trade.pair}</p>
-                    </div>
                     <span className={cn(
                       "text-[12px] font-mono font-bold",
-                      (trade.pnl ?? 0) >= 0 ? "text-success" : "text-destructive"
+                      (trade.pnl ?? 0) >= 0 ? "text-primary" : "text-destructive"
                     )}>
                       {(trade.pnl ?? 0) >= 0 ? "+" : ""}${(trade.pnl ?? 0).toFixed(2)}
                     </span>
+                    <p className="text-[8px] font-mono text-muted-foreground">
+                      {(trade.pnl ?? 0) >= 0 ? "TP Hit ✓" : "SL Hit ✗"}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </>
-          )}
-
-          <button
-            onClick={() => navigate("/trade-journal")}
-            className="w-full py-2.5 rounded-lg bg-secondary/40 text-muted-foreground text-[11px] font-mono font-bold border border-border/10 hover:bg-secondary/60 transition-colors"
-          >
-            عرض السجل الكامل →
-          </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Quick Log Tab */}
-      {activeTab === "quick" && (
+      {/* How It Works Tab */}
+      {activeTab === "how-it-works" && (
         <div className="space-y-4">
-          <div className="glass rounded-[14px] p-6 text-center">
-            <Plus className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h4 className="text-sm font-bold font-mono mb-1">تسجيل سريع</h4>
-            <p className="text-[10px] text-muted-foreground font-mono mb-4">
-              افتح سجل الصفقات لتسجيل صفقة جديدة بالتفاصيل الكاملة
+          <div className="glass rounded-xl p-5 space-y-4">
+            <h3 className="text-sm font-display font-bold tracking-wide text-foreground flex items-center gap-2">
+              <Brain className="w-5 h-5 text-primary" /> How Nexus AI Works
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
+              يعتمد Nexus AI على تحليل متعدد الطبقات يجمع بين هيكل السوق، مناطق السيولة، ونماذج التقلب لتوليد إشارات تداول عالية الدقة.
             </p>
-            <button
-              onClick={() => navigate("/trade-journal")}
-              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground text-[12px] font-mono font-bold hover:brightness-110 transition-all"
-            >
-              <Plus className="w-4 h-4 inline-block ml-2" />
-              تسجيل صفقة جديدة
-            </button>
+
+            {[
+              { icon: Layers, title: "Market Structure", desc: "تحليل الاتجاهات الرئيسية عبر فريمات زمنية متعددة (H1, H4, D1) لتحديد الاتجاه السائد ومستويات الدعم والمقاومة الحرجة." },
+              { icon: BarChart3, title: "Liquidity Zones", desc: "رصد مناطق تجمع السيولة وأوامر المؤسسات الكبرى لتحديد نقاط الدخول المثالية حيث تتركز أوامر الشراء/البيع." },
+              { icon: Shield, title: "Volatility Models", desc: "نماذج تقلب متقدمة تقيس انحراف الأسعار عن المتوسطات وتحدد فترات التوسع والانكماش لتوقيت الدخول بدقة." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-3 p-3 rounded-xl bg-secondary/20 border border-border/10">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-mono font-bold mb-0.5">{item.title}</p>
+                  <p className="text-[10px] font-mono text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => navigate("/risk-calculator")}
-              className="glass rounded-[12px] p-4 text-center hover:bg-secondary/20 transition-colors"
-            >
-              <BarChart3 className="w-5 h-5 text-accent mx-auto mb-2" />
-              <p className="text-[11px] font-mono font-bold">حاسبة المخاطر</p>
-              <p className="text-[9px] font-mono text-muted-foreground">حجم الصفقة المثالي</p>
-            </button>
-            <button
-              onClick={() => navigate("/my-analyses")}
-              className="glass rounded-[12px] p-4 text-center hover:bg-secondary/20 transition-colors"
-            >
-              <Crosshair className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="text-[11px] font-mono font-bold">سجل التحليلات</p>
-              <p className="text-[9px] font-mono text-muted-foreground">تحليلاتك المحفوظة</p>
-            </button>
+          {/* Compliance Disclaimer */}
+          <div className="glass rounded-xl p-4 border-warning/20">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-mono font-bold text-warning mb-1">تحذير المخاطر</p>
+                <p className="text-[10px] font-mono text-muted-foreground leading-relaxed">
+                  جميع الإشارات والتوصيات المقدمة هي لأغراض تعليمية فقط ولا تشكل نصيحة مالية أو استثمارية. التداول في الأسواق المالية ينطوي على مخاطر عالية وقد يؤدي إلى خسارة كامل رأس المال. يرجى التداول بمسؤولية.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
