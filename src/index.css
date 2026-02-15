@@ -236,6 +236,27 @@
     display: none;
   }
 
+  .animate-scroll {
+    animation: scrollTicker linear infinite;
+  }
+  @keyframes scrollTicker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(135 100% 50%);
+    box-shadow: 0 0 8px hsl(135 100% 50% / 0.6);
+    animation: livePulse 2s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
   /* Star-dust / data-grid overlay — dark mode only */
   .deep-space-overlay {
     position: fixed;

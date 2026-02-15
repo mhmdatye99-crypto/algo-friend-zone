@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   Zap, Target, TrendingUp, TrendingDown, Star, ChevronLeft, Gauge,
   Bitcoin, DollarSign, LineChart, Activity, Brain, Briefcase, Shield,
+  Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +14,7 @@ import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
 import AICoachTip from "@/components/dashboard/AICoachTip";
 import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
+import MarketMovers from "@/components/dashboard/MarketMovers";
 import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -85,18 +87,22 @@ const Dashboard = () => {
         <motion.div variants={fadeUp} className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-primary" /> توصيات حية
+              <div className="live-dot" />
+              <Flame className="w-3.5 h-3.5 text-destructive" /> توصيات حية
             </p>
             <button onClick={() => navigate("/trade-center")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
               عرض الكل <ChevronLeft className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-2">
-            {hotSignals.map((signal) => (
-              <div
+            {hotSignals.map((signal, idx) => (
+              <motion.div
                 key={signal.pair}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
                 onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
-                className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-colors border border-border/20"
+                className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-all duration-200 hover:scale-[1.01] active:scale-[0.98]"
                 style={{ borderImage: "linear-gradient(135deg, hsla(43,100%,50%,0.15), hsla(190,100%,50%,0.1)) 1" }}
               >
                 <div className="flex items-center justify-between">
@@ -116,10 +122,17 @@ const Dashboard = () => {
                     )}>
                       {signal.direction === "صعودي" ? "شراء ↑" : "بيع ↓"}
                     </span>
-                    <span className="text-[12px] font-mono font-bold text-primary">{signal.confidence}%</span>
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-[11px] border",
+                      signal.confidence >= 85 ? "bg-success/10 text-success border-success/20" :
+                      signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
+                      "bg-warning/10 text-warning border-warning/20"
+                    )}>
+                      {signal.confidence}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -188,6 +201,19 @@ const Dashboard = () => {
         </p>
         <MorningBriefCard />
         <AICoachTip />
+      </motion.div>
+
+      {/* ═══ Market Movers ═══ */}
+      <motion.div variants={fadeUp}>
+        <div className="flex items-center justify-between px-1 mb-2">
+          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-warning" /> أكبر التحركات
+          </p>
+          <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
+            الأسواق <ChevronLeft className="w-3 h-3" />
+          </button>
+        </div>
+        <MarketMovers />
       </motion.div>
 
       {/* ═══ Tabbed View ═══ */}
