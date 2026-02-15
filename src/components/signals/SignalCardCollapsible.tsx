@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye, Info, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
@@ -44,6 +44,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
   const [deepDiveOpen, setDeepDiveOpen] = useState(false);
   const [showInsufficient, setShowInsufficient] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
+  const [showWhyTooltip, setShowWhyTooltip] = useState(false);
   const navigate = useNavigate();
   const { credits, spendCredits, canAfford, isFounder } = useCredits();
 
@@ -105,14 +106,24 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Confidence badge */}
-            <div className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border",
-              signal.confidence >= 85 ? "bg-success/10 text-success border-success/20" :
-              signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
-              "bg-warning/10 text-warning border-warning/20"
-            )}>
-              {signal.confidence}
+            {/* Confidence badge with "Why?" */}
+            <div className="relative">
+              <div className={cn(
+                "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border cursor-pointer",
+                signal.confidence >= 85 ? "bg-success/10 text-success border-success/20" :
+                signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
+                "bg-warning/10 text-warning border-warning/20"
+              )}
+                onClick={(e) => { e.stopPropagation(); setShowWhyTooltip(!showWhyTooltip); }}
+              >
+                {signal.confidence}
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowWhyTooltip(!showWhyTooltip); }}
+                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent/20 text-accent flex items-center justify-center border border-accent/30"
+              >
+                <Info className="w-2.5 h-2.5" />
+              </button>
             </div>
 
             {/* Direction icon */}
@@ -126,6 +137,45 @@ const SignalCardCollapsible = ({ signal }: Props) => {
             </div>
           </div>
         </div>
+
+        {/* "Why?" Confidence Explanation Overlay */}
+        <AnimatePresence>
+          {showWhyTooltip && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="px-4 overflow-hidden"
+            >
+              <div className="rounded-xl bg-accent/5 border border-accent/15 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1">
+                    <BookOpen className="w-3 h-3" /> لماذا {signal.confidence}%؟
+                  </p>
+                  <button onClick={() => setShowWhyTooltip(false)} className="text-muted-foreground hover:text-foreground">
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </div>
+                <ul className="space-y-1.5">
+                  {signal.reasons.map((reason, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[11px] font-mono text-foreground/80">
+                      <span className="text-accent mt-0.5">•</span>
+                      {reason}
+                    </li>
+                  ))}
+                  {signal.rsi > 60 && <li className="flex items-start gap-2 text-[11px] font-mono text-foreground/80"><span className="text-accent mt-0.5">•</span>RSI عند {signal.rsi} — {signal.rsiSignal}</li>}
+                  {signal.macd !== "محايد" && <li className="flex items-start gap-2 text-[11px] font-mono text-foreground/80"><span className="text-accent mt-0.5">•</span>MACD {signal.macd} ({signal.macdHist})</li>}
+                </ul>
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                    <div className={cn("h-full rounded-full transition-all", signal.convergence >= 4 ? "bg-success" : signal.convergence >= 3 ? "bg-primary" : "bg-warning")} style={{ width: `${(signal.convergence / 5) * 100}%` }} />
+                  </div>
+                  <span className="text-[9px] font-mono text-muted-foreground">{signal.convergence}/5 تقارب</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* "Tap to Analyze" button — shown when collapsed */}
         {!expanded && (

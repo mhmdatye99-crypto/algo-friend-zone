@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { useSignals } from "@/hooks/useSignals";
-import { Skeleton } from "@/components/ui/skeleton";
+
 
 const filters = ["الكل", "فوركس", "كريبتو", "سلع", "مؤشرات"];
 
@@ -39,7 +39,17 @@ const Signals = () => {
       {signals.length === 0 ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            <div key={i} className="glass rounded-xl p-4 space-y-3 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-muted" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="h-3.5 bg-muted rounded-md w-24" />
+                  <div className="h-2.5 bg-muted rounded-md w-16" />
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-muted" />
+              </div>
+              <div className="h-10 bg-muted rounded-xl w-full" />
+            </div>
           ))}
         </div>
       ) : (
