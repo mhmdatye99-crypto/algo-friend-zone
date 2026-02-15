@@ -149,7 +149,7 @@ const Academy = () => {
     const course = courses[selectedCourse];
     return (
       <motion.div
-        className="px-4 pt-8 pb-24 max-w-lg mx-auto"
+        className="px-4 pt-8 pb-28 max-w-lg mx-auto"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -397,7 +397,7 @@ const Academy = () => {
     const course = courses[selectedCourse];
     return (
       <motion.div
-        className="px-4 pt-8 pb-24 max-w-lg mx-auto"
+        className="px-4 pt-8 pb-28 max-w-lg mx-auto"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >

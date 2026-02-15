@@ -4,11 +4,12 @@ import {
   Brain, Target, Sun, Shield, Crown, ChevronLeft, LogOut, ShieldCheck,
   User, Star, Trophy, Flame, BookOpen, Bell, Palette, HelpCircle,
   Settings, Activity, Award, TrendingDown, Calculator, Wallet, Users,
-  BarChart3, Coins
+  BarChart3, Coins, Crosshair
 } from "lucide-react";
 import { useThemeMode } from "@/hooks/useTheme";
 import { toast } from "sonner";
 import PerformanceSection from "@/components/hub/PerformanceSection";
+import PredictionAchievements from "@/components/profile/PredictionAchievements";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -18,6 +19,7 @@ import NotificationsSheet from "@/components/notifications/NotificationsSheet";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTradePerformance } from "@/hooks/useTradePerformance";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -85,7 +87,6 @@ const Hub = () => {
   const { credits, tier, transactions, isFounder } = useCredits();
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showPerf, setShowPerf] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { isDark, toggle: toggleTheme } = useThemeMode();
 
@@ -181,30 +182,30 @@ const Hub = () => {
           ))}
         </div>
 
-        {/* Performance toggle */}
-        <button
-          onClick={() => setShowPerf(!showPerf)}
-          className="mt-3 text-[10px] font-mono text-primary flex items-center gap-1 mx-auto hover:underline"
-        >
-          <BarChart3 className="w-3 h-3" />
-          {showPerf ? "إخفاء الأداء" : "📊 عرض إحصائيات الأداء"}
-        </button>
-
-        <AnimatePresence>
-          {showPerf && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-3">
-                <PerformanceSection />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
+
+      {/* Tabs: الأداء | الإنجازات */}
+      <motion.div variants={fadeUp}>
+        <Tabs defaultValue="performance" className="w-full">
+          <TabsList className="w-full grid grid-cols-2 bg-secondary/30 border border-border/20 rounded-xl h-10 p-1 gap-1">
+            <TabsTrigger value="performance" className="text-[10px] font-mono font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5" />
+              الأداء
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="text-[10px] font-mono font-medium data-[state=active]:bg-success/10 data-[state=active]:text-success rounded-lg flex items-center gap-1.5">
+              <Crosshair className="w-3.5 h-3.5" />
+              الإنجازات
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="performance" className="mt-3">
+            <PerformanceSection />
+          </TabsContent>
+          <TabsContent value="achievements" className="mt-3">
+            <PredictionAchievements />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+
 
       {/* Billing / Credits Section */}
       <motion.div variants={fadeUp} className="space-y-1.5">

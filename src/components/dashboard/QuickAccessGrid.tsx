@@ -1,20 +1,20 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  BookOpen, Calculator, Target, Users, Sun, Brain, Crown,
-  ScanLine, Zap, BarChart3
+  BookOpen, Calculator, Target, Sun, Brain, Crown,
+  ScanLine, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const shortcuts = [
-  { icon: Zap, label: "الإشارات", path: "/signals", color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
+  { icon: Zap, label: "التوصيات", path: "/trade-center", color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
   { icon: ScanLine, label: "تحليل الشارت", path: "/chart-vision", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
   { icon: BookOpen, label: "سجل الصفقات", path: "/trade-journal", color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
   { icon: Calculator, label: "حاسبة المخاطر", path: "/risk-calculator", color: "text-success", bg: "bg-success/10", border: "border-success/20" },
-  { icon: Target, label: "الأوديسة", path: "/goal-planner", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
-  { icon: Users, label: "المجتمع", path: "/community", color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
+  { icon: Crown, label: "التحديات", path: "/challenges", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+  { icon: Brain, label: "مركز الذكاء", path: "/nexus-brain", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
   { icon: Sun, label: "الملخص", path: "/morning-brief", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
-  { icon: Brain, label: "الأكاديمية", path: "/academy", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+  { icon: Target, label: "مسار النمو", path: "/goal-planner", color: "text-success", bg: "bg-success/10", border: "border-success/20" },
 ];
 
 const QuickAccessGrid = () => {

@@ -10,7 +10,7 @@ const tabs = [
   { path: "/trade-center", icon: TrendingUp, label: "التوصيات" },
   { path: "action", icon: Plus, label: "إجراء", center: true },
   { path: "/community", icon: Users, label: "الساحة", hasBadge: true },
-  { path: "/profile", icon: User, label: "الملف" },
+  { path: "/hub", icon: User, label: "المقر" },
 ];
 
 const quickActions = [
