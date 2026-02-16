@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye, Info, BookOpen, Calculator, AlertTriangle } from "lucide-react";
+import {
+  TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye,
+  Info, BookOpen, Calculator, AlertTriangle, Target, Shield, ArrowDownUp,
+  Clock, Crosshair, Loader2, MapPin, Route, BarChart3
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/CreditModals";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Signal {
   pair: string;
@@ -34,6 +39,20 @@ interface Signal {
   category?: string;
 }
 
+interface AIAnalysis {
+  entryZone?: { from: string; to: string; type: string };
+  exitZones?: { target: string; label: string; probability: number }[];
+  stopLoss?: { price: string; reason: string };
+  entryReasons?: string[];
+  scenarios?: { title: string; probability: number; description: string; targets: string[] }[];
+  riskReward?: string;
+  strategy?: string;
+  keyLevels?: { support: string[]; resistance: string[] };
+  timeHorizon?: string;
+  verdict?: string;
+  error?: string;
+}
+
 interface Props {
   signal: Signal;
 }
@@ -46,13 +65,64 @@ const SignalCardCollapsible = ({ signal }: Props) => {
   const [deepDiveOpen, setDeepDiveOpen] = useState(false);
   const [showInsufficient, setShowInsufficient] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
-  const [showWhyTooltip, setShowWhyTooltip] = useState(false);
   const [showRiskCalc, setShowRiskCalc] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
   const navigate = useNavigate();
   const { credits, spendCredits, canAfford, isFounder } = useCredits();
 
-  // Simulated status based on confidence
   const status = signal.confidence >= 80 ? "Active" : "Pending";
+
+  const handleAnalyze = async () => {
+    if (analyzing) return;
+    
+    // Check credits
+    if (!isFounder && !canAfford(CREDIT_COSTS.reveal_signal)) {
+      setShowInsufficient(true);
+      return;
+    }
+
+    setAnalyzing(true);
+    setExpanded(true);
+
+    try {
+      if (!isFounder) {
+        const success = await spendCredits(CREDIT_COSTS.reveal_signal, "reveal_signal", `تحليل AI لـ ${signal.pair}`);
+        if (!success) {
+          setShowInsufficient(true);
+          setAnalyzing(false);
+          return;
+        }
+      }
+
+      const { data, error } = await supabase.functions.invoke("signal-analysis", {
+        body: {
+          pair: signal.pair,
+          direction: signal.direction,
+          timeFrame: signal.timeFrame,
+          price: signal.entry,
+          rsi: signal.rsi,
+          macd: signal.macd,
+          confidence: signal.confidence,
+          reasons: signal.reasons,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+      } else {
+        setAiAnalysis(data);
+        setRevealed(true);
+        toast.success("تم التحليل بنجاح ✨");
+      }
+    } catch (e) {
+      console.error("Analysis error:", e);
+      toast.error("تعذر التحليل. حاول مرة أخرى.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   const handleReveal = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,7 +144,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
     }
   };
 
-  // Mini risk calculator
   const RiskCalcInline = () => {
     const [capital, setCapital] = useState("10000");
     const [riskPct, setRiskPct] = useState("2");
@@ -85,12 +154,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
     const posSize = priceDiff > 0 ? riskAmount / priceDiff : 0;
 
     return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
-        className="overflow-hidden"
-      >
+      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
         <div className="rounded-xl bg-accent/5 border border-accent/15 p-3 space-y-2.5">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1">
@@ -140,7 +204,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           signal.alphaScore >= 90 ? "border-primary/25 glow-gold" : "border-border/10"
         )}
       >
-        {/* Compact Header */}
+        {/* Compact Header - NO chart, NO confidence visible */}
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {signal.icon && (
@@ -151,12 +215,9 @@ const SignalCardCollapsible = ({ signal }: Props) => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-mono font-bold text-[14px]">{signal.pair}</span>
-                {/* Status Label */}
                 <span className={cn(
                   "text-[8px] px-1.5 py-0.5 rounded-md font-mono font-bold",
-                  status === "Active"
-                    ? "bg-primary/15 text-primary"
-                    : "bg-warning/15 text-warning"
+                  status === "Active" ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
                 )}>
                   {status}
                 </span>
@@ -175,24 +236,22 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Confidence badge with "Why?" */}
-            <div className="relative">
-              <div className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border cursor-pointer",
-                signal.confidence >= 85 ? "bg-primary/10 text-primary border-primary/20" :
-                signal.confidence >= 70 ? "bg-accent/10 text-accent border-accent/20" :
-                "bg-warning/10 text-warning border-warning/20"
+            {/* Hidden confidence - blurred until analyzed */}
+            <div className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border relative overflow-hidden",
+              !aiAnalysis ? "bg-muted/20 border-border/20" :
+              signal.confidence >= 85 ? "bg-primary/10 text-primary border-primary/20" :
+              signal.confidence >= 70 ? "bg-accent/10 text-accent border-accent/20" :
+              "bg-warning/10 text-warning border-warning/20"
+            )}>
+              {aiAnalysis ? (
+                signal.confidence
+              ) : (
+                <>
+                  <span className="blur-[6px] text-muted-foreground select-none">{signal.confidence}</span>
+                  <Lock className="w-3 h-3 text-muted-foreground absolute" />
+                </>
               )}
-                onClick={(e) => { e.stopPropagation(); setShowWhyTooltip(!showWhyTooltip); }}
-              >
-                {signal.confidence}
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowWhyTooltip(!showWhyTooltip); }}
-                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent/20 text-accent flex items-center justify-center border border-accent/30"
-              >
-                <Info className="w-2.5 h-2.5" />
-              </button>
             </div>
 
             {/* Direction icon */}
@@ -207,71 +266,83 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
         </div>
 
-        {/* "Why?" Confidence Explanation */}
+        {/* "Tap to Analyze" button - AI powered */}
+        {!expanded && !aiAnalysis && (
+          <div className="px-4 pb-3">
+            <motion.button
+              onClick={handleAnalyze}
+              whileTap={{ scale: 0.97 }}
+              disabled={analyzing}
+              className={cn(
+                "w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-[12px] font-mono font-bold transition-all border",
+                analyzing
+                  ? "bg-primary/5 text-primary/50 border-primary/10 cursor-wait"
+                  : "bg-primary/5 text-primary border-primary/20 hover:bg-primary/10"
+              )}
+            >
+              {analyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  جاري التحليل بالذكاء الاصطناعي...
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4" />
+                  اضغط للتحليل
+                  <Zap className="w-3.5 h-3.5 text-accent" />
+                </>
+              )}
+            </motion.button>
+          </div>
+        )}
+
+        {/* AI Analysis Loading Animation */}
         <AnimatePresence>
-          {showWhyTooltip && (
+          {analyzing && expanded && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="px-4 overflow-hidden"
+              className="px-4 pb-4 overflow-hidden"
             >
-              <div className="rounded-xl bg-accent/5 border border-accent/15 p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1">
-                    <BookOpen className="w-3 h-3" /> لماذا {signal.confidence}%؟
-                  </p>
-                  <button onClick={() => setShowWhyTooltip(false)} className="text-muted-foreground hover:text-foreground">
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                </div>
-                <ul className="space-y-1.5">
-                  {signal.reasons.map((reason, i) => (
-                    <li key={i} className="flex items-start gap-2 text-[11px] font-mono text-foreground/80">
-                      <span className="text-primary mt-0.5">▸</span>
-                      {reason}
-                    </li>
-                  ))}
-                  {signal.rsi > 60 && <li className="flex items-start gap-2 text-[11px] font-mono text-foreground/80"><span className="text-primary mt-0.5">▸</span>RSI عند {signal.rsi} — {signal.rsiSignal}</li>}
-                  {signal.macd !== "محايد" && <li className="flex items-start gap-2 text-[11px] font-mono text-foreground/80"><span className="text-primary mt-0.5">▸</span>MACD {signal.macd} ({signal.macdHist})</li>}
-                </ul>
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all", signal.convergence >= 4 ? "bg-primary" : signal.convergence >= 3 ? "bg-accent" : "bg-warning")} style={{ width: `${(signal.convergence / 5) * 100}%` }} />
+              <div className="rounded-xl bg-primary/5 border border-primary/15 p-5 flex flex-col items-center justify-center gap-3">
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <BarChart3 className="w-7 h-7 text-primary animate-pulse" />
                   </div>
-                  <span className="text-[9px] font-mono text-muted-foreground">{signal.convergence}/5 تقارب</span>
+                  <motion.div
+                    className="absolute -inset-2 rounded-2xl border border-primary/20"
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-[12px] font-mono font-bold text-primary">تحليل AI جاري...</p>
+                  <p className="text-[10px] font-mono text-muted-foreground">تحديد مناطق الدخول والخروج والسيناريوهات</p>
+                </div>
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3].map(i => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-primary"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
+                    />
+                  ))}
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* "Tap to Analyze" button */}
-        {!expanded && (
-          <div className="px-4 pb-3">
-            <motion.button
-              onClick={() => setExpanded(true)}
-              whileTap={{ scale: 0.97 }}
-              className={cn(
-                "w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-[12px] font-mono font-bold transition-all border",
-                "bg-primary/5 text-primary border-primary/20 hover:bg-primary/10"
-              )}
-            >
-              <Eye className="w-4 h-4" />
-              اضغط للتحليل
-              <Zap className="w-3.5 h-3.5 text-accent" />
-            </motion.button>
-          </div>
-        )}
-
-        {/* Expanded content */}
+        {/* AI Analysis Results */}
         <AnimatePresence>
-          {expanded && (
+          {aiAnalysis && !aiAnalysis.error && expanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               className="overflow-hidden"
             >
               <div className="px-4 pb-4 space-y-3 border-t border-border/10 pt-3">
@@ -285,154 +356,269 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   إخفاء التحليل
                 </button>
 
-                {/* Reveal or show levels */}
-                {!revealed ? (
-                  <motion.button
-                    onClick={handleReveal}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2 text-[12px] font-mono font-bold transition-all btn-nexus text-primary"
-                  >
-                    <Lock className="w-4 h-4" />
-                    كشف المستويات
-                    <span className="text-[10px] bg-primary/15 px-1.5 py-0.5 rounded-md">
-                      {isFounder ? "مجاني" : `${CREDIT_COSTS.reveal_signal} نقطة`}
-                    </span>
-                  </motion.button>
-                ) : (
+                {/* Verdict */}
+                {aiAnalysis.verdict && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
+                    className="rounded-xl bg-primary/5 border border-primary/15 p-3"
                   >
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-primary">
-                      <Unlock className="w-3 h-3" /> تم كشف المستويات
-                    </div>
-                    {/* Entry / TP / SL grid */}
-                    <div className="grid grid-cols-3 gap-1.5">
-                      <div className="bg-secondary/30 rounded-lg px-2 py-2 text-center">
-                        <p className="text-[9px] font-mono text-muted-foreground">Entry</p>
-                        <p className="text-[13px] font-mono font-bold">{signal.entry}</p>
-                      </div>
-                      <div className="bg-primary/5 rounded-lg px-2 py-2 text-center border border-primary/10">
-                        <p className="text-[9px] font-mono text-muted-foreground">TP</p>
-                        <p className="text-[13px] font-mono font-bold text-primary">{signal.target1}</p>
-                      </div>
-                      <div className="bg-destructive/5 rounded-lg px-2 py-2 text-center border border-destructive/10">
-                        <p className="text-[9px] font-mono text-muted-foreground">SL</p>
-                        <p className="text-[13px] font-mono font-bold text-destructive">{signal.sl}</p>
-                      </div>
-                    </div>
-
-                    {/* Risk & R:R */}
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className={cn(
-                        "px-2 py-1 rounded-lg",
-                        signal.risk === "منخفض" ? "bg-primary/10 text-primary" : signal.risk === "متوسط" ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                      )}>
-                        Risk: {signal.risk}
-                      </span>
-                      <span className="text-muted-foreground">R:R {signal.rr}</span>
-                    </div>
-
-                    {/* Reasons */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {signal.reasons.map((r, ri) => (
-                        <span key={ri} className="text-[10px] font-mono bg-secondary px-2 py-1 rounded-md text-muted-foreground">{r}</span>
-                      ))}
-                    </div>
-
-                    {/* Risk Calculator Button */}
-                    <button
-                      onClick={() => setShowRiskCalc(!showRiskCalc)}
-                      className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-accent/5 border border-accent/15 text-[10px] font-mono text-accent font-bold hover:bg-accent/10 transition-colors"
-                    >
-                      <Calculator className="w-3.5 h-3.5" />
-                      حاسبة حجم المركز
-                    </button>
-
-                    <AnimatePresence>
-                      {showRiskCalc && <RiskCalcInline />}
-                    </AnimatePresence>
+                    <p className="text-[11px] font-mono font-bold text-primary leading-relaxed">
+                      ⚡ {aiAnalysis.verdict}
+                    </p>
                   </motion.div>
                 )}
 
-                {/* Deep Dive */}
-                {revealed && (
-                  <Collapsible open={deepDiveOpen} onOpenChange={setDeepDiveOpen}>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-secondary/30 border border-border/10 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        {deepDiveOpen ? "إخفاء التفاصيل المتقدمة" : "تحليل معمّق (RSI · MACD · BB)"}
-                        <motion.div animate={{ rotate: deepDiveOpen ? 180 : 0 }}>
-                          <ChevronDown className="w-3 h-3" />
-                        </motion.div>
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="pt-3 space-y-2">
-                        <div className="grid grid-cols-4 gap-1.5">
-                          <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
-                            <p className="text-[9px] font-mono text-muted-foreground">RSI</p>
-                            <p className={cn("text-[13px] font-mono font-bold",
-                              signal.rsi > 70 ? "text-destructive" : signal.rsi < 30 ? "text-primary" : "text-foreground"
-                            )}>{signal.rsi}</p>
-                            <p className="text-[9px] font-mono text-muted-foreground">{signal.rsiSignal}</p>
-                          </div>
-                          <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
-                            <p className="text-[9px] font-mono text-muted-foreground">MACD</p>
-                            <p className={cn("text-[13px] font-mono font-bold",
-                              signal.macd === "صعودي" ? "text-primary" : signal.macd === "هبوطي" ? "text-destructive" : "text-muted-foreground"
-                            )}>{signal.macdHist}</p>
-                          </div>
-                          <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
-                            <p className="text-[9px] font-mono text-muted-foreground">BB</p>
-                            <p className="text-[13px] font-mono font-bold">{signal.bbPosition.replace("نطاق ", "")}</p>
-                          </div>
-                          <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
-                            <p className="text-[9px] font-mono text-muted-foreground">Vol</p>
-                            <p className="text-[13px] font-mono font-bold">{signal.volume}</p>
+                {/* Entry Zone */}
+                {aiAnalysis.entryZone && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Crosshair className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider">منطقة الدخول</span>
+                      <span className="text-[9px] font-mono bg-accent/10 text-accent px-1.5 py-0.5 rounded-md">{aiAnalysis.entryZone.type}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <div className="bg-accent/5 rounded-lg px-3 py-2 text-center border border-accent/10">
+                        <p className="text-[9px] font-mono text-muted-foreground">من</p>
+                        <p className="text-[14px] font-mono font-bold">{aiAnalysis.entryZone.from}</p>
+                      </div>
+                      <div className="bg-accent/5 rounded-lg px-3 py-2 text-center border border-accent/10">
+                        <p className="text-[9px] font-mono text-muted-foreground">إلى</p>
+                        <p className="text-[14px] font-mono font-bold">{aiAnalysis.entryZone.to}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Exit Zones (TPs) */}
+                {aiAnalysis.exitZones && aiAnalysis.exitZones.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Target className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider">مناطق الخروج</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {aiAnalysis.exitZones.map((zone, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2 border border-primary/10">
+                          <span className="text-[10px] font-mono font-bold text-primary w-8">{zone.label}</span>
+                          <span className="text-[13px] font-mono font-bold flex-1">{zone.target}</span>
+                          <div className="flex items-center gap-1">
+                            <div className="w-12 h-1.5 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full bg-primary" style={{ width: `${zone.probability}%` }} />
+                            </div>
+                            <span className="text-[9px] font-mono text-muted-foreground">{zone.probability}%</span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <div className="bg-primary/5 rounded-lg px-2 py-1.5 text-center border border-primary/10">
-                            <p className="text-[9px] font-mono text-muted-foreground">TP 2</p>
-                            <p className="text-[12px] font-mono font-semibold text-primary">{signal.target2}</p>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Stop Loss */}
+                {aiAnalysis.stopLoss && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                    <div className="flex items-center gap-2 bg-destructive/5 rounded-lg px-3 py-2 border border-destructive/10">
+                      <Shield className="w-4 h-4 text-destructive" />
+                      <div className="flex-1">
+                        <p className="text-[9px] font-mono text-muted-foreground">وقف الخسارة</p>
+                        <p className="text-[13px] font-mono font-bold text-destructive">{aiAnalysis.stopLoss.price}</p>
+                      </div>
+                      <p className="text-[9px] font-mono text-muted-foreground max-w-[120px] text-left leading-relaxed">{aiAnalysis.stopLoss.reason}</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* R:R & Time Horizon */}
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  className="flex gap-2"
+                >
+                  {aiAnalysis.riskReward && (
+                    <div className="flex-1 bg-secondary/30 rounded-lg px-3 py-2 text-center">
+                      <p className="text-[9px] font-mono text-muted-foreground flex items-center justify-center gap-1"><ArrowDownUp className="w-3 h-3" /> R:R</p>
+                      <p className="text-[14px] font-mono font-bold text-primary">{aiAnalysis.riskReward}</p>
+                    </div>
+                  )}
+                  {aiAnalysis.timeHorizon && (
+                    <div className="flex-1 bg-secondary/30 rounded-lg px-3 py-2 text-center">
+                      <p className="text-[9px] font-mono text-muted-foreground flex items-center justify-center gap-1"><Clock className="w-3 h-3" /> المدة</p>
+                      <p className="text-[12px] font-mono font-bold">{aiAnalysis.timeHorizon}</p>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Entry Reasons */}
+                {aiAnalysis.entryReasons && aiAnalysis.entryReasons.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <BookOpen className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider">أسباب الدخول</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {aiAnalysis.entryReasons.map((reason, i) => (
+                        <div key={i} className="flex items-start gap-2 bg-secondary/20 rounded-lg px-3 py-2">
+                          <span className="text-primary font-bold text-[11px] mt-0.5">{i + 1}</span>
+                          <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{reason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Scenarios */}
+                {aiAnalysis.scenarios && aiAnalysis.scenarios.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Route className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider">السيناريوهات المتوقعة</span>
+                    </div>
+                    <div className="space-y-2">
+                      {aiAnalysis.scenarios.map((scenario, i) => {
+                        const isPositive = scenario.title.includes("إيجابي") || scenario.title.includes("صعود");
+                        const isNegative = scenario.title.includes("سلبي") || scenario.title.includes("هبوط");
+                        return (
+                          <div key={i} className={cn(
+                            "rounded-xl p-3 border space-y-2",
+                            isPositive ? "bg-primary/5 border-primary/15" :
+                            isNegative ? "bg-destructive/5 border-destructive/15" :
+                            "bg-secondary/20 border-border/10"
+                          )}>
+                            <div className="flex items-center justify-between">
+                              <p className={cn(
+                                "text-[11px] font-mono font-bold",
+                                isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-muted-foreground"
+                              )}>
+                                {isPositive ? "🟢" : isNegative ? "🔴" : "🟡"} {scenario.title}
+                              </p>
+                              <span className={cn(
+                                "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md",
+                                isPositive ? "bg-primary/10 text-primary" :
+                                isNegative ? "bg-destructive/10 text-destructive" :
+                                "bg-warning/10 text-warning"
+                              )}>
+                                {scenario.probability}%
+                              </span>
+                            </div>
+                            <p className="text-[10px] font-mono text-foreground/70 leading-relaxed">{scenario.description}</p>
+                            {scenario.targets && scenario.targets.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {scenario.targets.map((t, ti) => (
+                                  <span key={ti} className="text-[9px] font-mono bg-secondary/40 px-1.5 py-0.5 rounded-md">{t}</span>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <div className="bg-secondary/30 rounded-lg px-2 py-1.5 text-center">
-                            <p className="text-[9px] font-mono text-muted-foreground">Sentiment</p>
-                            <p className="text-[12px] font-mono font-semibold">{signal.sentiment}%</p>
-                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Strategy */}
+                {aiAnalysis.strategy && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                    className="rounded-xl bg-accent/5 border border-accent/10 p-3"
+                  >
+                    <p className="text-[10px] font-mono text-accent font-bold mb-1 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> الاستراتيجية المقترحة
+                    </p>
+                    <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{aiAnalysis.strategy}</p>
+                  </motion.div>
+                )}
+
+                {/* Key Levels */}
+                {aiAnalysis.keyLevels && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className="grid grid-cols-2 gap-2"
+                  >
+                    <div className="bg-primary/5 rounded-lg p-2 border border-primary/10">
+                      <p className="text-[9px] font-mono text-muted-foreground mb-1">دعم</p>
+                      {aiAnalysis.keyLevels.support?.map((s, i) => (
+                        <p key={i} className="text-[11px] font-mono font-bold text-primary">{s}</p>
+                      ))}
+                    </div>
+                    <div className="bg-destructive/5 rounded-lg p-2 border border-destructive/10">
+                      <p className="text-[9px] font-mono text-muted-foreground mb-1">مقاومة</p>
+                      {aiAnalysis.keyLevels.resistance?.map((r, i) => (
+                        <p key={i} className="text-[11px] font-mono font-bold text-destructive">{r}</p>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Risk Calculator Button */}
+                <button
+                  onClick={() => setShowRiskCalc(!showRiskCalc)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-accent/5 border border-accent/15 text-[10px] font-mono text-accent font-bold hover:bg-accent/10 transition-colors"
+                >
+                  <Calculator className="w-3.5 h-3.5" />
+                  حاسبة حجم المركز
+                </button>
+
+                <AnimatePresence>
+                  {showRiskCalc && <RiskCalcInline />}
+                </AnimatePresence>
+
+                {/* Deep Dive */}
+                <Collapsible open={deepDiveOpen} onOpenChange={setDeepDiveOpen}>
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-secondary/30 border border-border/10 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+                      <Layers className="w-3.5 h-3.5" />
+                      {deepDiveOpen ? "إخفاء المؤشرات" : "المؤشرات الفنية (RSI · MACD · BB)"}
+                      <motion.div animate={{ rotate: deepDiveOpen ? 180 : 0 }}>
+                        <ChevronDown className="w-3 h-3" />
+                      </motion.div>
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="pt-3 space-y-2">
+                      <div className="grid grid-cols-4 gap-1.5">
+                        <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
+                          <p className="text-[9px] font-mono text-muted-foreground">RSI</p>
+                          <p className={cn("text-[13px] font-mono font-bold",
+                            signal.rsi > 70 ? "text-destructive" : signal.rsi < 30 ? "text-primary" : "text-foreground"
+                          )}>{signal.rsi}</p>
+                          <p className="text-[9px] font-mono text-muted-foreground">{signal.rsiSignal}</p>
+                        </div>
+                        <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
+                          <p className="text-[9px] font-mono text-muted-foreground">MACD</p>
+                          <p className={cn("text-[13px] font-mono font-bold",
+                            signal.macd === "صعودي" ? "text-primary" : signal.macd === "هبوطي" ? "text-destructive" : "text-muted-foreground"
+                          )}>{signal.macdHist}</p>
+                        </div>
+                        <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
+                          <p className="text-[9px] font-mono text-muted-foreground">BB</p>
+                          <p className="text-[13px] font-mono font-bold">{signal.bbPosition.replace("نطاق ", "")}</p>
+                        </div>
+                        <div className="bg-secondary/50 rounded-lg px-2 py-1.5 text-center">
+                          <p className="text-[9px] font-mono text-muted-foreground">Vol</p>
+                          <p className="text-[13px] font-mono font-bold">{signal.volume}</p>
                         </div>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Footer actions */}
                 <div className="flex items-center justify-between pt-1 gap-2">
-                  {revealed && (
-                    <button
-                      onClick={() => navigate("/trade-journal", {
-                        state: {
-                          prefill: {
-                            pair: signal.pair,
-                            direction: signal.direction === "صعودي" ? "buy" : "sell",
-                            entry: signal.entry,
-                            tp: signal.target1,
-                            sl: signal.sl,
-                            reason: signal.reasons.join(" • "),
-                            strategy: `${signal.timeFrame} | ${signal.direction} | ثقة ${signal.confidence}%`,
-                          }
+                  <button
+                    onClick={() => navigate("/trade-journal", {
+                      state: {
+                        prefill: {
+                          pair: signal.pair,
+                          direction: signal.direction === "صعودي" ? "buy" : "sell",
+                          entry: aiAnalysis.entryZone?.from || signal.entry,
+                          tp: aiAnalysis.exitZones?.[0]?.target || signal.target1,
+                          sl: aiAnalysis.stopLoss?.price || signal.sl,
+                          reason: aiAnalysis.entryReasons?.join(" • ") || signal.reasons.join(" • "),
+                          strategy: aiAnalysis.strategy || `${signal.timeFrame} | ${signal.direction}`,
                         }
-                      })}
-                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors border border-primary/20"
-                    >
-                      <Zap className="w-3.5 h-3.5" />
-                      Log to Journal
-                    </button>
-                  )}
+                      }
+                    })}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors border border-primary/20"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Log to Journal
+                  </button>
                   <button
                     onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
                     className="text-[11px] font-mono font-bold bg-accent/10 text-accent px-3 py-2 rounded-lg hover:bg-accent/20 transition-colors"
@@ -452,6 +638,21 @@ const SignalCardCollapsible = ({ signal }: Props) => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Show collapsed state after analysis */}
+        {aiAnalysis && !expanded && (
+          <div className="px-4 pb-3">
+            <motion.button
+              onClick={() => setExpanded(true)}
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-2 rounded-xl flex items-center justify-center gap-2 text-[11px] font-mono font-bold bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 transition-all"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              عرض التحليل
+              <ChevronDown className="w-3 h-3" />
+            </motion.button>
+          </div>
+        )}
       </motion.div>
 
       <InsufficientCreditsPopup
