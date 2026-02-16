@@ -80,6 +80,7 @@ const TradeCenter = () => {
 
   // Signals state
   const [activeSignalFilter, setActiveSignalFilter] = useState("الكل");
+  const [signalSearch, setSignalSearch] = useState("");
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -114,9 +115,11 @@ const TradeCenter = () => {
     return result;
   }, [assets, activeCategory, searchQuery, showFavOnly, signalFilter, changeFilter, sortField, sortDir, favorites]);
 
-  const filteredSignals = activeSignalFilter === "الكل"
-    ? signals
-    : signals.filter(s => s.category === activeSignalFilter);
+  const filteredSignals = useMemo(() => {
+    return signals
+      .filter(s => activeSignalFilter === "الكل" || s.category === activeSignalFilter)
+      .filter(s => !signalSearch || s.pair.toLowerCase().includes(signalSearch.toLowerCase()));
+  }, [signals, activeSignalFilter, signalSearch]);
 
   // Performance data
   const { data: closedTrades = [] } = useQuery({
@@ -395,17 +398,34 @@ const TradeCenter = () => {
       {/* ═══════════════════════════════════════════ */}
       {activeTab === "signals" && (
         <div className="space-y-3">
-          {/* Signal category filters */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={signalSearch}
+              onChange={(e) => setSignalSearch(e.target.value)}
+              placeholder="ابحث عن عملة... BTC, ETH, GOLD"
+              className="w-full bg-secondary/60 border border-border/30 rounded-xl pr-10 pl-10 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+            />
+            {signalSearch && (
+              <button onClick={() => setSignalSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Category filters */}
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-4 px-4">
             {signalCategoryFilters.map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveSignalFilter(f)}
                 className={cn(
-                  "px-4 py-1.5 rounded-lg text-[11px] font-mono font-medium whitespace-nowrap transition-all",
+                  "px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium whitespace-nowrap transition-all",
                   activeSignalFilter === f
                     ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                    : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
                 )}
               >
                 {f}
@@ -413,12 +433,18 @@ const TradeCenter = () => {
             ))}
           </div>
 
+          {/* Count */}
+          <p className="text-[10px] font-mono text-muted-foreground px-1">
+            {filteredSignals.length} توصية
+            {signalSearch && ` — "${signalSearch}"`}
+          </p>
+
           {signals.length === 0 ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
             </div>
           ) : (
-            <motion.div className="space-y-3" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.06 } } }}>
+            <motion.div className="space-y-3" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.03 } } }}>
               {filteredSignals.map((signal) => (
                 <SignalCardCollapsible key={signal.pair} signal={signal} />
               ))}
@@ -426,7 +452,7 @@ const TradeCenter = () => {
           )}
 
           {filteredSignals.length === 0 && signals.length > 0 && (
-            <p className="text-center text-muted-foreground font-mono text-sm mt-10">لا توجد إشارات لهذه الفئة حالياً</p>
+            <p className="text-center text-muted-foreground font-mono text-sm mt-10">لا توجد إشارات لهذا البحث</p>
           )}
 
           {/* Risk Warning */}
