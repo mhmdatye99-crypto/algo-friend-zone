@@ -97,12 +97,14 @@ serve(async (req) => {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
+        // Fix Arabic comma that breaks JSON parsing
+        const cleaned = jsonMatch[0].replace(/،/g, ",");
+        analysis = JSON.parse(cleaned);
       } else {
         throw new Error("No JSON found");
       }
-    } catch {
-      console.error("Failed to parse AI response:", content);
+    } catch (parseErr) {
+      console.error("Failed to parse AI response:", parseErr, content);
       analysis = { error: "تعذر التحليل. حاول مرة أخرى." };
     }
 
