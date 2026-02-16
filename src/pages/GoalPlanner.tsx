@@ -488,6 +488,42 @@ const ProgressTracker = () => {
         </motion.div>
       )}
 
+      {/* Equity Curve */}
+      {tradeStats && tradeStats.equityCurve && tradeStats.equityCurve.length > 1 && (
+        <motion.div variants={fadeUp} className="glass rounded-xl p-5">
+          <h3 className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" />
+            منحنى رأس المال — EQUITY CURVE
+          </h3>
+          <p className="text-[9px] font-mono text-muted-foreground mb-3">تطور الرصيد الفعلي بناءً على الصفقات المغلقة</p>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={tradeStats.equityCurve}>
+                <defs>
+                  <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" tick={{ fontSize: 9, fill: "hsl(215 15% 50%)" }} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(tradeStats.equityCurve.length / 6))} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(215 15% 50%)" }} axisLine={false} tickLine={false} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(1) + "k" : v}`} domain={['dataMin - 50', 'dataMax + 50']} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  formatter={(v: number, name: string) => [`$${v.toLocaleString()}`, name === "balance" ? "الرصيد" : "P&L"]}
+                />
+                <Area type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#equityGrad)" name="balance" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex justify-between mt-2 text-[9px] font-mono text-muted-foreground">
+            <span>البداية: ${goal.initial_capital.toLocaleString()}</span>
+            <span className={cn("font-bold", tradeStats.totalPnl >= 0 ? "text-success" : "text-destructive")}>
+              الحالي: ${tradeStats.realBalance.toLocaleString()}
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Add Entry */}
       <motion.div variants={fadeUp}>
         <AnimatePresence>
