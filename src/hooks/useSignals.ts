@@ -170,21 +170,17 @@ export const useSignals = () => {
   const assets = useLivePrices();
   
   const signals = useMemo(() => {
-    return assets
-      .filter(a => a.signal !== "محايد" || Math.abs(a.change) > 1.5)
-      .sort((a, b) => {
-        const idxA = PRIORITY_PAIRS.indexOf(a.pair);
-        const idxB = PRIORITY_PAIRS.indexOf(b.pair);
-        // Priority pairs come first, then by signal strength
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        const scoreA = a.signal === "محايد" ? 0 : Math.abs(a.change) + (a.rsi > 60 || a.rsi < 40 ? 10 : 0);
-        const scoreB = b.signal === "محايد" ? 0 : Math.abs(b.change) + (b.rsi > 60 || b.rsi < 40 ? 10 : 0);
-        return scoreB - scoreA;
-      })
-      .slice(0, 20)
-      .map(assetToSignal);
+    // Stable sort: sort once by priority, don't re-shuffle on price updates
+    const sorted = [...assets].sort((a, b) => {
+      const idxA = PRIORITY_PAIRS.indexOf(a.pair);
+      const idxB = PRIORITY_PAIRS.indexOf(b.pair);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      // Stable fallback: alphabetical
+      return a.pair.localeCompare(b.pair);
+    });
+    return sorted.map(assetToSignal);
   }, [assets]);
   
   return { signals };
