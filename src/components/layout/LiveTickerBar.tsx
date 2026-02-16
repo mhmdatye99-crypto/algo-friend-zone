@@ -21,7 +21,7 @@ const LiveTickerBar = () => {
   }, [assets]);
 
   const topMovers = assets
-    .filter(a => a.category === "كريبتو" || a.category === "سلع")
+    .filter(a => a.category === "كريبتو" || a.category === "فوركس")
     .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
     .slice(0, 15);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-export type AssetCategory = "الكل" | "كريبتو" | "فوركس" | "سلع" | "مؤشرات";
+export type AssetCategory = "الكل" | "كريبتو" | "فوركس";
 
 export interface Asset {
   pair: string;
@@ -13,6 +13,7 @@ export interface Asset {
   signal: string;
   category: AssetCategory;
   icon: string;
+  logoUrl?: string;
   sparkline: number[];
 }
 
@@ -130,19 +131,57 @@ const initialAssets: Asset[] = [
   { pair: "USD/MXN", price: 17.23, change: -0.28, up: false, vol: "$52M", rsi: 39, macd: "هبوطي", signal: "بيع", category: "فوركس", icon: "MX", sparkline: [] },
   { pair: "USD/SEK", price: 10.78, change: 0.15, up: true, vol: "$28M", rsi: 52, macd: "صعودي", signal: "شراء", category: "فوركس", icon: "kr", sparkline: [] },
   { pair: "USD/NOK", price: 10.45, change: -0.12, up: false, vol: "$25M", rsi: 46, macd: "هبوطي", signal: "محايد", category: "فوركس", icon: "NK", sparkline: [] },
-  // سلع
-  { pair: "GOLD", price: 2345.60, change: 0.45, up: true, vol: "$540M", rsi: 67, macd: "صعودي", signal: "شراء", category: "سلع", icon: "Au", sparkline: [] },
-  { pair: "SILVER", price: 27.84, change: 1.12, up: true, vol: "$120M", rsi: 59, macd: "صعودي", signal: "شراء", category: "سلع", icon: "Ag", sparkline: [] },
-  { pair: "OIL", price: 78.45, change: -0.67, up: false, vol: "$340M", rsi: 45, macd: "هبوطي", signal: "محايد", category: "سلع", icon: "🛢", sparkline: [] },
-  { pair: "NATGAS", price: 2.34, change: 1.89, up: true, vol: "$85M", rsi: 56, macd: "صعودي", signal: "شراء", category: "سلع", icon: "⛽", sparkline: [] },
-  { pair: "COPPER", price: 4.12, change: -0.34, up: false, vol: "$65M", rsi: 47, macd: "هبوطي", signal: "محايد", category: "سلع", icon: "Cu", sparkline: [] },
-  // مؤشرات
-  { pair: "S&P 500", price: 5234.18, change: 0.82, up: true, vol: "$4.2B", rsi: 64, macd: "صعودي", signal: "شراء", category: "مؤشرات", icon: "📊", sparkline: [] },
-  { pair: "NASDAQ", price: 16432.50, change: 1.24, up: true, vol: "$3.8B", rsi: 66, macd: "صعودي", signal: "شراء", category: "مؤشرات", icon: "📈", sparkline: [] },
-  { pair: "DAX", price: 18234.70, change: -0.18, up: false, vol: "$1.2B", rsi: 52, macd: "محايد", signal: "محايد", category: "مؤشرات", icon: "🇩🇪", sparkline: [] },
 ];
 
-export const assetCategories: AssetCategory[] = ["الكل", "كريبتو", "فوركس", "سلع", "مؤشرات"];
+export const assetCategories: AssetCategory[] = ["الكل", "كريبتو", "فوركس"];
+
+// Crypto logo URLs from CoinGecko CDN
+const CRYPTO_LOGO_MAP: Record<string, string> = {
+  "BTC/USDT": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
+  "ETH/USDT": "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+  "SOL/USDT": "https://assets.coingecko.com/coins/images/4128/small/solana.png",
+  "BNB/USDT": "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png",
+  "XRP/USDT": "https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png",
+  "ADA/USDT": "https://assets.coingecko.com/coins/images/975/small/cardano.png",
+  "DOGE/USDT": "https://assets.coingecko.com/coins/images/5/small/dogecoin.png",
+  "DOT/USDT": "https://assets.coingecko.com/coins/images/12171/small/polkadot.png",
+  "AVAX/USDT": "https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png",
+  "LINK/USDT": "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png",
+  "MATIC/USDT": "https://assets.coingecko.com/coins/images/4713/small/polygon.png",
+  "ATOM/USDT": "https://assets.coingecko.com/coins/images/1481/small/cosmos_hub.png",
+  "UNI/USDT": "https://assets.coingecko.com/coins/images/12504/small/uni.jpg",
+  "LTC/USDT": "https://assets.coingecko.com/coins/images/2/small/litecoin.png",
+  "NEAR/USDT": "https://assets.coingecko.com/coins/images/10365/small/near.jpg",
+  "APT/USDT": "https://assets.coingecko.com/coins/images/26455/small/aptos_round.png",
+  "FIL/USDT": "https://assets.coingecko.com/coins/images/12817/small/filecoin.png",
+  "ARB/USDT": "https://assets.coingecko.com/coins/images/16547/small/photo_2023-03-29_21.47.00.jpeg",
+  "OP/USDT": "https://assets.coingecko.com/coins/images/25244/small/Optimism.png",
+  "SUI/USDT": "https://assets.coingecko.com/coins/images/26375/small/sui_asset.jpeg",
+  "INJ/USDT": "https://assets.coingecko.com/coins/images/12882/small/Secondary_Symbol.png",
+  "TIA/USDT": "https://assets.coingecko.com/coins/images/31967/small/tia.jpg",
+  "SEI/USDT": "https://assets.coingecko.com/coins/images/28205/small/Sei_Logo_-_Transparent.png",
+  "PEPE/USDT": "https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg",
+  "SHIB/USDT": "https://assets.coingecko.com/coins/images/11939/small/shiba.png",
+  "WIF/USDT": "https://assets.coingecko.com/coins/images/33566/small/dogwifhat.jpg",
+  "RENDER/USDT": "https://assets.coingecko.com/coins/images/11636/small/rndr.png",
+  "FET/USDT": "https://assets.coingecko.com/coins/images/5681/small/Fetch.jpg",
+  "AAVE/USDT": "https://assets.coingecko.com/coins/images/12645/small/AAVE.png",
+  "TRX/USDT": "https://assets.coingecko.com/coins/images/1094/small/tron-logo.png",
+};
+
+// Forex flag pairs
+const FOREX_FLAG_MAP: Record<string, string> = {
+  "EUR/USD": "🇪🇺🇺🇸", "GBP/USD": "🇬🇧🇺🇸", "USD/JPY": "🇺🇸🇯🇵", "AUD/USD": "🇦🇺🇺🇸",
+  "USD/CHF": "🇺🇸🇨🇭", "NZD/USD": "🇳🇿🇺🇸", "USD/CAD": "🇺🇸🇨🇦", "EUR/GBP": "🇪🇺🇬🇧",
+  "EUR/JPY": "🇪🇺🇯🇵", "GBP/JPY": "🇬🇧🇯🇵", "AUD/JPY": "🇦🇺🇯🇵", "CHF/JPY": "🇨🇭🇯🇵",
+  "NZD/JPY": "🇳🇿🇯🇵", "CAD/JPY": "🇨🇦🇯🇵", "EUR/AUD": "🇪🇺🇦🇺", "GBP/AUD": "🇬🇧🇦🇺",
+  "EUR/CHF": "🇪🇺🇨🇭", "GBP/CHF": "🇬🇧🇨🇭", "EUR/CAD": "🇪🇺🇨🇦", "GBP/CAD": "🇬🇧🇨🇦",
+  "AUD/CAD": "🇦🇺🇨🇦", "AUD/NZD": "🇦🇺🇳🇿", "EUR/NZD": "🇪🇺🇳🇿", "GBP/NZD": "🇬🇧🇳🇿",
+  "USD/SGD": "🇺🇸🇸🇬", "USD/HKD": "🇺🇸🇭🇰", "USD/TRY": "🇺🇸🇹🇷", "USD/ZAR": "🇺🇸🇿🇦",
+  "USD/MXN": "🇺🇸🇲🇽", "USD/SEK": "🇺🇸🇸🇪", "USD/NOK": "🇺🇸🇳🇴",
+};
+
+export { CRYPTO_LOGO_MAP, FOREX_FLAG_MAP };
 
 // Helper: compute RSI-like value from sparkline
 function computeRsi(sparkline: number[]): number {
