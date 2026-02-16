@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye,
   Info, BookOpen, Calculator, AlertTriangle, Target, Shield, ArrowDownUp,
-  Clock, Crosshair, Loader2, MapPin, Route, BarChart3
+  Clock, Crosshair, Loader2, MapPin, Route, BarChart3, Save
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { useAuth } from "@/contexts/AuthContext";
 import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/CreditModals";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -67,10 +68,50 @@ const SignalCardCollapsible = ({ signal }: Props) => {
   const [showRiskCalc, setShowRiskCalc] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { credits, spendCredits, canAfford, isFounder } = useCredits();
 
   const status = signal.confidence >= 80 ? "Active" : "Pending";
+
+  const handleSaveAnalysis = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user || !aiAnalysis || saving) return;
+
+    setSaving(true);
+    try {
+      const notes = [
+        aiAnalysis.verdict,
+        aiAnalysis.strategy && `الاستراتيجية: ${aiAnalysis.strategy}`,
+        aiAnalysis.entryZone && `دخول: ${aiAnalysis.entryZone.from} - ${aiAnalysis.entryZone.to}`,
+        aiAnalysis.stopLoss && `وقف: ${aiAnalysis.stopLoss.price}`,
+        aiAnalysis.exitZones?.map(z => `${z.label}: ${z.target}`).join(" | "),
+        aiAnalysis.riskReward && `R:R ${aiAnalysis.riskReward}`,
+      ].filter(Boolean).join("\n");
+
+      const { error } = await supabase.from("saved_analyses").insert({
+        user_id: user.id,
+        pair: signal.pair,
+        direction: signal.direction,
+        price: parseFloat(signal.entry.replace(/,/g, "")) || 0,
+        confidence: signal.confidence,
+        timeframe: signal.timeFrame,
+        rsi: signal.rsi,
+        macd: signal.macd,
+        icon: signal.icon || null,
+        notes,
+      });
+
+      if (error) throw error;
+      toast.success("تم حفظ التحليل في السجل ✅");
+    } catch (err) {
+      console.error("Save analysis error:", err);
+      toast.error("تعذر حفظ التحليل");
+    } finally {
+      setSaving(false);
+    }
+  }, [user, aiAnalysis, saving, signal]);
 
   const handleAnalyze = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -615,10 +656,18 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                     سجّل في اليومية
                   </button>
                   <button
-                    onClick={(e) => { stop(e); navigate(`/asset/${encodeURIComponent(signal.pair)}`); }}
-                    className="text-[11px] font-mono font-bold bg-accent/10 text-accent px-3 py-2.5 rounded-xl hover:bg-accent/20 transition-colors border border-accent/15"
+                    onClick={handleSaveAnalysis}
+                    disabled={saving}
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-accent/10 text-accent px-3 py-2.5 rounded-xl hover:bg-accent/20 transition-colors border border-accent/15 disabled:opacity-50"
                   >
-                    تفاصيل الأصل
+                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    حفظ التحليل
+                  </button>
+                  <button
+                    onClick={(e) => { stop(e); navigate(`/asset/${encodeURIComponent(signal.pair)}`); }}
+                    className="text-[11px] font-mono font-bold bg-secondary/30 text-muted-foreground px-3 py-2.5 rounded-xl hover:bg-secondary/50 transition-colors border border-border/10"
+                  >
+                    تفاصيل
                   </button>
                 </div>
 
