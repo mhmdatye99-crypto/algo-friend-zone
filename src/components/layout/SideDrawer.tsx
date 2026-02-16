@@ -116,7 +116,8 @@ const SideDrawer = ({ open, onClose }: SideDrawerProps) => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 350, damping: 35 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-card flex flex-col shadow-2xl border-l border-border/30"
+              className="fixed inset-y-0 right-0 z-[60] w-[85vw] max-w-[320px] flex flex-col shadow-2xl border-l border-border/30 overflow-hidden"
+              style={{ backgroundColor: "hsl(var(--background))", opacity: 1 }}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/20">
