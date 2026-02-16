@@ -71,7 +71,7 @@ const App = () => (
               <Route path="/asset/*" element={<AssetDetail />} />
               <Route path="/community" element={<Community />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
-              <Route path="/markets" element={<Markets />} />
+              <Route path="/markets" element={<Navigate to="/trade-center" replace />} />
               <Route path="/hub" element={<Hub />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
               <Route path="/subscription" element={<Subscription />} />
