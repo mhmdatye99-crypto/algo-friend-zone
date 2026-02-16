@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, User, Coins, Moon, Sun, Search } from "lucide-react";
+import { Bell, User, Coins, Moon, Sun, Search, Menu } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
@@ -10,6 +10,7 @@ import { useThemeMode } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import NotificationsSheet from "@/components/notifications/NotificationsSheet";
 import UniversalSearch from "@/components/layout/UniversalSearch";
+import SideDrawer from "@/components/layout/SideDrawer";
 
 const pageTitles: Record<string, string> = {
   "/": "",
@@ -43,6 +44,7 @@ const TopBar = () => {
   const { unreadCount } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
   const { isDark, toggle } = useThemeMode();
 
   const isHome = location.pathname === "/";
@@ -128,6 +130,14 @@ const TopBar = () => {
               </span>
             )}
           </button>
+          {/* Menu */}
+          <button
+            onClick={() => setShowDrawer(true)}
+            className="w-9 h-9 rounded-full bg-secondary/60 flex items-center justify-center border border-border/20 hover:bg-secondary transition-colors"
+            aria-label="القائمة"
+          >
+            <Menu className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
       </div>
 
@@ -153,6 +163,7 @@ const TopBar = () => {
 
       <NotificationsSheet open={showNotifications} onClose={() => setShowNotifications(false)} />
       <UniversalSearch open={showSearch} onClose={() => setShowSearch(false)} />
+      <SideDrawer open={showDrawer} onClose={() => setShowDrawer(false)} />
     </header>
   );
 };
