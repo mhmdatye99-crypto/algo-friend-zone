@@ -2,19 +2,18 @@ import { motion } from "framer-motion";
 import {
   Zap, Target, TrendingUp, TrendingDown, Star, ChevronLeft, Gauge,
   Bitcoin, DollarSign, LineChart, Activity, Brain, Briefcase, Shield,
-  Flame,
+  Flame, ScanLine, BookOpen, Calculator, Crown, Sun, Eye, ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
+import { useLivePrices, formatPrice, CRYPTO_LOGO_MAP, FOREX_FLAG_MAP } from "@/hooks/useLivePrices";
 import MiniChart from "@/components/MiniChart";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import GaugeChart from "@/components/dashboard/GaugeChart";
 import AICoachTip from "@/components/dashboard/AICoachTip";
 import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
-import MarketMovers from "@/components/dashboard/MarketMovers";
 import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +25,17 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-type DashTab = "markets" | "trades" | "growth";
+const AssetLogo = ({ pair, icon, category }: { pair: string; icon: string; category: string }) => {
+  const logoUrl = CRYPTO_LOGO_MAP[pair];
+  const flags = FOREX_FLAG_MAP[pair];
+  if (category === "كريبتو" && logoUrl) {
+    return <img src={logoUrl} alt={pair} className="w-7 h-7 rounded-full" />;
+  }
+  if (category === "فوركس" && flags) {
+    return <span className="text-base leading-none">{flags}</span>;
+  }
+  return <span className="text-base">{icon}</span>;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -36,7 +45,6 @@ const Dashboard = () => {
   const { signals } = useSignals();
   const { user } = useAuth();
   const { latestScore } = useChallenges();
-  const [activeTab, setActiveTab] = useState<DashTab>("markets");
 
   const activeSignalsCount = signals.filter(s => s.confidence >= 70).length;
 
@@ -48,7 +56,6 @@ const Dashboard = () => {
     return { index, label };
   }, [signals]);
 
-  // Active trades
   const { data: activeTrades = [] } = useQuery({
     queryKey: ["active-trades", user?.id],
     queryFn: async () => {
@@ -63,51 +70,142 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  const cryptoAssets = useMemo(() => assets.filter(a => a.category === "كريبتو").slice(0, 8), [assets]);
-  const forexAssets = useMemo(() => assets.filter(a => a.category === "فوركس").slice(0, 8), [assets]);
+  const cryptoAssets = useMemo(() => assets.filter(a => a.category === "كريبتو").slice(0, 6), [assets]);
+  const forexAssets = useMemo(() => assets.filter(a => a.category === "فوركس").slice(0, 6), [assets]);
   const favoriteAssets = assets.filter(a => favorites.has(a.pair));
-
-  const tabs: { key: DashTab; label: string; icon: React.ReactNode }[] = [
-    { key: "markets", label: "الأسواق", icon: <Activity className="w-3.5 h-3.5" /> },
-    { key: "trades", label: "صفقاتي", icon: <Briefcase className="w-3.5 h-3.5" /> },
-    { key: "growth", label: "مسار النمو", icon: <Target className="w-3.5 h-3.5" /> },
-  ];
-
   const hotSignals = useMemo(() => signals.slice(0, 3), [signals]);
+
+  const topGainers = useMemo(() => [...assets].sort((a, b) => b.change - a.change).slice(0, 3), [assets]);
+  const topLosers = useMemo(() => [...assets].sort((a, b) => a.change - b.change).slice(0, 3), [assets]);
+
+  const quickTools = [
+    { icon: Zap, label: "التوصيات", path: "/trade-center", gradient: "from-amber-500/20 to-orange-500/20", border: "border-amber-500/20", iconColor: "text-amber-400" },
+    { icon: ScanLine, label: "تحليل الشارت", path: "/chart-vision", gradient: "from-blue-500/20 to-cyan-500/20", border: "border-blue-500/20", iconColor: "text-blue-400" },
+    { icon: BookOpen, label: "سجل الصفقات", path: "/trade-journal", gradient: "from-emerald-500/20 to-green-500/20", border: "border-emerald-500/20", iconColor: "text-emerald-400" },
+    { icon: Calculator, label: "الحاسبة", path: "/risk-calculator", gradient: "from-violet-500/20 to-purple-500/20", border: "border-violet-500/20", iconColor: "text-violet-400" },
+  ];
 
   return (
     <motion.div
       initial="hidden"
       animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-      className="px-5 pt-4 pb-28 space-y-5 max-w-lg mx-auto"
+      variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+      className="px-4 pt-3 pb-28 space-y-4 max-w-lg mx-auto"
     >
-      {/* ═══ HOT AI SIGNALS — Hero Section ═══ */}
+      {/* ═══ WELCOME + MARKET PULSE HERO ═══ */}
+      <motion.div
+        variants={fadeUp}
+        className="rounded-2xl p-4 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, hsla(43, 100%, 50%, 0.08) 0%, hsla(220, 60%, 20%, 0.4) 50%, hsla(190, 100%, 50%, 0.06) 100%)",
+          border: "1px solid hsla(43, 100%, 50%, 0.1)",
+        }}
+      >
+        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]" style={{
+          backgroundImage: "radial-gradient(circle at 20% 50%, hsla(43,100%,50%,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsla(190,100%,50%,0.3) 0%, transparent 40%)"
+        }} />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">مرحباً بك في</p>
+              <h1 className="text-lg font-bold bg-gradient-to-l from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">
+                Nexus Central
+              </h1>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card/50 border border-border/20">
+              <div className="live-dot" />
+              <span className="text-[9px] font-mono text-muted-foreground">LIVE</span>
+            </div>
+          </div>
+
+          {/* 3 Key Metrics Row */}
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => navigate("/markets")}
+              className="rounded-xl p-2.5 text-center bg-card/40 border border-border/10 hover:bg-card/60 transition-all active:scale-95"
+            >
+              <Gauge className="w-4 h-4 mx-auto mb-1 text-primary" />
+              <p className={cn(
+                "text-base font-mono font-bold",
+                marketPulse.index >= 55 ? "text-success" : marketPulse.index <= 45 ? "text-destructive" : "text-primary"
+              )}>
+                {marketPulse.index}%
+              </p>
+              <p className="text-[8px] font-mono text-muted-foreground">نبض السوق</p>
+            </button>
+            <button
+              onClick={() => navigate("/trade-center")}
+              className="rounded-xl p-2.5 text-center bg-card/40 border border-border/10 hover:bg-card/60 transition-all active:scale-95"
+            >
+              <Activity className="w-4 h-4 mx-auto mb-1 text-success" />
+              <p className="text-base font-mono font-bold text-success">{activeSignalsCount}</p>
+              <p className="text-[8px] font-mono text-muted-foreground">إشارة نشطة</p>
+            </button>
+            <button
+              onClick={() => navigate("/goal-planner")}
+              className="rounded-xl p-2.5 text-center bg-card/40 border border-border/10 hover:bg-card/60 transition-all active:scale-95"
+            >
+              <Target className="w-4 h-4 mx-auto mb-1 text-accent" />
+              <p className="text-base font-mono font-bold text-accent">{stats ? `${stats.progress.toFixed(0)}%` : "0%"}</p>
+              <p className="text-[8px] font-mono text-muted-foreground">تقدّم الثروة</p>
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ═══ QUICK TOOLS ═══ */}
+      <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
+        {quickTools.map((t, i) => (
+          <motion.button
+            key={t.path}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.04 }}
+            onClick={() => navigate(t.path)}
+            className={cn(
+              "flex flex-col items-center gap-1.5 py-3 rounded-xl border bg-gradient-to-b transition-all hover:brightness-125 active:scale-95",
+              t.gradient, t.border
+            )}
+          >
+            <t.icon className={cn("w-5 h-5", t.iconColor)} />
+            <span className="text-[9px] font-mono font-bold text-foreground">{t.label}</span>
+          </motion.button>
+        ))}
+      </motion.div>
+
+      {/* ═══ HOT AI SIGNALS ═══ */}
       {hotSignals.length > 0 && (
         <motion.div variants={fadeUp} className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <div className="live-dot" />
-              <Flame className="w-3.5 h-3.5 text-destructive" /> توصيات حية
+              <Flame className="w-3.5 h-3.5 text-destructive" />
+              <span className="bg-gradient-to-l from-red-400 to-orange-400 bg-clip-text text-transparent font-bold">توصيات ساخنة</span>
             </p>
-            <button onClick={() => navigate("/trade-center")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
-              عرض الكل <ChevronLeft className="w-3 h-3" />
+            <button onClick={() => navigate("/trade-center")} className="text-[10px] font-mono text-primary flex items-center gap-0.5 hover:underline">
+              الكل <ChevronLeft className="w-3 h-3" />
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {hotSignals.map((signal, idx) => (
               <motion.div
                 key={signal.pair}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
+                transition={{ delay: idx * 0.08 }}
                 onClick={() => navigate(`/asset/${encodeURIComponent(signal.pair)}`)}
-                className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-all duration-200 hover:scale-[1.01] active:scale-[0.98]"
-                style={{ borderImage: "linear-gradient(135deg, hsla(43,100%,50%,0.15), hsla(190,100%,50%,0.1)) 1" }}
+                className="rounded-xl p-3 cursor-pointer hover:brightness-110 transition-all active:scale-[0.98]"
+                style={{
+                  background: signal.direction === "صعودي"
+                    ? "linear-gradient(135deg, hsla(120, 60%, 40%, 0.08) 0%, hsla(120, 60%, 40%, 0.02) 100%)"
+                    : "linear-gradient(135deg, hsla(0, 60%, 40%, 0.08) 0%, hsla(0, 60%, 40%, 0.02) 100%)",
+                  border: `1px solid ${signal.direction === "صعودي" ? "hsla(120, 60%, 40%, 0.15)" : "hsla(0, 60%, 40%, 0.15)"}`,
+                }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-lg">{signal.icon}</span>
+                    <div className="w-9 h-9 rounded-xl bg-card/60 border border-border/10 flex items-center justify-center">
+                      <span className="text-lg">{signal.icon}</span>
+                    </div>
                     <div>
                       <p className="text-[12px] font-mono font-bold">{signal.pair}</p>
                       <p className="text-[9px] font-mono text-muted-foreground">{signal.timeFrame} • {signal.risk}</p>
@@ -115,20 +213,20 @@ const Dashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={cn(
-                      "px-2 py-0.5 rounded-md text-[10px] font-mono font-bold",
+                      "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold",
                       signal.direction === "صعودي"
                         ? "bg-success/15 text-success"
                         : "bg-destructive/15 text-destructive"
                     )}>
-                      {signal.direction === "صعودي" ? "شراء ↑" : "بيع ↓"}
+                      {signal.direction === "صعودي" ? "↑ شراء" : "↓ بيع"}
                     </span>
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-[11px] border",
+                      "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-[12px] border",
                       signal.confidence >= 85 ? "bg-success/10 text-success border-success/20" :
                       signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
                       "bg-warning/10 text-warning border-warning/20"
                     )}>
-                      {signal.confidence}
+                      {signal.confidence}%
                     </div>
                   </div>
                 </div>
@@ -138,64 +236,240 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* ═══ ONE-GLANCE: 3 Key Metrics ═══ */}
-      <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2">
-        <div
-          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
-          style={{ background: "hsla(43, 100%, 50%, 0.06)", border: "1px solid hsla(43, 100%, 50%, 0.12)" }}
-          onClick={() => navigate("/markets")}
-        >
-          <Gauge className="w-4 h-4 text-primary mx-auto mb-1" />
-          <p className="text-lg font-mono font-bold text-primary">{marketPulse.index}%</p>
-          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">نبض السوق</p>
+      {/* ═══ TOP MOVERS - Gainers & Losers ═══ */}
+      <motion.div variants={fadeUp} className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-warning" /> أبرز التحركات
+          </p>
+          <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5 hover:underline">
+            الأسواق <ChevronLeft className="w-3 h-3" />
+          </button>
         </div>
-        <div
-          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
-          style={{ background: "hsla(190, 100%, 50%, 0.06)", border: "1px solid hsla(190, 100%, 50%, 0.12)" }}
-          onClick={() => navigate("/goal-planner")}
-        >
-          <Target className="w-4 h-4 text-accent mx-auto mb-1" />
-          <p className="text-lg font-mono font-bold text-accent">{stats ? `${stats.progress.toFixed(0)}%` : "0%"}</p>
-          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">تقدّم الثروة</p>
-        </div>
-        <div
-          className="rounded-[12px] p-3 text-center cursor-pointer hover:brightness-110 transition-all"
-          style={{ background: "hsla(120, 60%, 50%, 0.06)", border: "1px solid hsla(120, 60%, 50%, 0.12)" }}
-          onClick={() => navigate("/trade-center")}
-        >
-          <Activity className="w-4 h-4 text-success mx-auto mb-1" />
-          <p className="text-lg font-mono font-bold text-success">{activeSignalsCount}</p>
-          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">إشارات نشطة</p>
-        </div>
-      </motion.div>
-
-      {/* ═══ Discipline Score Widget ═══ */}
-      <motion.div
-        variants={fadeUp}
-        onClick={() => navigate("/challenges")}
-        className="rounded-[12px] p-3 cursor-pointer hover:brightness-110 transition-all flex items-center gap-3"
-        style={{ background: "hsla(190, 100%, 50%, 0.04)", border: "1px solid hsla(190, 100%, 50%, 0.1)" }}
-      >
-        <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-          <Shield className="w-5 h-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">درجة الانضباط</p>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className={cn(
-              "text-lg font-mono font-bold",
-              (latestScore?.score ?? 50) >= 70 ? "text-success" : (latestScore?.score ?? 50) >= 40 ? "text-warning" : "text-destructive"
-            )}>
-              {latestScore?.score ?? 50}/100
-            </span>
-            <span className="text-[9px] font-mono text-muted-foreground">التحديات والخطط →</span>
+        <div className="grid grid-cols-2 gap-2">
+          {/* Gainers */}
+          <div className="rounded-xl p-3 space-y-2" style={{ background: "hsla(120, 60%, 40%, 0.04)", border: "1px solid hsla(120, 60%, 40%, 0.1)" }}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <TrendingUp className="w-3 h-3 text-success" />
+              <span className="text-[9px] font-mono text-success font-bold uppercase tracking-wider">الأكثر ارتفاعاً</span>
+            </div>
+            {topGainers.map((a) => (
+              <button
+                key={a.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(a.pair)}`)}
+                className="flex items-center gap-2 w-full py-1.5 hover:bg-success/5 rounded-lg transition-colors"
+              >
+                <AssetLogo pair={a.pair} icon={a.icon} category={a.category} />
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-[10px] font-mono font-bold truncate">{a.pair.replace("/USDT", "")}</p>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-success tabular-nums">+{a.change}%</span>
+              </button>
+            ))}
+          </div>
+          {/* Losers */}
+          <div className="rounded-xl p-3 space-y-2" style={{ background: "hsla(0, 60%, 40%, 0.04)", border: "1px solid hsla(0, 60%, 40%, 0.1)" }}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <TrendingDown className="w-3 h-3 text-destructive" />
+              <span className="text-[9px] font-mono text-destructive font-bold uppercase tracking-wider">الأكثر انخفاضاً</span>
+            </div>
+            {topLosers.map((a) => (
+              <button
+                key={a.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(a.pair)}`)}
+                className="flex items-center gap-2 w-full py-1.5 hover:bg-destructive/5 rounded-lg transition-colors"
+              >
+                <AssetLogo pair={a.pair} icon={a.icon} category={a.category} />
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-[10px] font-mono font-bold truncate">{a.pair.replace("/USDT", "")}</p>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-destructive tabular-nums">{a.change}%</span>
+              </button>
+            ))}
           </div>
         </div>
-        <ChevronLeft className="w-4 h-4 text-muted-foreground/30 shrink-0" />
       </motion.div>
 
-      {/* ═══ Intelligence Center — AI Coach + Morning Brief ═══ */}
-      <motion.div variants={fadeUp} className="space-y-2.5">
+      {/* ═══ CRYPTO MARKET CAROUSEL ═══ */}
+      <motion.div variants={fadeUp} className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Bitcoin className="w-3.5 h-3.5 text-amber-400" /> سوق الكريبتو
+          </p>
+          <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5 hover:underline">
+            عرض الكل <ChevronLeft className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-2 min-w-max">
+            {cryptoAssets.map((asset) => (
+              <div
+                key={asset.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
+                className="rounded-xl px-3 py-2.5 cursor-pointer hover:brightness-110 transition-all active:scale-[0.98] min-w-[130px]"
+                style={{ background: "hsla(220, 20%, 12%, 0.6)", border: "1px solid hsla(43, 100%, 50%, 0.08)" }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <AssetLogo pair={asset.pair} icon={asset.icon} category={asset.category} />
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-mono font-bold block truncate">{asset.pair.replace("/USDT", "")}</span>
+                    <span className="text-[8px] font-mono text-muted-foreground">USDT</span>
+                  </div>
+                </div>
+                <MiniChart data={asset.sparkline} up={asset.up} width={105} height={26} />
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-[10px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
+                  <span className={cn("text-[10px] font-mono font-bold tabular-nums", asset.up ? "text-success" : "text-destructive")}>
+                    {asset.up ? "+" : ""}{asset.change}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ═══ FOREX MARKET CAROUSEL ═══ */}
+      <motion.div variants={fadeUp} className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> سوق الفوركس
+          </p>
+          <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5 hover:underline">
+            عرض الكل <ChevronLeft className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-2 min-w-max">
+            {forexAssets.map((asset) => (
+              <div
+                key={asset.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
+                className="rounded-xl px-3 py-2.5 cursor-pointer hover:brightness-110 transition-all active:scale-[0.98] min-w-[130px]"
+                style={{ background: "hsla(220, 20%, 12%, 0.6)", border: "1px solid hsla(190, 100%, 50%, 0.08)" }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <AssetLogo pair={asset.pair} icon={asset.icon} category={asset.category} />
+                  <span className="text-[11px] font-mono font-bold truncate">{asset.pair}</span>
+                </div>
+                <MiniChart data={asset.sparkline} up={asset.up} width={105} height={26} />
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-[10px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
+                  <span className={cn("text-[10px] font-mono font-bold tabular-nums", asset.up ? "text-success" : "text-destructive")}>
+                    {asset.up ? "+" : ""}{asset.change}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ═══ DISCIPLINE + GROWTH PATH ═══ */}
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
+        {/* Discipline Score */}
+        <button
+          onClick={() => navigate("/challenges")}
+          className="rounded-xl p-3 text-right hover:brightness-110 transition-all active:scale-[0.98]"
+          style={{ background: "hsla(190, 100%, 50%, 0.05)", border: "1px solid hsla(190, 100%, 50%, 0.1)" }}
+        >
+          <Shield className="w-5 h-5 text-primary mb-2" />
+          <p className={cn(
+            "text-xl font-mono font-bold",
+            (latestScore?.score ?? 50) >= 70 ? "text-success" : (latestScore?.score ?? 50) >= 40 ? "text-warning" : "text-destructive"
+          )}>
+            {latestScore?.score ?? 50}<span className="text-[10px] text-muted-foreground">/100</span>
+          </p>
+          <p className="text-[9px] font-mono text-muted-foreground mt-0.5">درجة الانضباط</p>
+          <div className="h-1 rounded-full bg-muted mt-2 overflow-hidden">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${latestScore?.score ?? 50}%` }} />
+          </div>
+        </button>
+
+        {/* Growth Path */}
+        <button
+          onClick={() => navigate("/goal-planner")}
+          className="rounded-xl p-3 text-right hover:brightness-110 transition-all active:scale-[0.98]"
+          style={{ background: "hsla(43, 100%, 50%, 0.05)", border: "1px solid hsla(43, 100%, 50%, 0.1)" }}
+        >
+          <Target className="w-5 h-5 text-accent mb-2" />
+          {goal && stats ? (
+            <>
+              <p className="text-xl font-mono font-bold text-accent">
+                {stats.progress.toFixed(0)}%
+              </p>
+              <p className="text-[9px] font-mono text-muted-foreground mt-0.5">مسار النمو</p>
+              <div className="h-1 rounded-full bg-muted mt-2 overflow-hidden">
+                <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(stats.progress, 100)}%` }} />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-[11px] font-mono font-bold text-foreground">ابدأ مسارك</p>
+              <p className="text-[9px] font-mono text-muted-foreground mt-0.5">مسار النمو المالي</p>
+              <div className="flex items-center gap-1 mt-2">
+                <ArrowUpRight className="w-3 h-3 text-accent" />
+                <span className="text-[8px] font-mono text-accent">اضغط للبدء</span>
+              </div>
+            </>
+          )}
+        </button>
+      </motion.div>
+
+      {/* ═══ ACTIVE TRADES ═══ */}
+      {activeTrades.length > 0 && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5 text-primary" /> صفقات مفتوحة
+              <span className="bg-primary/15 text-primary text-[9px] font-bold px-1.5 py-0.5 rounded-md">{activeTrades.length}</span>
+            </p>
+            <button onClick={() => navigate("/trade-journal")} className="text-[10px] font-mono text-primary flex items-center gap-0.5 hover:underline">
+              السجل <ChevronLeft className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-1.5">
+            {activeTrades.slice(0, 3).map((trade: any) => (
+              <div
+                key={trade.id}
+                onClick={() => navigate("/trade-journal")}
+                className="rounded-xl p-3 cursor-pointer hover:brightness-110 transition-all"
+                style={{ background: "hsla(220, 20%, 12%, 0.5)", border: "1px solid hsla(220, 40%, 40%, 0.1)" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center",
+                      trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
+                    )}>
+                      {trade.direction === "long"
+                        ? <TrendingUp className="w-4 h-4 text-success" />
+                        : <TrendingDown className="w-4 h-4 text-destructive" />}
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-mono font-bold">{trade.pair}</p>
+                      <p className="text-[8px] font-mono text-muted-foreground">
+                        {trade.direction === "long" ? "شراء" : "بيع"} • {formatPrice(trade.entry_price)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-left">
+                    {trade.take_profit && (
+                      <p className="text-[9px] font-mono text-success">TP: {trade.take_profit}</p>
+                    )}
+                    {trade.stop_loss && (
+                      <p className="text-[9px] font-mono text-destructive">SL: {trade.stop_loss}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ═══ INTELLIGENCE CENTER ═══ */}
+      <motion.div variants={fadeUp} className="space-y-2">
         <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider px-1 flex items-center gap-1.5">
           <Brain className="w-3.5 h-3.5 text-primary" /> مركز الذكاء
         </p>
@@ -203,303 +477,60 @@ const Dashboard = () => {
         <AICoachTip />
       </motion.div>
 
-      {/* ═══ Market Movers ═══ */}
-      <motion.div variants={fadeUp}>
-        <div className="flex items-center justify-between px-1 mb-2">
-          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-warning" /> أكبر التحركات
-          </p>
-          <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
-            الأسواق <ChevronLeft className="w-3 h-3" />
+      {/* ═══ FAVORITES ═══ */}
+      {isLoggedIn && favoriteAssets.length > 0 && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <div className="flex items-center gap-1.5 px-1">
+            <Star className="w-3.5 h-3.5 text-primary fill-primary" />
+            <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">المفضلة</span>
+          </div>
+          <div className="rounded-xl overflow-hidden" style={{ background: "hsla(220, 20%, 12%, 0.5)", border: "1px solid hsla(43, 100%, 50%, 0.06)" }}>
+            {favoriteAssets.slice(0, 5).map((asset, i) => (
+              <div
+                key={asset.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
+                className={cn(
+                  "flex items-center justify-between px-3 py-2.5 hover:bg-secondary/20 cursor-pointer transition-colors",
+                  i < favoriteAssets.length - 1 && "border-b border-border/5"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <AssetLogo pair={asset.pair} icon={asset.icon} category={asset.category} />
+                  <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MiniChart data={asset.sparkline} up={asset.up} width={40} height={16} />
+                  <span className="text-[10px] font-mono tabular-nums">{formatPrice(asset.price)}</span>
+                  <span className={cn("text-[10px] font-mono font-bold tabular-nums min-w-[42px] text-left", asset.up ? "text-success" : "text-destructive")}>
+                    {asset.up ? "+" : ""}{asset.change}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ═══ MORE TOOLS ROW ═══ */}
+      <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
+        {[
+          { icon: Crown, label: "التحديات", path: "/challenges", color: "text-warning", bg: "bg-warning/8", border: "border-warning/15" },
+          { icon: Brain, label: "الذكاء", path: "/nexus-brain", color: "text-primary", bg: "bg-primary/8", border: "border-primary/15" },
+          { icon: Sun, label: "الملخص", path: "/morning-brief", color: "text-amber-400", bg: "bg-amber-400/8", border: "border-amber-400/15" },
+          { icon: Eye, label: "الأكاديمية", path: "/academy", color: "text-accent", bg: "bg-accent/8", border: "border-accent/15" },
+        ].map((t) => (
+          <button
+            key={t.path}
+            onClick={() => navigate(t.path)}
+            className={cn(
+              "flex flex-col items-center gap-1.5 py-3 rounded-xl border transition-all hover:brightness-125 active:scale-95",
+              t.bg, t.border
+            )}
+          >
+            <t.icon className={cn("w-4.5 h-4.5", t.color)} />
+            <span className="text-[9px] font-mono font-bold text-foreground">{t.label}</span>
           </button>
-        </div>
-        <MarketMovers />
-      </motion.div>
-
-      {/* ═══ Tabbed View ═══ */}
-      <motion.div variants={fadeUp}>
-        <div className="flex gap-1.5 mb-4">
-          {tabs.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-mono font-bold transition-all",
-                activeTab === t.key
-                  ? "bg-primary/15 text-primary border border-primary/30"
-                  : "bg-secondary/40 text-muted-foreground border border-border/10"
-              )}
-            >
-              {t.icon}
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Markets Tab */}
-        {activeTab === "markets" && (
-          <div className="space-y-4">
-            {/* Crypto Market */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Bitcoin className="w-3.5 h-3.5 text-amber-400" /> سوق الكريبتو
-                </p>
-                <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
-                  عرض الكل <ChevronLeft className="w-3 h-3" />
-                </button>
-              </div>
-              <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
-                <div className="flex gap-2.5 min-w-max">
-                  {cryptoAssets.map((asset) => (
-                    <div
-                      key={asset.pair}
-                      onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
-                      className="glass rounded-[12px] px-3 py-2.5 cursor-pointer hover:bg-secondary/30 transition-colors min-w-[140px]"
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">{asset.icon}</span>
-                        <span className="text-[11px] font-mono font-bold truncate">{asset.pair}</span>
-                      </div>
-                      <MiniChart data={asset.sparkline} up={asset.up} width={110} height={28} />
-                      <div className="flex items-center justify-between mt-1.5">
-                        <span className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
-                        <span className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
-                          {asset.up ? "+" : ""}{asset.change}%
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Forex Market */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> سوق الفوركس
-                </p>
-                <button onClick={() => navigate("/markets")} className="text-[10px] font-mono text-primary flex items-center gap-0.5">
-                  عرض الكل <ChevronLeft className="w-3 h-3" />
-                </button>
-              </div>
-              <div className="overflow-x-auto scrollbar-hide -mx-5 px-5">
-                <div className="flex gap-2.5 min-w-max">
-                  {forexAssets.map((asset) => (
-                    <div
-                      key={asset.pair}
-                      onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
-                      className="glass rounded-[12px] px-3 py-2.5 cursor-pointer hover:bg-secondary/30 transition-colors min-w-[140px]"
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">{asset.icon}</span>
-                        <span className="text-[11px] font-mono font-bold truncate">{asset.pair}</span>
-                      </div>
-                      <MiniChart data={asset.sparkline} up={asset.up} width={110} height={28} />
-                      <div className="flex items-center justify-between mt-1.5">
-                        <span className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
-                        <span className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
-                          {asset.up ? "+" : ""}{asset.change}%
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Favorites */}
-            {isLoggedIn && favoriteAssets.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-primary fill-primary" /> المفضلة
-                  </p>
-                </div>
-                <div className="glass rounded-[12px] divide-y divide-border/10">
-                  {favoriteAssets.slice(0, 5).map((asset) => (
-                    <div
-                      key={asset.pair}
-                      onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
-                      className="flex items-center justify-between px-3 py-2.5 hover:bg-secondary/20 cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
-                          <span className="text-sm">{asset.icon}</span>
-                        </div>
-                        <span className="text-[12px] font-mono font-medium">{asset.pair}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <MiniChart data={asset.sparkline} up={asset.up} width={40} height={16} />
-                        <span className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</span>
-                        <span className={cn("text-[10px] font-mono font-medium tabular-nums", asset.up ? "text-success" : "text-destructive")}>
-                          {asset.up ? "+" : ""}{asset.change}%
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Active Trades Tab */}
-        {activeTab === "trades" && (
-          <div className="space-y-3">
-            {activeTrades.length === 0 ? (
-              <div className="glass rounded-[14px] p-8 text-center">
-                <Briefcase className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground font-mono">لا توجد صفقات مفتوحة</p>
-                <button
-                  onClick={() => navigate("/trade-journal")}
-                  className="mt-3 px-4 py-2 rounded-lg bg-primary/15 text-primary text-[11px] font-mono font-bold border border-primary/30"
-                >
-                  افتح سجل الصفقات
-                </button>
-              </div>
-            ) : (
-              <>
-                {activeTrades.map((trade: any) => (
-                  <div
-                    key={trade.id}
-                    onClick={() => navigate("/trade-journal")}
-                    className="glass rounded-[12px] p-3 cursor-pointer hover:bg-secondary/20 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center",
-                          trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
-                        )}>
-                          {trade.direction === "long"
-                            ? <TrendingUp className="w-3.5 h-3.5 text-success" />
-                            : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                        </div>
-                        <div>
-                          <p className="text-[12px] font-mono font-bold">{trade.pair}</p>
-                          <p className="text-[9px] font-mono text-muted-foreground">
-                            {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-md bg-warning/15 text-warning">مفتوحة</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-secondary/30 rounded-lg px-2 py-1.5 text-center">
-                        <p className="text-[8px] font-mono text-muted-foreground">الدخول</p>
-                        <p className="text-[11px] font-mono font-bold">{trade.entry_price}</p>
-                      </div>
-                      {trade.take_profit && (
-                        <div className="bg-success/5 rounded-lg px-2 py-1.5 text-center">
-                          <p className="text-[8px] font-mono text-muted-foreground">TP</p>
-                          <p className="text-[11px] font-mono font-bold text-success">{trade.take_profit}</p>
-                        </div>
-                      )}
-                      {trade.stop_loss && (
-                        <div className="bg-destructive/5 rounded-lg px-2 py-1.5 text-center">
-                          <p className="text-[8px] font-mono text-muted-foreground">SL</p>
-                          <p className="text-[11px] font-mono font-bold text-destructive">{trade.stop_loss}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <button
-                  onClick={() => navigate("/trade-journal")}
-                  className="w-full py-2.5 rounded-lg bg-secondary/40 text-muted-foreground text-[11px] font-mono font-bold border border-border/10 hover:bg-secondary/60 transition-colors"
-                >
-                  عرض جميع الصفقات →
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Growth Path Tab */}
-        {activeTab === "growth" && (
-          <div className="space-y-3">
-            {goal && stats ? (
-              <>
-                {/* Live P&L Card */}
-                <div
-                  onClick={() => navigate("/goal-planner")}
-                  className="rounded-[14px] p-4 bg-card border border-border/30 cursor-pointer hover:brightness-105 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="live-dot" />
-                      <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">رصيد فعلي من الصفقات</span>
-                    </div>
-                    <span className={cn(
-                      "text-[11px] font-mono font-bold px-2 py-0.5 rounded-md",
-                      stats.achieved >= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-                    )}>
-                      {stats.achieved >= 0 ? "+" : ""}${stats.achieved.toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-end justify-between mb-2">
-                    <div>
-                      <p className="text-[9px] font-mono text-muted-foreground">الرصيد الحالي</p>
-                      <p className="text-2xl font-mono font-bold text-foreground">${(stats as any).effectiveBalance?.toLocaleString()}</p>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[9px] font-mono text-muted-foreground">الهدف</p>
-                      <p className="text-lg font-mono font-bold text-primary">${goal.target_goal.toLocaleString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="h-2.5 rounded-full bg-muted overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full bg-primary"
-                      style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.5)" }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(stats.progress, 100)}%` }}
-                      transition={{ duration: 1.5 }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-1.5 text-[9px] font-mono text-muted-foreground">
-                    <span>{stats.progress.toFixed(1)}% مكتمل</span>
-                    <span>{stats.daysRemaining} يوم متبقي</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="glass rounded-[12px] p-3 text-center">
-                    <p className="text-[9px] font-mono text-muted-foreground uppercase">المتبقي</p>
-                    <p className="text-sm font-mono font-bold">${stats.remaining.toLocaleString()}</p>
-                  </div>
-                  <div className="glass rounded-[12px] p-3 text-center">
-                    <p className="text-[9px] font-mono text-muted-foreground uppercase">المطلوب يومياً</p>
-                    <p className="text-sm font-mono font-bold text-warning">${stats.dailyRequired.toFixed(0)}</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => navigate("/goal-planner")}
-                  className="w-full py-2.5 rounded-lg bg-primary/10 text-primary text-[11px] font-mono font-bold border border-primary/20 hover:bg-primary/15 transition-colors"
-                >
-                  عرض مسار النمو الكامل →
-                </button>
-              </>
-            ) : (
-              <div className="glass rounded-[14px] p-8 text-center">
-                <Target className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground font-mono">لم تبدأ مسار النمو بعد</p>
-                <p className="text-[10px] text-muted-foreground/60 font-mono mt-1">ضع هدفاً مالياً وابدأ تتبع أرباحك من الصفقات</p>
-                <button
-                  onClick={() => navigate("/goal-planner")}
-                  className="mt-3 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[11px] font-mono font-bold"
-                >
-                  ابدأ الآن
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        ))}
       </motion.div>
     </motion.div>
   );
