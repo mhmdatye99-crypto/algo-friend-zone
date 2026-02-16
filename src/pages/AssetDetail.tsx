@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen, ChevronDown, Sparkles, HelpCircle, X } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown, Star, Activity, Gauge, ArrowUpRight, Clock, Zap, Save, Loader2, CheckCircle, BookOpen, ChevronDown, Sparkles, HelpCircle, X, Lock } from "lucide-react";
 import { AlphaConsultant } from "@/components/asset/AlphaConsultant";
 import { cn } from "@/lib/utils";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { LockedFeatureOverlay } from "@/components/credits/LockedFeatureOverlay";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -466,6 +468,9 @@ const AssetDetail = () => {
   const assets = useLivePrices();
   const { favorites, toggle, isLoggedIn } = useFavorites();
   const [timeframe, setTimeframe] = useState("4H");
+  const [mtfUnlocked, setMtfUnlocked] = useState(false);
+  const [indicatorsUnlocked, setIndicatorsUnlocked] = useState(false);
+  const [consultantUnlocked, setConsultantUnlocked] = useState(false);
 
   const decodedPair = decodeURIComponent(location.pathname.replace("/asset/", ""));
   const asset = assets.find(a => a.pair === decodedPair);
@@ -582,6 +587,13 @@ const AssetDetail = () => {
 
       {/* ═══ Multi-Timeframe Analysis — Collapsed by Default ═══ */}
       <motion.div variants={fadeUp} className="space-y-2">
+        <LockedFeatureOverlay
+          cost={CREDIT_COSTS.mtf_analysis}
+          featureName="mtf_analysis"
+          featureDescription="تحليل متعدد الفريمات"
+          onUnlock={() => setMtfUnlocked(true)}
+          locked={!mtfUnlocked}
+        >
         <div className="intel-card rounded-[14px] p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -609,10 +621,19 @@ const AssetDetail = () => {
             ))}
           </div>
         </div>
+        </LockedFeatureOverlay>
       </motion.div>
 
       {/* Technical Indicators */}
-      <motion.div variants={fadeUp} className="glass rounded-xl p-4">
+      <motion.div variants={fadeUp}>
+        <LockedFeatureOverlay
+          cost={CREDIT_COSTS.technical_indicators}
+          featureName="technical_indicators"
+          featureDescription="المؤشرات الفنية المتقدمة"
+          onUnlock={() => setIndicatorsUnlocked(true)}
+          locked={!indicatorsUnlocked}
+        >
+        <div className="glass rounded-xl p-4">
         <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-3">المؤشرات الفنية</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-secondary/50 rounded-lg p-3">
@@ -658,11 +679,22 @@ const AssetDetail = () => {
             <p className="text-[10px] font-mono text-muted-foreground">حجم التداول اليومي</p>
           </div>
         </div>
+        </div>
+        </LockedFeatureOverlay>
       </motion.div>
 
       {/* AI Consultant */}
       <motion.div variants={fadeUp} className="flex justify-center">
-        <AlphaConsultant asset={asset} />
+        <LockedFeatureOverlay
+          cost={CREDIT_COSTS.ai_consultant}
+          featureName="ai_consultant"
+          featureDescription="مستشار Alpha AI"
+          onUnlock={() => setConsultantUnlocked(true)}
+          locked={!consultantUnlocked}
+          compact
+        >
+          <AlphaConsultant asset={asset} />
+        </LockedFeatureOverlay>
       </motion.div>
 
       {/* Save Analysis */}

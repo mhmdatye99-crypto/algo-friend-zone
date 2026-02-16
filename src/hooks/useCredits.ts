@@ -23,6 +23,12 @@ export const CREDIT_COSTS = {
   chart_analysis: 5,
   chat_session: 2,
   reveal_signal: 1,
+  mtf_analysis: 3,
+  technical_indicators: 2,
+  ai_consultant: 3,
+  deep_dive: 2,
+  save_analysis: 1,
+  morning_brief: 1,
 } as const;
 
 export const CREDIT_PACKAGES = [
