@@ -102,6 +102,18 @@ export function useGoalPlanner() {
     const losses = tradePnl.filter(t => (t.pnl ?? 0) < 0).length;
     const recentTrades = tradePnl.slice(-5);
     
+    // Build equity curve (cumulative balance over time)
+    let cumPnl = 0;
+    const equityCurve = tradePnl.map((t) => {
+      cumPnl += t.pnl ?? 0;
+      const date = t.closed_at || "";
+      return {
+        date: new Date(date).toLocaleDateString("ar-EG", { month: "short", day: "numeric" }),
+        balance: Math.round((goal.initial_capital + cumPnl) * 100) / 100,
+        pnl: Math.round(cumPnl * 100) / 100,
+      };
+    });
+
     return {
       totalPnl: Math.round(totalPnl * 100) / 100,
       realBalance: Math.round(realBalance * 100) / 100,
@@ -110,6 +122,7 @@ export function useGoalPlanner() {
       losses,
       winRate: tradePnl.length > 0 ? Math.round((wins / tradePnl.length) * 100) : 0,
       recentTrades,
+      equityCurve,
     };
   }, [tradePnl, goal]);
 
