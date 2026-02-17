@@ -122,6 +122,9 @@ const TradeCenter = () => {
   // Signals state
   const [activeSignalFilter, setActiveSignalFilter] = useState("الكل");
   const [signalSearch, setSignalSearch] = useState("");
+  const [confidenceFilter, setConfidenceFilter] = useState<"all" | "80+" | "70+" | "60+">("all");
+  const [riskFilter, setRiskFilter] = useState<"all" | "منخفض" | "متوسط" | "مرتفع">("all");
+  const [showSignalFilters, setShowSignalFilters] = useState(false);
 
   // Analysis state
   const [analysisStep, setAnalysisStep] = useState<AnalysisStep>("idle");
@@ -168,10 +171,13 @@ const TradeCenter = () => {
   }, [assets, activeCategory, searchQuery, showFavOnly, signalFilter, changeFilter, sortField, sortDir, favorites]);
 
   const filteredSignals = useMemo(() => {
+    const confMin = confidenceFilter === "80+" ? 80 : confidenceFilter === "70+" ? 70 : confidenceFilter === "60+" ? 60 : 0;
     return signals
       .filter(s => activeSignalFilter === "الكل" || s.category === activeSignalFilter)
-      .filter(s => !signalSearch || s.pair.toLowerCase().includes(signalSearch.toLowerCase()));
-  }, [signals, activeSignalFilter, signalSearch]);
+      .filter(s => !signalSearch || s.pair.toLowerCase().includes(signalSearch.toLowerCase()))
+      .filter(s => s.confidence >= confMin)
+      .filter(s => riskFilter === "all" || s.risk === riskFilter);
+  }, [signals, activeSignalFilter, signalSearch, confidenceFilter, riskFilter]);
 
   const symbolFilteredAssets = useMemo(() => {
     return assets.filter(a => !symbolSearch || a.pair.toLowerCase().includes(symbolSearch.toLowerCase())).slice(0, 8);
@@ -533,26 +539,109 @@ const TradeCenter = () => {
             )}
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-4 px-4">
-            {signalCategoryFilters.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveSignalFilter(f)}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium whitespace-nowrap transition-all",
-                  activeSignalFilter === f
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
-                )}
-              >
-                {f}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
+              {signalCategoryFilters.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setActiveSignalFilter(f)}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium whitespace-nowrap transition-all",
+                    activeSignalFilter === f
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowSignalFilters(!showSignalFilters)}
+              className={cn(
+                "relative w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                showSignalFilters ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+              )}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              {(confidenceFilter !== "all" || riskFilter !== "all") && (
+                <span className="absolute -top-1 -left-1 w-4 h-4 bg-primary text-primary-foreground text-[9px] rounded-full flex items-center justify-center font-bold">
+                  {[confidenceFilter !== "all", riskFilter !== "all"].filter(Boolean).length}
+                </span>
+              )}
+            </button>
           </div>
+
+          {/* Smart Filters Panel */}
+          <AnimatePresence>
+            {showSignalFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="glass rounded-xl p-3 space-y-3 border border-border/20">
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground mb-1.5 flex items-center gap-1">
+                      <Shield className="w-3 h-3" /> نسبة الثقة
+                    </p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {([
+                        { key: "all" as const, label: "الكل" },
+                        { key: "80+" as const, label: "80%+" },
+                        { key: "70+" as const, label: "70%+" },
+                        { key: "60+" as const, label: "60%+" },
+                      ]).map(({ key, label }) => (
+                        <button key={key} onClick={() => setConfidenceFilter(key)}
+                          className={cn(
+                            "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all",
+                            confidenceFilter === key ? "bg-primary text-primary-foreground" : "bg-secondary/80 text-muted-foreground"
+                          )}>
+                          {key === "80+" && <Zap className="w-3 h-3" />}
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground mb-1.5 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> مستوى المخاطرة
+                    </p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {([
+                        { key: "all" as const, label: "الكل", color: "" },
+                        { key: "منخفض" as const, label: "منخفض", color: "text-success" },
+                        { key: "متوسط" as const, label: "متوسط", color: "text-warning" },
+                        { key: "مرتفع" as const, label: "مرتفع", color: "text-destructive" },
+                      ]).map(({ key, label, color }) => (
+                        <button key={key} onClick={() => setRiskFilter(key)}
+                          className={cn(
+                            "px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all",
+                            riskFilter === key ? "bg-primary text-primary-foreground" : cn("bg-secondary/80 text-muted-foreground", color && riskFilter !== key && color)
+                          )}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {(confidenceFilter !== "all" || riskFilter !== "all") && (
+                    <button onClick={() => { setConfidenceFilter("all"); setRiskFilter("all"); }}
+                      className="text-[10px] font-mono text-destructive hover:underline">
+                      إعادة تعيين الفلاتر
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <p className="text-[10px] font-mono text-muted-foreground px-1">
             {filteredSignals.length} توصية
             {signalSearch && ` — "${signalSearch}"`}
+            {confidenceFilter !== "all" && ` • ثقة ${confidenceFilter}`}
+            {riskFilter !== "all" && ` • مخاطرة ${riskFilter}`}
           </p>
 
           {signals.length === 0 ? (
