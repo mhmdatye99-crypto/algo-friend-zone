@@ -61,7 +61,7 @@ const Auth = () => {
     "w-full bg-secondary/40 rounded-xl px-4 py-3 pr-11 text-sm font-mono border border-border/20 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all duration-200 placeholder:text-muted-foreground/40";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-5" dir="rtl">
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-5" dir="rtl">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
       <AnimatePresence mode="wait">
@@ -207,7 +207,7 @@ const Auth = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   );
 };
 
