@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { Home, ScanLine, Brain, Trophy, User, X } from "lucide-react";
+import { Home, ScanLine, TrendingUp, Trophy, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "الرئيسية" },
+  { path: "/profile", icon: User, label: "المقر" },
+  { path: "/community", icon: Trophy, label: "الساحة" },
   { path: "/ai-scan", icon: ScanLine, label: "AI Scan" },
-  { path: "/mentor", icon: Brain, label: "المُرشد" },
-  { path: "/community", icon: Trophy, label: "المجتمع" },
-  { path: "/profile", icon: User, label: "الملف" },
+  { path: "/trade-center", icon: TrendingUp, label: "التوصيات" },
+  { path: "/", icon: Home, label: "الرئيسية" },
 ];
 
 const BottomNav = () => {
