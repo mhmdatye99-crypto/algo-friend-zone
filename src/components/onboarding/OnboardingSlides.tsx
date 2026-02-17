@@ -1,25 +1,37 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ScanLine, Users, Target, ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, ScanLine, Brain, Users, UserCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   {
-    icon: ScanLine,
-    title: "حلّل أي شارت بالذكاء الاصطناعي",
-    subtitle: "التقط صورة لأي شارت واحصل على تحليل مؤسسي فوري",
+    icon: BarChart3,
+    title: "مركز استخبارات التداول",
+    subtitle: "توصيات حية، نسبة ثقة AI، مؤشر المخاطرة، ومنحنى رأس المال — كل شيء في لوحة واحدة",
     color: "43, 100%, 50%",
   },
   {
-    icon: Users,
-    title: "تابع إشارات ألفا من الحيتان",
-    subtitle: "إشارات حية من أقوى المتداولين مع نقاط الدخول والأهداف",
+    icon: ScanLine,
+    title: "ماسح الأسواق بالذكاء الاصطناعي",
+    subtitle: "التقط صورة لأي شارت أو ابحث عن أي زوج واحصل على تحليل مؤسسي فوري",
     color: "190, 100%, 50%",
   },
   {
-    icon: Target,
-    title: "ارسم مسارك نحو $1M",
-    subtitle: "خطط أهدافك المالية وتتبع تقدمك يومياً",
-    color: "300, 80%, 50%",
+    icon: Brain,
+    title: "المُرشد — مدربك الشخصي",
+    subtitle: "يتابع انضباطك، يحلل سلوكك، ويقدم نصائح مخصصة لتطوير أدائك",
+    color: "260, 80%, 60%",
+  },
+  {
+    icon: Users,
+    title: "المجتمع والتحديات",
+    subtitle: "تحديات أسبوعية، تصنيفات، وشارات إنجاز — الانضباط أهم من الربح",
+    color: "150, 80%, 45%",
+  },
+  {
+    icon: UserCircle,
+    title: "ملفك المهني",
+    subtitle: "إحصائيات أدائك، سجل صفقاتك، ومنحنى نموّك كمتداول محترف",
+    color: "20, 90%, 55%",
   },
 ];
 
@@ -65,6 +77,10 @@ const OnboardingSlides = ({ onComplete }: Props) => {
           >
             <Icon className="w-9 h-9" style={{ color: `hsl(${slide.color})` }} />
           </motion.div>
+
+          <p className="text-[10px] font-mono text-muted-foreground mb-1 tracking-widest">
+            {current + 1} / {slides.length}
+          </p>
           <h2 className="text-lg font-display font-bold mb-2">{slide.title}</h2>
           <p className="text-sm font-mono text-muted-foreground max-w-xs">{slide.subtitle}</p>
         </motion.div>
