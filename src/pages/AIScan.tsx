@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLivePrices, formatPrice, CRYPTO_LOGO_MAP, FOREX_FLAG_MAP } from "@/hooks/useLivePrices";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
 
 interface AnalysisResult {
   pair?: string;
@@ -63,6 +65,7 @@ const AIScan = () => {
   const { createPost } = useCommunity();
   const { user } = useAuth();
   const assets = useLivePrices();
+  const { isPro, loading: subLoading } = useSubscription();
 
   const filteredAssets = assets.filter(a =>
     !symbolSearch || a.pair.toLowerCase().includes(symbolSearch.toLowerCase())
@@ -127,6 +130,27 @@ const AIScan = () => {
   const resetAnalysis = () => { setStep("idle"); setImagePreview(null); setAnalysis(null); setLoadingStep(0); };
 
   const dirColor = analysis?.direction === "bullish" ? "text-success" : analysis?.direction === "bearish" ? "text-destructive" : "text-warning";
+
+  if (!subLoading && !isPro) {
+    return (
+      <div className="px-4 pt-3 pb-28 max-w-lg mx-auto">
+        <div className="mb-4">
+          <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.2em]">ماسح متقدم</p>
+          <h1 className="text-lg font-bold">AI <span className="text-gradient-gold">Scan</span></h1>
+        </div>
+        <SubscriptionGate featureName="AI Scan">
+          <div className="space-y-4 py-20">
+            <div className="grid grid-cols-3 gap-2">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="rounded-xl p-3 bg-card/60 border border-border/10 h-16" />
+              ))}
+            </div>
+            <div className="rounded-xl p-10 bg-card/40 border border-dashed border-border/30" />
+          </div>
+        </SubscriptionGate>
+      </div>
+    );
+  }
 
   return (
     <motion.div className="px-4 pt-3 pb-28 max-w-lg mx-auto space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
