@@ -50,11 +50,11 @@ const TopBar = () => {
           {/* Center */}
           <div className="flex flex-col items-center">
             {isHome ? (
-              <p className="text-[13px] font-mono font-black tracking-[0.15em] text-foreground/90">
-                <span className="text-accent">NEXUS</span> <span className="text-foreground/50">TRADE</span>
+              <p className="text-[14px] font-mono font-black tracking-[0.18em] text-foreground/90">
+                <span className="text-accent">NEXUS</span> <span className="text-foreground/60">TRADE</span>
               </p>
             ) : (
-              <p className="text-[12px] font-mono font-bold text-foreground/80">{currentTitle}</p>
+              <p className="text-[13px] font-semibold text-foreground/85">{currentTitle}</p>
             )}
           </div>
 

@@ -43,7 +43,7 @@ const BottomNav = () => {
                   active ? "text-accent" : "text-muted-foreground/60"
                 )} strokeWidth={active ? 2.5 : 1.8} />
                 <span className={cn(
-                  "text-[9px] font-medium transition-colors duration-200",
+                  "text-[10px] font-semibold transition-colors duration-200",
                   active ? "text-accent" : "text-muted-foreground/50"
                 )}>{tab.label}</span>
               </button>
