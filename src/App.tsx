@@ -5,24 +5,22 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
-import NexusBrain from "./pages/NexusBrain";
-import TradeCenter from "./pages/TradeCenter";
-import ChartVision from "./pages/ChartVision";
-import Academy from "./pages/Academy";
-
-import MorningBrief from "./pages/MorningBrief";
+import AIScan from "./pages/AIScan";
+import Mentor from "./pages/Mentor";
+import CommunityPage from "./pages/CommunityPage";
+import ProfilePage from "./pages/ProfilePage";
 import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
-import Community from "./pages/Community";
 import GoalPlanner from "./pages/GoalPlanner";
-import Markets from "./pages/Markets";
 import RiskCalculator from "./pages/RiskCalculator";
 import Subscription from "./pages/Subscription";
 import AdminPanel from "./pages/AdminPanel";
 import TradeJournal from "./pages/TradeJournal";
-import Hub from "./pages/Hub";
+import TradeCenter from "./pages/TradeCenter";
 import MyAnalyses from "./pages/MyAnalyses";
-import Challenges from "./pages/Challenges";
+import MorningBrief from "./pages/MorningBrief";
+import Academy from "./pages/Academy";
+import ChartVision from "./pages/ChartVision";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,27 +60,33 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthRoute />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+              {/* 5 Main Sections */}
               <Route path="/" element={<Dashboard />} />
-              <Route path="/nexus-brain" element={<NexusBrain />} />
-              <Route path="/trade-center" element={<TradeCenter />} />
-              <Route path="/chart-vision" element={<ChartVision />} />
-              <Route path="/academy" element={<Academy />} />
-              <Route path="/morning-brief" element={<MorningBrief />} />
+              <Route path="/ai-scan" element={<AIScan />} />
+              <Route path="/mentor" element={<Mentor />} />
+              <Route path="/community" element={<CommunityPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+
+              {/* Supporting pages */}
               <Route path="/asset/*" element={<AssetDetail />} />
-              <Route path="/community" element={<Community />} />
+              <Route path="/trade-center" element={<TradeCenter />} />
+              <Route path="/trade-journal" element={<TradeJournal />} />
               <Route path="/goal-planner" element={<GoalPlanner />} />
-              <Route path="/markets" element={<Navigate to="/trade-center" replace />} />
-              <Route path="/hub" element={<Hub />} />
               <Route path="/risk-calculator" element={<RiskCalculator />} />
               <Route path="/subscription" element={<Subscription />} />
-              <Route path="/trade-journal" element={<TradeJournal />} />
               <Route path="/my-analyses" element={<MyAnalyses />} />
-              <Route path="/challenges" element={<Challenges />} />
+              <Route path="/morning-brief" element={<MorningBrief />} />
+              <Route path="/academy" element={<Academy />} />
+              <Route path="/chart-vision" element={<ChartVision />} />
               <Route path="/admin" element={<AdminPanel />} />
+
               {/* Legacy redirects */}
+              <Route path="/hub" element={<Navigate to="/profile" replace />} />
               <Route path="/signals" element={<Navigate to="/trade-center" replace />} />
-              <Route path="/profile" element={<Navigate to="/hub" replace />} />
-              <Route path="/more" element={<Navigate to="/hub" replace />} />
+              <Route path="/markets" element={<Navigate to="/trade-center" replace />} />
+              <Route path="/nexus-brain" element={<Navigate to="/mentor" replace />} />
+              <Route path="/challenges" element={<Navigate to="/community" replace />} />
+              <Route path="/more" element={<Navigate to="/profile" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
