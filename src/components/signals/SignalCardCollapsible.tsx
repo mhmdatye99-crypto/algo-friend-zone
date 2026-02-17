@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  TrendingUp, TrendingDown, ChevronDown, Lock, Unlock, Layers, Zap, Eye,
-  Info, BookOpen, Calculator, AlertTriangle, Target, Shield, ArrowDownUp,
-  Clock, Crosshair, Loader2, MapPin, Route, BarChart3, Save
+  TrendingUp, TrendingDown, ChevronDown, Lock, Layers, Zap, Eye,
+  BookOpen, Calculator, AlertTriangle, Target, Shield, ArrowDownUp,
+  Clock, Crosshair, Loader2, MapPin, Route, BarChart3, Save, MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/
 import { toast } from "sonner";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
+import AskXChat from "./AskXChat";
 
 interface Signal {
   pair: string;
@@ -60,12 +61,28 @@ interface Props {
 
 const stop = (e: React.MouseEvent | React.PointerEvent) => e.stopPropagation();
 
+// X-Ray Badge component
+const XBadge = ({ label, value, variant = "default" }: { label: string; value: string; variant?: "success" | "danger" | "warning" | "default" }) => {
+  const colors = {
+    success: "bg-primary/8 text-primary border-primary/15",
+    danger: "bg-destructive/8 text-destructive border-destructive/15",
+    warning: "bg-warning/8 text-warning border-warning/15",
+    default: "bg-accent/8 text-accent border-accent/15",
+  };
+  return (
+    <span className={cn("text-[8px] font-mono font-bold px-2 py-0.5 rounded-md border inline-flex items-center gap-1", colors[variant])}>
+      <span className="opacity-60">X-{label}:</span> {value}
+    </span>
+  );
+};
+
 const SignalCardCollapsible = ({ signal }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(false);
   const [showInsufficient, setShowInsufficient] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
   const [showRiskCalc, setShowRiskCalc] = useState(false);
+  const [showAskX, setShowAskX] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -75,10 +92,19 @@ const SignalCardCollapsible = ({ signal }: Props) => {
 
   const status = signal.confidence >= 80 ? "Active" : "Pending";
 
+  // X-Ray badge data
+  const trendVariant = signal.direction === "صعودي" ? "success" : "danger";
+  const riskVariant = signal.risk === "منخفض" ? "success" : signal.risk === "متوسط" ? "warning" : "danger";
+  const volVariant = Math.abs(parseFloat(signal.volume)) > 30 ? "warning" : "default";
+
+  // X Strategic Brief
+  const xBrief = signal.direction === "صعودي"
+    ? `X يرصد زخم ${signal.macd === "صعودي" ? "إيجابي" : "محايد"} على ${signal.pair} مع RSI عند ${signal.rsi}. ${signal.rsi < 40 ? "منطقة تشبع بيعي — فرصة ارتداد محتملة." : signal.rsi > 60 ? "استمرار الاتجاه الصاعد مع مراقبة مستويات التشبع." : "منطقة محايدة — انتظر تأكيد الاختراق."}`
+    : `X يكشف ضغط بيعي على ${signal.pair} مع RSI عند ${signal.rsi}. ${signal.rsi > 60 ? "منطقة تشبع شرائي — احتمال تصحيح هبوطي." : signal.rsi < 40 ? "استمرار الاتجاه الهابط مع مراقبة مستويات الدعم." : "سيولة متراجعة — ترقب حركة حاسمة."}`;
+
   const handleSaveAnalysis = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user || !aiAnalysis || saving) return;
-
     setSaving(true);
     try {
       const notes = [
@@ -102,11 +128,10 @@ const SignalCardCollapsible = ({ signal }: Props) => {
         icon: signal.icon || null,
         notes,
       });
-
       if (error) throw error;
-      toast.success("تم حفظ التحليل في السجل ✅");
+      toast.success("تم حفظ التحليل ✅");
     } catch (err) {
-      console.error("Save analysis error:", err);
+      console.error("Save error:", err);
       toast.error("تعذر حفظ التحليل");
     } finally {
       setSaving(false);
@@ -116,45 +141,27 @@ const SignalCardCollapsible = ({ signal }: Props) => {
   const handleAnalyze = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (analyzing) return;
-
     if (!isFounder && !canAfford(CREDIT_COSTS.reveal_signal)) {
       setShowInsufficient(true);
       return;
     }
-
     setAnalyzing(true);
     setExpanded(true);
-
     try {
       if (!isFounder) {
-        const success = await spendCredits(CREDIT_COSTS.reveal_signal, "reveal_signal", `تحليل AI لـ ${signal.pair}`);
-        if (!success) {
-          setShowInsufficient(true);
-          setAnalyzing(false);
-          return;
-        }
+        const success = await spendCredits(CREDIT_COSTS.reveal_signal, "reveal_signal", `تحليل X لـ ${signal.pair}`);
+        if (!success) { setShowInsufficient(true); setAnalyzing(false); return; }
       }
-
       const { data, error } = await supabase.functions.invoke("signal-analysis", {
         body: {
-          pair: signal.pair,
-          direction: signal.direction,
-          timeFrame: signal.timeFrame,
-          price: signal.entry,
-          rsi: signal.rsi,
-          macd: signal.macd,
-          confidence: signal.confidence,
-          reasons: signal.reasons,
+          pair: signal.pair, direction: signal.direction, timeFrame: signal.timeFrame,
+          price: signal.entry, rsi: signal.rsi, macd: signal.macd,
+          confidence: signal.confidence, reasons: signal.reasons,
         },
       });
-
       if (error) throw error;
-      if (data?.error) {
-        toast.error(data.error);
-      } else {
-        setAiAnalysis(data);
-        toast.success("تم التحليل بنجاح ✨");
-      }
+      if (data?.error) toast.error(data.error);
+      else { setAiAnalysis(data); toast.success("تحليل X جاهز ✨"); }
     } catch (err) {
       console.error("Analysis error:", err);
       toast.error("تعذر التحليل. حاول مرة أخرى.");
@@ -182,7 +189,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
         <div className="rounded-xl bg-accent/5 border border-accent/15 p-3 space-y-2.5">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1">
-              <Calculator className="w-3 h-3" /> حاسبة المخاطر
+              <Calculator className="w-3 h-3" /> X حاسبة المخاطر
             </p>
             <button onClick={(e) => { stop(e); setShowRiskCalc(false); }} className="text-muted-foreground hover:text-foreground">
               <ChevronDown className="w-3 h-3" />
@@ -207,7 +214,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
             </div>
             <div className="bg-secondary/30 rounded-lg p-2 text-center">
               <p className="text-[8px] font-mono text-muted-foreground">حجم المركز</p>
-              <p className="text-[12px] font-mono font-bold text-primary">{posSize > 0 ? posSize.toFixed(4) : "—"}</p>
+              <p className="text-[12px] font-mono font-bold text-accent">{posSize > 0 ? posSize.toFixed(4) : "—"}</p>
             </div>
             <div className="bg-secondary/30 rounded-lg p-2 text-center">
               <p className="text-[8px] font-mono text-muted-foreground">R:R</p>
@@ -224,13 +231,26 @@ const SignalCardCollapsible = ({ signal }: Props) => {
       <motion.div
         variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
         className={cn(
-          "glass rounded-2xl overflow-hidden transition-all duration-300",
-          signal.alphaScore >= 90 ? "border-primary/25 glow-gold" : "border-border/10"
+          "rounded-2xl overflow-hidden transition-all duration-300 border bg-card/80 backdrop-blur-xl",
+          signal.alphaScore >= 90 ? "border-accent/25 shadow-[0_0_20px_hsla(210,100%,60%,0.08)]" : "border-border/10"
         )}
         onClick={stop}
       >
+        {/* ─── X Intelligence Brief (Top) ─── */}
+        <div className="px-4 py-2.5 bg-accent/3 border-b border-accent/8" onClick={stop}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-5 h-5 rounded-md bg-accent/15 flex items-center justify-center border border-accent/20">
+              <span className="text-[9px] font-black text-accent">X</span>
+            </div>
+            <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">X Intelligence</span>
+            <div className="flex-1" />
+            <span className="text-[7px] font-mono text-muted-foreground/50 uppercase">Strategic Brief</span>
+          </div>
+          <p className="text-[10px] font-mono text-foreground/70 leading-relaxed">{xBrief}</p>
+        </div>
+
         {/* ─── Header ─── */}
-        <div className="px-4 py-3.5 flex items-center justify-between" onClick={stop}>
+        <div className="px-4 py-3 flex items-center justify-between" onClick={stop}>
           <div className="flex items-center gap-3">
             {signal.icon && (
               <span className="w-10 h-10 rounded-xl bg-secondary/60 flex items-center justify-center text-lg border border-border/20 shadow-sm">
@@ -242,7 +262,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 <span className="font-mono font-bold text-[15px] tracking-wide">{signal.pair}</span>
                 <span className={cn(
                   "text-[8px] px-1.5 py-0.5 rounded-md font-mono font-bold uppercase tracking-wider",
-                  status === "Active" ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
+                  status === "Active" ? "bg-accent/15 text-accent" : "bg-warning/15 text-warning"
                 )}>
                   {status}
                 </span>
@@ -262,25 +282,32 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Confidence - blurred until analyzed */}
+            {/* Ask X button */}
+            <button
+              onClick={(e) => { stop(e); setShowAskX(!showAskX); }}
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
+                showAskX ? "bg-accent/15 border-accent/30 text-accent" : "bg-secondary/30 border-border/20 text-muted-foreground hover:text-accent hover:border-accent/20"
+              )}
+            >
+              <MessageCircle className="w-4.5 h-4.5" />
+            </button>
+            {/* Confidence */}
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-[13px] border relative overflow-hidden",
               !aiAnalysis ? "bg-muted/20 border-border/20" :
-              signal.confidence >= 85 ? "bg-primary/10 text-primary border-primary/20" :
-              signal.confidence >= 70 ? "bg-accent/10 text-accent border-accent/20" :
+              signal.confidence >= 85 ? "bg-accent/10 text-accent border-accent/20" :
+              signal.confidence >= 70 ? "bg-primary/10 text-primary border-primary/20" :
               "bg-warning/10 text-warning border-warning/20"
             )}>
-              {aiAnalysis ? (
-                signal.confidence
-              ) : (
+              {aiAnalysis ? signal.confidence : (
                 <>
                   <span className="blur-[6px] text-muted-foreground select-none">{signal.confidence}</span>
                   <Lock className="w-3 h-3 text-muted-foreground/60 absolute" />
                 </>
               )}
             </div>
-
-            {/* Direction icon */}
+            {/* Direction */}
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center border",
               signal.direction === "صعودي" ? "bg-primary/10 border-primary/20" : "bg-destructive/10 border-destructive/20"
@@ -292,16 +319,93 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
         </div>
 
+        {/* ─── X-Ray Badges ─── */}
+        <div className="px-4 pb-2 flex flex-wrap gap-1" onClick={stop}>
+          <XBadge label="Trend" value={signal.direction === "صعودي" ? "Bullish" : "Bearish"} variant={trendVariant as any} />
+          <XBadge label="Risk" value={signal.risk === "منخفض" ? "Low" : signal.risk === "متوسط" ? "Med" : "High"} variant={riskVariant as any} />
+          <XBadge label="RSI" value={String(signal.rsi)} variant={signal.rsi > 70 ? "danger" : signal.rsi < 30 ? "success" : "default"} />
+          <XBadge label="Vol" value={signal.volume} variant={volVariant as any} />
+          <XBadge label="Conv" value={`${signal.convergence}/5`} variant={signal.convergence >= 4 ? "success" : signal.convergence >= 3 ? "warning" : "danger"} />
+        </div>
+
+        {/* ─── Master Execution Card ─── */}
+        <div className="px-4 pb-3" onClick={stop}>
+          <div className="rounded-xl bg-secondary/20 border border-accent/8 p-3 space-y-2">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Crosshair className="w-3 h-3 text-accent" />
+              <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">Master Execution</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-accent/5 rounded-lg px-2 py-2 text-center border border-accent/10">
+                <p className="text-[7px] font-mono text-muted-foreground uppercase">Entry</p>
+                <p className="text-[13px] font-mono font-bold text-accent tabular-nums">{signal.entry}</p>
+              </div>
+              <div className="bg-destructive/5 rounded-lg px-2 py-2 text-center border border-destructive/10">
+                <p className="text-[7px] font-mono text-muted-foreground uppercase">Stop Loss</p>
+                <p className="text-[13px] font-mono font-bold text-destructive tabular-nums">{signal.sl}</p>
+              </div>
+              <div className="bg-primary/5 rounded-lg px-2 py-2 text-center border border-primary/10">
+                <p className="text-[7px] font-mono text-muted-foreground uppercase">R:R</p>
+                <p className="text-[13px] font-mono font-bold text-primary">{signal.rr}</p>
+              </div>
+            </div>
+
+            {/* TP Goal Slider */}
+            <div className="space-y-1.5">
+              <p className="text-[8px] font-mono text-muted-foreground uppercase">Take Profit Targets</p>
+              {[
+                { label: "TP1", value: signal.target1, prob: 75 },
+                { label: "TP2", value: signal.target2, prob: 45 },
+              ].map((tp) => (
+                <div key={tp.label} className="flex items-center gap-2">
+                  <span className="text-[8px] font-mono font-bold text-primary w-7">{tp.label}</span>
+                  <div className="flex-1 h-2 rounded-full bg-muted/30 overflow-hidden relative">
+                    <motion.div
+                      className="h-full rounded-full bg-gradient-to-r from-accent/60 to-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${tp.prob}%` }}
+                      transition={{ duration: 1, delay: 0.3 }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold tabular-nums w-16 text-left text-primary">{tp.value}</span>
+                  <span className="text-[8px] font-mono text-muted-foreground w-7 text-left">{tp.prob}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Ask X Chat ─── */}
+        <AnimatePresence>
+          {showAskX && (
+            <div className="px-4 pb-3">
+              <AskXChat
+                signalContext={{
+                  pair: signal.pair, direction: signal.direction, timeFrame: signal.timeFrame,
+                  price: signal.entry, rsi: signal.rsi, macd: signal.macd,
+                  confidence: signal.confidence, rr: signal.rr, sl: signal.sl,
+                  target1: signal.target1, target2: signal.target2,
+                }}
+                open={showAskX}
+                onClose={() => setShowAskX(false)}
+                onOpenRiskCalc={() => { setShowRiskCalc(true); setExpanded(true); }}
+              />
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* ─── Analyze Button ─── */}
         {!aiAnalysis && !analyzing && (
           <div className="px-4 pb-3.5" onClick={stop}>
             <motion.button
               onClick={handleAnalyze}
               whileTap={{ scale: 0.97 }}
-              className="w-full py-3 rounded-xl flex items-center justify-center gap-2.5 text-[12px] font-mono font-bold transition-all border bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 active:bg-primary/15"
+              className="w-full py-3 rounded-xl flex items-center justify-center gap-2.5 text-[12px] font-mono font-bold transition-all border bg-accent/5 text-accent border-accent/20 hover:bg-accent/10 active:bg-accent/15"
             >
-              <Eye className="w-4 h-4" />
-              اضغط للتحليل
+              <div className="w-5 h-5 rounded-md bg-accent/15 flex items-center justify-center border border-accent/20">
+                <span className="text-[9px] font-black">X</span>
+              </div>
+              تحليل X العميق
               <Zap className="w-3.5 h-3.5 text-accent" />
             </motion.button>
           </div>
@@ -317,22 +421,22 @@ const SignalCardCollapsible = ({ signal }: Props) => {
               className="px-4 pb-4 overflow-hidden"
               onClick={stop}
             >
-              <div className="rounded-xl bg-primary/5 border border-primary/15 p-6 flex flex-col items-center justify-center gap-3">
+              <div className="rounded-xl bg-accent/5 border border-accent/15 p-6 flex flex-col items-center justify-center gap-3">
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <BarChart3 className="w-7 h-7 text-primary animate-pulse" />
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center">
+                    <span className="text-xl font-black text-accent">X</span>
                   </div>
                   <motion.div
-                    className="absolute -inset-2 rounded-2xl border border-primary/20"
+                    className="absolute -inset-2 rounded-2xl border border-accent/20"
                     animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   />
                 </div>
-                <p className="text-[12px] font-mono font-bold text-primary">تحليل AI جاري...</p>
+                <p className="text-[12px] font-mono font-bold text-accent">X يحلل البيانات...</p>
                 <p className="text-[10px] font-mono text-muted-foreground">تحديد مناطق الدخول والخروج والسيناريوهات</p>
                 <div className="flex gap-1.5">
                   {[0, 1, 2, 3].map(i => (
-                    <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary"
+                    <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-accent"
                       animate={{ opacity: [0.3, 1, 0.3] }}
                       transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
                     />
@@ -343,16 +447,16 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           )}
         </AnimatePresence>
 
-        {/* ─── Collapsed Re-expand Button ─── */}
+        {/* ─── Collapsed Re-expand ─── */}
         {aiAnalysis && !expanded && !analyzing && (
           <div className="px-4 pb-3.5" onClick={stop}>
             <motion.button
               onClick={toggleExpand}
               whileTap={{ scale: 0.97 }}
-              className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-[11px] font-mono font-bold bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 transition-all"
+              className="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-[11px] font-mono font-bold bg-accent/5 text-accent border border-accent/20 hover:bg-accent/10 transition-all"
             >
               <Eye className="w-3.5 h-3.5" />
-              عرض التحليل
+              عرض تحليل X
               <ChevronDown className="w-3 h-3" />
             </motion.button>
           </div>
@@ -370,7 +474,6 @@ const SignalCardCollapsible = ({ signal }: Props) => {
               onClick={stop}
             >
               <div className="px-4 pb-4 space-y-3">
-                {/* Collapse button */}
                 <button
                   onClick={toggleExpand}
                   className="w-full flex items-center justify-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors py-1.5 border-t border-border/10"
@@ -379,27 +482,30 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   إخفاء التحليل
                 </button>
 
-                {/* ── Verdict ── */}
+                {/* Verdict */}
                 {aiAnalysis.verdict && (
                   <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                    className="rounded-xl bg-gradient-to-r from-primary/8 to-accent/5 border border-primary/15 p-3.5"
+                    className="rounded-xl bg-gradient-to-r from-accent/8 to-primary/5 border border-accent/15 p-3.5"
                   >
-                    <p className="text-[11px] font-mono font-bold text-primary leading-relaxed">
-                      ⚡ {aiAnalysis.verdict}
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-5 h-5 rounded-md bg-accent/15 flex items-center justify-center">
+                        <span className="text-[9px] font-black text-accent">X</span>
+                      </div>
+                      <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-wider">X Verdict</span>
+                    </div>
+                    <p className="text-[11px] font-mono font-bold text-foreground/90 leading-relaxed">
+                      {aiAnalysis.verdict}
                     </p>
                   </motion.div>
                 )}
 
-                {/* ── Entry & Exit Grid ── */}
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-                  className="space-y-2"
-                >
-                  {/* Entry Zone */}
-                  {aiAnalysis.entryZone && (
-                    <div className="rounded-xl bg-secondary/20 border border-border/10 p-3 space-y-2">
+                {/* Entry Zone */}
+                {aiAnalysis.entryZone && (
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                    <div className="rounded-xl bg-secondary/20 border border-accent/10 p-3 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Crosshair className="w-3.5 h-3.5" /> منطقة الدخول
+                          <Crosshair className="w-3.5 h-3.5" /> X Entry Zone
                         </span>
                         <span className="text-[9px] font-mono bg-accent/10 text-accent px-2 py-0.5 rounded-full">{aiAnalysis.entryZone.type}</span>
                       </div>
@@ -414,81 +520,90 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                         </div>
                       </div>
                     </div>
-                  )}
+                  </motion.div>
+                )}
 
-                  {/* Exit Zones */}
-                  {aiAnalysis.exitZones && aiAnalysis.exitZones.length > 0 && (
+                {/* Exit Zones with Goal Slider */}
+                {aiAnalysis.exitZones && aiAnalysis.exitZones.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
                     <div className="rounded-xl bg-secondary/20 border border-border/10 p-3 space-y-2">
                       <span className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Target className="w-3.5 h-3.5" /> أهداف الخروج
+                        <Target className="w-3.5 h-3.5" /> X Exit Targets
                       </span>
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {aiAnalysis.exitZones.map((zone, i) => (
-                          <div key={i} className="flex items-center gap-3 bg-primary/5 rounded-lg px-3 py-2 border border-primary/8">
-                            <span className={cn(
-                              "text-[10px] font-mono font-bold w-7 h-7 rounded-lg flex items-center justify-center",
-                              i === 0 ? "bg-primary/15 text-primary" : i === 1 ? "bg-primary/10 text-primary/80" : "bg-primary/5 text-primary/60"
-                            )}>{zone.label}</span>
-                            <span className="text-[14px] font-mono font-bold flex-1">{zone.target}</span>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-14 h-1.5 rounded-full bg-muted overflow-hidden">
-                                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${zone.probability}%` }} />
-                              </div>
-                              <span className="text-[9px] font-mono text-muted-foreground w-8 text-left">{zone.probability}%</span>
+                          <div key={i} className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono font-bold text-accent">{zone.label}</span>
+                              <span className="text-[12px] font-mono font-bold">{zone.target}</span>
                             </div>
+                            <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
+                              <motion.div
+                                className={cn(
+                                  "h-full rounded-full",
+                                  i === 0 ? "bg-gradient-to-r from-accent to-primary" :
+                                  i === 1 ? "bg-gradient-to-r from-accent/70 to-primary/70" :
+                                  "bg-gradient-to-r from-accent/40 to-primary/40"
+                                )}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${zone.probability}%` }}
+                                transition={{ duration: 0.8, delay: i * 0.15 }}
+                              />
+                            </div>
+                            <p className="text-[8px] font-mono text-muted-foreground text-left">احتمالية: {zone.probability}%</p>
                           </div>
                         ))}
                       </div>
                     </div>
-                  )}
+                  </motion.div>
+                )}
 
-                  {/* Stop Loss */}
-                  {aiAnalysis.stopLoss && (
+                {/* Stop Loss */}
+                {aiAnalysis.stopLoss && (
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     <div className="rounded-xl bg-destructive/5 border border-destructive/10 p-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/15 flex items-center justify-center shrink-0">
                           <Shield className="w-5 h-5 text-destructive" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[9px] font-mono text-muted-foreground uppercase">وقف الخسارة</p>
+                        <div className="flex-1">
+                          <p className="text-[9px] font-mono text-muted-foreground uppercase">X Stop Loss</p>
                           <p className="text-[15px] font-mono font-bold text-destructive">{aiAnalysis.stopLoss.price}</p>
                         </div>
                       </div>
                       <p className="text-[9px] font-mono text-muted-foreground mt-2 leading-relaxed border-t border-destructive/10 pt-2">{aiAnalysis.stopLoss.reason}</p>
                     </div>
-                  )}
-                </motion.div>
+                  </motion.div>
+                )}
 
-                {/* ── R:R & Time ── */}
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className="grid grid-cols-2 gap-2"
-                >
+                {/* R:R & Time */}
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="grid grid-cols-2 gap-2">
                   {aiAnalysis.riskReward && (
-                    <div className="bg-secondary/30 rounded-xl px-3 py-3 text-center border border-border/10">
-                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><ArrowDownUp className="w-3 h-3" /> نسبة المخاطرة/العائد</p>
-                      <p className="text-[18px] font-mono font-bold text-primary">{aiAnalysis.riskReward}</p>
+                    <div className="bg-secondary/30 rounded-xl px-3 py-3 text-center border border-accent/10">
+                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><ArrowDownUp className="w-3 h-3" /> R:R</p>
+                      <p className="text-[18px] font-mono font-bold text-accent">{aiAnalysis.riskReward}</p>
                     </div>
                   )}
                   {aiAnalysis.timeHorizon && (
                     <div className="bg-secondary/30 rounded-xl px-3 py-3 text-center border border-border/10">
-                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><Clock className="w-3 h-3" /> المدة المتوقعة</p>
+                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><Clock className="w-3 h-3" /> المدة</p>
                       <p className="text-[13px] font-mono font-bold">{aiAnalysis.timeHorizon}</p>
                     </div>
                   )}
                 </motion.div>
 
-                {/* ── Entry Reasons ── */}
+                {/* Entry Reasons */}
                 {aiAnalysis.entryReasons && aiAnalysis.entryReasons.length > 0 && (
                   <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
                     className="rounded-xl bg-secondary/20 border border-border/10 p-3 space-y-2"
                   >
                     <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5" /> أسباب الدخول
+                      <BookOpen className="w-3.5 h-3.5" /> X Entry Reasons
                     </span>
                     <div className="space-y-1.5">
                       {aiAnalysis.entryReasons.map((reason, i) => (
                         <div key={i} className="flex items-start gap-2.5 bg-secondary/30 rounded-lg px-3 py-2.5">
-                          <span className="w-5 h-5 rounded-md bg-primary/10 text-primary font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                          <span className="w-5 h-5 rounded-md bg-accent/10 text-accent font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                           <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{reason}</p>
                         </div>
                       ))}
@@ -496,18 +611,15 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   </motion.div>
                 )}
 
-                {/* ── Scenarios ── */}
+                {/* Scenarios */}
                 {aiAnalysis.scenarios && aiAnalysis.scenarios.length > 0 && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="space-y-2"
-                  >
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-2">
                     <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5 px-1">
-                      <Route className="w-3.5 h-3.5" /> السيناريوهات المتوقعة
+                      <Route className="w-3.5 h-3.5" /> X Scenarios
                     </span>
                     {aiAnalysis.scenarios.map((scenario, i) => {
                       const isPositive = scenario.title.includes("إيجابي") || scenario.title.includes("صعود");
                       const isNegative = scenario.title.includes("سلبي") || scenario.title.includes("هبوط");
-                      const color = isPositive ? "primary" : isNegative ? "destructive" : "warning";
                       return (
                         <div key={i} className={cn(
                           "rounded-xl p-3.5 border space-y-2",
@@ -516,18 +628,24 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                           "bg-warning/5 border-warning/12"
                         )}>
                           <div className="flex items-center justify-between">
-                            <p className={cn("text-[11px] font-mono font-bold flex items-center gap-1.5", `text-${color}`)}>
+                            <p className={cn("text-[11px] font-mono font-bold flex items-center gap-1.5",
+                              isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning"
+                            )}>
                               {isPositive ? "🟢" : isNegative ? "🔴" : "🟡"} {scenario.title}
                             </p>
                             <div className="flex items-center gap-1.5">
                               <div className="w-10 h-1.5 rounded-full bg-muted overflow-hidden">
-                                <div className={cn("h-full rounded-full", `bg-${color}`)} style={{ width: `${scenario.probability}%` }} />
+                                <div className={cn("h-full rounded-full",
+                                  isPositive ? "bg-primary" : isNegative ? "bg-destructive" : "bg-warning"
+                                )} style={{ width: `${scenario.probability}%` }} />
                               </div>
-                              <span className={cn("text-[10px] font-mono font-bold", `text-${color}`)}>{scenario.probability}%</span>
+                              <span className={cn("text-[10px] font-mono font-bold",
+                                isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning"
+                              )}>{scenario.probability}%</span>
                             </div>
                           </div>
                           <p className="text-[10px] font-mono text-foreground/70 leading-relaxed">{scenario.description}</p>
-                          {scenario.targets && scenario.targets.length > 0 && (
+                          {scenario.targets?.length > 0 && (
                             <div className="flex flex-wrap gap-1.5">
                               {scenario.targets.map((t, ti) => (
                                 <span key={ti} className="text-[9px] font-mono bg-secondary/40 px-2 py-0.5 rounded-md border border-border/10">{t}</span>
@@ -540,64 +658,54 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   </motion.div>
                 )}
 
-                {/* ── Strategy ── */}
+                {/* Strategy */}
                 {aiAnalysis.strategy && (
                   <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
                     className="rounded-xl bg-accent/5 border border-accent/10 p-3.5"
                   >
                     <p className="text-[10px] font-mono text-accent font-bold mb-1.5 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" /> الاستراتيجية المقترحة
+                      <MapPin className="w-3.5 h-3.5" /> X Strategy
                     </p>
                     <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{aiAnalysis.strategy}</p>
                   </motion.div>
                 )}
 
-                {/* ── Key Levels ── */}
+                {/* Key Levels */}
                 {aiAnalysis.keyLevels && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="grid grid-cols-2 gap-2"
-                  >
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-2 gap-2">
                     <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
-                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingUp className="w-3 h-3 text-primary" /> دعم</p>
-                      <div className="space-y-1">
-                        {aiAnalysis.keyLevels.support?.map((s, i) => (
-                          <p key={i} className="text-[12px] font-mono font-bold text-primary">{s}</p>
-                        ))}
-                      </div>
+                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingUp className="w-3 h-3 text-primary" /> Support</p>
+                      {aiAnalysis.keyLevels.support?.map((s, i) => (
+                        <p key={i} className="text-[12px] font-mono font-bold text-primary">{s}</p>
+                      ))}
                     </div>
                     <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/10">
-                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingDown className="w-3 h-3 text-destructive" /> مقاومة</p>
-                      <div className="space-y-1">
-                        {aiAnalysis.keyLevels.resistance?.map((r, i) => (
-                          <p key={i} className="text-[12px] font-mono font-bold text-destructive">{r}</p>
-                        ))}
-                      </div>
+                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingDown className="w-3 h-3 text-destructive" /> Resistance</p>
+                      {aiAnalysis.keyLevels.resistance?.map((r, i) => (
+                        <p key={i} className="text-[12px] font-mono font-bold text-destructive">{r}</p>
+                      ))}
                     </div>
                   </motion.div>
                 )}
 
-                {/* ── Tools ── */}
+                {/* Tools */}
                 <div className="space-y-2">
                   <button
                     onClick={(e) => { stop(e); setShowRiskCalc(!showRiskCalc); }}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-accent/5 border border-accent/15 text-[10px] font-mono text-accent font-bold hover:bg-accent/10 transition-colors"
                   >
                     <Calculator className="w-3.5 h-3.5" />
-                    حاسبة حجم المركز
+                    X حاسبة المخاطر
                   </button>
+                  <AnimatePresence>{showRiskCalc && <RiskCalcInline />}</AnimatePresence>
 
-                  <AnimatePresence>
-                    {showRiskCalc && <RiskCalcInline />}
-                  </AnimatePresence>
-
-                  {/* Deep Dive */}
                   <Collapsible open={deepDiveOpen} onOpenChange={setDeepDiveOpen}>
                     <CollapsibleTrigger asChild>
                       <button onClick={stop}
                         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary/30 border border-border/10 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Layers className="w-3.5 h-3.5" />
-                        {deepDiveOpen ? "إخفاء المؤشرات" : "المؤشرات الفنية (RSI · MACD · BB)"}
+                        {deepDiveOpen ? "إخفاء المؤشرات" : "X Technical Indicators"}
                         <motion.div animate={{ rotate: deepDiveOpen ? 180 : 0 }}>
                           <ChevronDown className="w-3 h-3" />
                         </motion.div>
@@ -631,7 +739,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   </Collapsible>
                 </div>
 
-                {/* ── Footer Actions ── */}
+                {/* Footer Actions */}
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={(e) => {
@@ -650,7 +758,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                         }
                       });
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-primary/10 text-primary px-3 py-2.5 rounded-xl hover:bg-primary/20 transition-colors border border-primary/20"
+                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-accent/10 text-accent px-3 py-2.5 rounded-xl hover:bg-accent/20 transition-colors border border-accent/20"
                   >
                     <Zap className="w-3.5 h-3.5" />
                     سجّل في اليومية
@@ -661,7 +769,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                     className="flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold bg-accent/10 text-accent px-3 py-2.5 rounded-xl hover:bg-accent/20 transition-colors border border-accent/15 disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    حفظ التحليل
+                    حفظ
                   </button>
                   <button
                     onClick={(e) => { stop(e); navigate(`/asset/${encodeURIComponent(signal.pair)}`); }}
@@ -675,7 +783,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 <div className="flex items-start gap-1.5 pt-1">
                   <AlertTriangle className="w-3 h-3 text-warning/60 shrink-0 mt-0.5" />
                   <p className="text-[8px] font-mono text-muted-foreground/60 leading-relaxed">
-                    هذه توصية تعليمية وليست نصيحة مالية. التداول ينطوي على مخاطر خسارة رأس المال.
+                    تحليل X تعليمي ولا يشكل نصيحة مالية. التداول ينطوي على مخاطر خسارة رأس المال.
                   </p>
                 </div>
               </div>
