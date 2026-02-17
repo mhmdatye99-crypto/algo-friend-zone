@@ -20,6 +20,8 @@ import MiniChart from "@/components/MiniChart";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -105,6 +107,7 @@ const TradeCenter = () => {
   const { favorites, toggle: toggleFavorite, isLoggedIn } = useFavorites();
   const { spendCredits, canAfford, isFounder } = useCredits();
   const { createPost } = useCommunity();
+  const { isPro } = useSubscription();
 
   // Main tab
   const [activeTab, setActiveTab] = useState<MainTab>("markets");
@@ -521,7 +524,16 @@ const TradeCenter = () => {
       {/* ═══════════════════════════════════════════ */}
       {/* ─── SIGNALS TAB ─── */}
       {/* ═══════════════════════════════════════════ */}
-      {activeTab === "signals" && (
+      {activeTab === "signals" && !isPro && (
+        <SubscriptionGate featureName="إشارات التداول الحية">
+          <div className="space-y-3 py-16">
+            {[1,2,3].map(i => (
+              <div key={i} className="rounded-xl p-4 bg-card/60 border border-border/10 h-24" />
+            ))}
+          </div>
+        </SubscriptionGate>
+      )}
+      {activeTab === "signals" && isPro && (
         <div className="space-y-3">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
