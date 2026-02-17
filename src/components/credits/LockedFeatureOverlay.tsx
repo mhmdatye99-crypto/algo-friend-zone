@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Zap, Crown, Sparkles } from "lucide-react";
+import { Lock, Zap, Crown, Sparkles, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCredits } from "@/hooks/useCredits";
 import { InsufficientCreditsPopup, BuyCreditsModal } from "@/components/credits/CreditModals";
@@ -123,6 +123,17 @@ export const LockedFeatureOverlay = ({
                 {isFounder ? "مجاني" : `${cost} نقطة`}
               </span>
             </motion.button>
+
+            {!compact && (
+              <button
+                onClick={() => navigate("/subscription")}
+                className="flex items-center gap-1.5 text-[9px] font-mono text-amber-400 hover:text-amber-300 transition-colors mt-1"
+              >
+                <Crown className="w-3 h-3" />
+                <span>ترقية VIP — وصول بلا حدود</span>
+                <ChevronLeft className="w-2.5 h-2.5" />
+              </button>
+            )}
           </div>
         </motion.div>
       </div>
