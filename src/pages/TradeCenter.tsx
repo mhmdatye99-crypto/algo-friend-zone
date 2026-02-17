@@ -586,102 +586,193 @@ const TradeCenter = () => {
       {/* ─── ANALYSIS TAB ─── */}
       {/* ═══════════════════════════════════════════ */}
       {activeTab === "analysis" && (
-        <div className="space-y-3">
-          {/* Sub-tabs: Chart scan vs Symbol search */}
-          <div className="flex gap-1 bg-secondary/30 rounded-xl p-1 border border-border/10">
+        <motion.div
+          className="space-y-3"
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+        >
+          {/* Sub-tabs with glow effect */}
+          <motion.div
+            variants={fadeUp}
+            className="relative flex gap-1 bg-secondary/30 rounded-xl p-1 border border-border/10"
+            style={{ boxShadow: "0 0 20px hsla(var(--accent), 0.05)" }}
+          >
             <button
               onClick={() => setAnalysisMode("chart")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[11px] font-mono font-bold transition-all",
-                analysisMode === "chart" ? "bg-background text-foreground shadow-sm border border-border/20" : "text-muted-foreground"
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-mono font-bold transition-all duration-200",
+                analysisMode === "chart"
+                  ? "bg-background text-foreground shadow-sm border border-accent/20"
+                  : "text-muted-foreground hover:text-foreground/70"
               )}
+              style={analysisMode === "chart" ? { boxShadow: "0 0 12px hsla(var(--accent), 0.1)" } : {}}
             >
               <Camera className="w-3.5 h-3.5" /> مسح شارت
             </button>
             <button
               onClick={() => setAnalysisMode("symbol")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[11px] font-mono font-bold transition-all",
-                analysisMode === "symbol" ? "bg-background text-foreground shadow-sm border border-border/20" : "text-muted-foreground"
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-mono font-bold transition-all duration-200",
+                analysisMode === "symbol"
+                  ? "bg-background text-foreground shadow-sm border border-accent/20"
+                  : "text-muted-foreground hover:text-foreground/70"
               )}
+              style={analysisMode === "symbol" ? { boxShadow: "0 0 12px hsla(var(--accent), 0.1)" } : {}}
             >
               <Search className="w-3.5 h-3.5" /> بحث بالرمز
             </button>
-          </div>
+          </motion.div>
 
           {/* Chart Scan Mode */}
           {analysisMode === "chart" && (
             <AnimatePresence mode="wait">
               {analysisStep === "idle" && (
-                <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
+                <motion.div
+                  key="idle"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="space-y-3"
+                >
+                  {/* Capabilities grid with stagger */}
+                  <motion.div
+                    className="grid grid-cols-3 gap-2"
+                    initial="hidden"
+                    animate="show"
+                    variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
+                  >
                     {[
-                      { icon: Target, label: "اتجاه السوق" },
-                      { icon: Shield, label: "دعم ومقاومة" },
-                      { icon: BarChart3, label: "مناطق السيولة" },
-                      { icon: TrendingUp, label: "حالة التقلب" },
-                      { icon: Sparkles, label: "احتمالية الصفقة" },
-                      { icon: Cpu, label: "مستوى المخاطرة" },
+                      { icon: Target, label: "اتجاه السوق", color: "text-accent" },
+                      { icon: Shield, label: "دعم ومقاومة", color: "text-primary" },
+                      { icon: BarChart3, label: "مناطق السيولة", color: "text-accent" },
+                      { icon: TrendingUp, label: "حالة التقلب", color: "text-primary" },
+                      { icon: Sparkles, label: "احتمالية الصفقة", color: "text-accent" },
+                      { icon: Cpu, label: "مستوى المخاطرة", color: "text-warning" },
                     ].map((cap, i) => (
-                      <div key={i} className="rounded-xl p-3 bg-card/60 border border-border/10 text-center">
-                        <cap.icon className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-                        <span className="text-[8px] font-mono text-muted-foreground">{cap.label}</span>
-                      </div>
+                      <motion.div
+                        key={i}
+                        variants={{ hidden: { opacity: 0, scale: 0.9 }, show: { opacity: 1, scale: 1 } }}
+                        className="rounded-xl p-3 bg-card/60 border border-border/10 text-center hover:bg-card/80 hover:border-accent/15 transition-all duration-200 group cursor-default"
+                      >
+                        <cap.icon className={cn("w-4 h-4 mx-auto mb-1 transition-colors", cap.color, "opacity-60 group-hover:opacity-100")} />
+                        <span className="text-[8px] font-mono text-muted-foreground group-hover:text-foreground/80 transition-colors">{cap.label}</span>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
 
-                  <div className="rounded-xl p-8 bg-card/40 border border-dashed border-border/30 text-center">
-                    <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+                  {/* Upload area with animated border */}
+                  <motion.div
+                    variants={fadeUp}
+                    className="relative rounded-xl p-8 bg-card/40 text-center overflow-hidden group cursor-pointer"
+                    style={{
+                      border: "1px dashed hsla(var(--accent), 0.2)",
+                      background: "linear-gradient(135deg, hsla(var(--accent), 0.03), hsla(var(--primary), 0.02))",
+                    }}
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {/* Animated scan line */}
+                    <motion.div
+                      className="absolute top-0 left-0 right-0 h-[1px]"
+                      style={{ background: "linear-gradient(90deg, transparent, hsla(var(--accent), 0.4), transparent)" }}
+                      animate={{ y: [0, 120, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    />
+                    <motion.div
+                      animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.5, 0.3] }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                    >
+                      <Cpu className="w-10 h-10 mx-auto mb-3 text-accent/40" />
+                    </motion.div>
                     <p className="text-[11px] font-mono font-bold mb-1">ارفع صورة شارت للتحليل</p>
                     <p className="text-[9px] font-mono text-muted-foreground">
                       AI يكتشف الاتجاه، الدعم/المقاومة، السيولة، ومستوى المخاطرة
                     </p>
-                  </div>
+                  </motion.div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => cameraInputRef.current?.click()}
-                      className="rounded-xl p-4 flex items-center gap-3 bg-primary/8 border border-primary/15 hover:bg-primary/12 transition-all">
+                  {/* Action buttons with hover glow */}
+                  <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
+                    <motion.button
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="rounded-xl p-4 flex items-center gap-3 bg-primary/8 border border-primary/15 transition-all"
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 16px hsla(var(--primary), 0.15)" }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Camera className="w-5 h-5 text-primary" />
                       <div className="text-right">
                         <p className="text-[11px] font-mono font-bold">التقاط مباشر</p>
                         <p className="text-[8px] font-mono text-muted-foreground">كاميرا الجهاز</p>
                       </div>
-                    </button>
-                    <button onClick={() => fileInputRef.current?.click()}
-                      className="rounded-xl p-4 flex items-center gap-3 bg-accent/8 border border-accent/15 hover:bg-accent/12 transition-all">
+                    </motion.button>
+                    <motion.button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="rounded-xl p-4 flex items-center gap-3 bg-accent/8 border border-accent/15 transition-all"
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 16px hsla(var(--accent), 0.15)" }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Upload className="w-5 h-5 text-accent" />
                       <div className="text-right">
                         <p className="text-[11px] font-mono font-bold">رفع صورة</p>
                         <p className="text-[8px] font-mono text-muted-foreground">من المعرض</p>
                       </div>
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               )}
 
               {analysisStep === "loading" && (
-                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-4"
+                >
                   {imagePreview && (
-                    <div className="rounded-xl overflow-hidden border border-primary/15 relative">
-                      <img src={imagePreview} alt="Chart" className="w-full h-40 object-cover opacity-50" />
-                      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-                        <motion.div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center"
-                          animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                          <Cpu className="w-6 h-6 text-primary" />
+                    <div className="rounded-xl overflow-hidden border border-accent/20 relative">
+                      <img src={imagePreview} alt="Chart" className="w-full h-40 object-cover opacity-40" />
+                      {/* Scanning overlay */}
+                      <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
+                        <motion.div
+                          className="absolute inset-0"
+                          style={{ background: "linear-gradient(180deg, transparent 0%, hsla(var(--accent), 0.05) 50%, transparent 100%)" }}
+                          animate={{ y: ["-100%", "100%"] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        />
+                        <motion.div
+                          className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
+                          style={{
+                            background: "linear-gradient(135deg, hsla(var(--accent), 0.15), hsla(var(--primary), 0.1))",
+                            border: "1px solid hsla(var(--accent), 0.3)",
+                            boxShadow: "0 0 30px hsla(var(--accent), 0.15)",
+                          }}
+                          animate={{ rotate: [0, 360] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Cpu className="w-7 h-7 text-accent" />
                         </motion.div>
                       </div>
                     </div>
                   )}
-                  <div className="rounded-xl p-5 bg-card/60 border border-border/10 text-center">
-                    <h3 className="text-sm font-bold font-mono mb-4">جارٍ التحليل...</h3>
-                    <div className="space-y-2">
+                  <div className="rounded-xl p-5 bg-card/60 border border-border/10 text-center" style={{ boxShadow: "inset 0 0 30px hsla(var(--accent), 0.03)" }}>
+                    <h3 className="text-sm font-bold font-mono mb-4 text-accent">جارٍ التحليل العميق...</h3>
+                    <div className="space-y-2.5">
                       {loadingSteps.map((s, i) => (
-                        <div key={i} className={cn("flex items-center gap-2 text-xs font-mono", i <= loadingStep ? "text-foreground" : "text-muted-foreground/40")}>
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: i <= loadingStep ? 1 : 0.3, x: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.2 }}
+                          className={cn("flex items-center gap-2 text-xs font-mono", i <= loadingStep ? "text-foreground" : "text-muted-foreground/40")}
+                        >
                           {i < loadingStep ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" /> :
-                           i === loadingStep ? <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" /> :
+                           i === loadingStep ? <Loader2 className="w-4 h-4 text-accent animate-spin shrink-0" /> :
                            <div className="w-4 h-4 rounded border border-border/30 shrink-0" />}
                           {s.label}
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   </div>
@@ -689,17 +780,28 @@ const TradeCenter = () => {
               )}
 
               {analysisStep === "results" && analysis && (
-                <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                <motion.div
+                  key="results"
+                  initial="hidden"
+                  animate="show"
+                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+                  className="space-y-3"
+                >
                   {imagePreview && (
-                    <div className="rounded-xl overflow-hidden border border-primary/10 relative">
+                    <motion.div variants={fadeUp} className="rounded-xl overflow-hidden border border-accent/15 relative">
                       <img src={imagePreview} alt="Chart" className="w-full h-36 object-cover" />
-                      <div className="absolute bottom-2 right-2 bg-background/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[8px] font-mono text-primary border border-primary/20">
-                        تحليل مكتمل
-                      </div>
-                    </div>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-[8px] font-mono text-accent border border-accent/25 flex items-center gap-1"
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> تحليل مكتمل
+                      </motion.div>
+                    </motion.div>
                   )}
 
-                  <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                  <motion.div variants={fadeUp} className="rounded-xl p-3 bg-card/60 border border-border/10" style={{ boxShadow: "0 0 20px hsla(var(--accent), 0.04)" }}>
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <h2 className="text-base font-bold font-mono">{analysis.pair || "—"}</h2>
@@ -710,25 +812,25 @@ const TradeCenter = () => {
                         {analysis.directionAr || analysis.direction}
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono bg-accent/10 text-accent px-1.5 py-0.5 rounded">
                       الثقة: {analysis.directionConfidence}%
                     </span>
-                  </div>
+                  </motion.div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-xl p-3 bg-success/5 border border-success/10">
+                  <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl p-3 border border-success/15" style={{ background: "linear-gradient(135deg, hsla(var(--success), 0.04), transparent)" }}>
                       <p className="text-[9px] font-mono font-bold text-success uppercase mb-1">سيناريو صعودي</p>
                       {analysis.takeProfit1 && <p className="text-[10px] font-mono">TP1: {analysis.takeProfit1}</p>}
                       {analysis.takeProfit2 && <p className="text-[10px] font-mono">TP2: {analysis.takeProfit2}</p>}
                     </div>
-                    <div className="rounded-xl p-3 bg-destructive/5 border border-destructive/10">
+                    <div className="rounded-xl p-3 border border-destructive/15" style={{ background: "linear-gradient(135deg, hsla(var(--destructive), 0.04), transparent)" }}>
                       <p className="text-[9px] font-mono font-bold text-destructive uppercase mb-1">سيناريو هبوطي</p>
                       {analysis.stopLoss && <p className="text-[10px] font-mono">SL: {analysis.stopLoss}</p>}
                       {analysis.riskReward && <p className="text-[10px] font-mono">R:R {analysis.riskReward}</p>}
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl p-3 bg-card/60 border border-border/10">
                       <p className="text-[8px] font-mono font-bold text-success uppercase mb-1">الدعم</p>
                       {analysis.supportLevels?.map((l, i) => (
@@ -741,27 +843,33 @@ const TradeCenter = () => {
                         <p key={i} className="text-[10px] font-mono text-destructive">{l}</p>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
 
                   {analysis.indicators && analysis.indicators.length > 0 && (
-                    <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                    <motion.div variants={fadeUp} className="rounded-xl p-3 bg-card/60 border border-border/10">
                       <p className="text-[9px] font-mono font-bold uppercase mb-2">المؤشرات الفنية</p>
                       <div className="flex flex-wrap gap-1.5">
                         {analysis.indicators.map((ind, i) => (
-                          <span key={i} className={cn(
-                            "text-[9px] font-mono px-2 py-1 rounded-lg border",
-                            ind.signal === "buy" || ind.signal === "bullish" ? "bg-success/8 text-success border-success/15" :
-                            ind.signal === "sell" || ind.signal === "bearish" ? "bg-destructive/8 text-destructive border-destructive/15" :
-                            "bg-secondary text-muted-foreground border-border/15"
-                          )}>
+                          <motion.span
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3 + i * 0.05 }}
+                            className={cn(
+                              "text-[9px] font-mono px-2 py-1 rounded-lg border",
+                              ind.signal === "buy" || ind.signal === "bullish" ? "bg-success/8 text-success border-success/15" :
+                              ind.signal === "sell" || ind.signal === "bearish" ? "bg-destructive/8 text-destructive border-destructive/15" :
+                              "bg-secondary text-muted-foreground border-border/15"
+                            )}
+                          >
                             {ind.name} {ind.value && `• ${ind.value}`}
-                          </span>
+                          </motion.span>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
-                  <div className="rounded-xl p-3 bg-card/60 border border-warning/10">
+                  <motion.div variants={fadeUp} className="rounded-xl p-3 bg-card/60 border border-warning/10">
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-warning" />
                       <div>
@@ -771,18 +879,27 @@ const TradeCenter = () => {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex gap-2">
-                    <button onClick={resetAnalysis}
-                      className="flex-1 py-2.5 rounded-xl bg-secondary/60 text-foreground text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-border/10">
+                  <motion.div variants={fadeUp} className="flex gap-2">
+                    <motion.button
+                      onClick={resetAnalysis}
+                      className="flex-1 py-2.5 rounded-xl bg-secondary/60 text-foreground text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-border/10"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <RotateCcw className="w-3.5 h-3.5" /> تحليل جديد
-                    </button>
-                    <button onClick={shareToFeed} disabled={sharing}
-                      className="flex-1 py-2.5 rounded-xl bg-primary/10 text-primary text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-primary/20">
+                    </motion.button>
+                    <motion.button
+                      onClick={shareToFeed}
+                      disabled={sharing}
+                      className="flex-1 py-2.5 rounded-xl bg-accent/10 text-accent text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-accent/20"
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 16px hsla(var(--accent), 0.12)" }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Share2 className="w-3.5 h-3.5" /> {sharing ? "جارٍ النشر..." : "شارك في المجتمع"}
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -790,23 +907,31 @@ const TradeCenter = () => {
 
           {/* Symbol Search Mode */}
           {analysisMode === "symbol" && (
-            <div className="space-y-3">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-3"
+            >
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   value={symbolSearch}
                   onChange={e => setSymbolSearch(e.target.value)}
                   placeholder="ابحث عن رمز... BTC, EUR/USD"
-                  className="w-full bg-secondary/50 border border-border/20 rounded-xl pr-10 pl-4 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40 transition-colors"
+                  className="w-full bg-secondary/50 border border-border/20 rounded-xl pr-10 pl-4 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent/30 focus:ring-1 focus:ring-accent/15 transition-all"
                   dir="rtl"
                 />
               </div>
-              <div className="space-y-1">
-                {symbolFilteredAssets.map(asset => (
-                  <button
+              <div className="space-y-1.5">
+                {symbolFilteredAssets.map((asset, i) => (
+                  <motion.button
                     key={asset.pair}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03, duration: 0.2 }}
                     onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-card/60 border border-border/10 hover:bg-card/80 transition-all"
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-card/60 border border-border/10 hover:bg-card/80 hover:border-accent/15 transition-all"
                   >
                     <div className="flex items-center gap-2">
                       {CRYPTO_LOGO_MAP[asset.pair] ? (
@@ -824,12 +949,12 @@ const TradeCenter = () => {
                         {asset.up ? "+" : ""}{asset.change}%
                       </span>
                     </div>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* ═══════════════════════════════════════════ */}
