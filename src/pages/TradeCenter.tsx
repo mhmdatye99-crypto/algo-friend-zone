@@ -144,7 +144,7 @@ const TradeCenter = () => {
 
   const mainTabs: { key: MainTab; label: string; icon: React.ReactNode; count?: number }[] = [
     { key: "markets", label: "الأسواق", icon: <BarChart3 className="w-3.5 h-3.5" />, count: assets.length },
-    { key: "signals", label: "التوصيات", icon: <Zap className="w-3.5 h-3.5" />, count: signals.length },
+    { key: "signals", label: "X توصيات", icon: <Zap className="w-3.5 h-3.5" />, count: signals.length },
     { key: "performance", label: "الأداء", icon: <BarChart className="w-3.5 h-3.5" /> },
   ];
 
