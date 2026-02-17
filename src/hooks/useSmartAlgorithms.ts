@@ -124,65 +124,112 @@ export function useSmartAlgorithms() {
     return result;
   }, [signals]);
 
-  // === X-LOGIC: LIQUIDITY ENGINE ===
+  // === X-LOGIC: LIQUIDITY ENGINE (Enhanced — uses convergence, sentiment, winProbability) ===
   const liquidityBlocks: LiquidityBlock[] = useMemo(() => {
-    return signals.slice(0, 8).map(s => {
-      const entryNum = parseFloat(s.entry.replace(/,/g, "")) || 0;
+    return signals.slice(0, 12).map(s => {
       const isBuy = s.direction === "صعودي";
-      const gap = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, ""))) > 25;
-      const strength = Math.min(100, s.confidence + Math.round(Math.abs(s.sentiment - 50) * 0.5));
 
-      return {
-        pair: s.pair,
-        type: gap ? "liquidity_gap" as const : isBuy ? "institutional_buy" as const : "institutional_sell" as const,
-        level: s.entry,
-        strength,
-        description: gap
-          ? `فجوة سيولة مكتشفة عند ${s.entry} — احتمال حركة سعرية حادة`
-          : isBuy
-          ? `كتلة شرائية مؤسسية عند ${s.entry} — تراكم مراكز كبيرة`
-          : `ضغط بيعي مؤسسي عند ${s.entry} — تصفية مراكز`,
-      };
-    }).filter(b => b.strength >= 60);
+      // Parse liquidity flow value from signal
+      const liqFlow = parseFloat(s.liquidity.replace(/[^0-9.]/g, "")) || 0;
+
+      // Strength = weighted combination of convergence, confidence, sentiment extremity, and win probability
+      const sentimentExtremity = Math.abs(s.sentiment - 50) / 50; // 0..1
+      const convergenceScore = (s.convergence / 5) * 30; // 0-30
+      const confidenceScore = (s.confidence / 100) * 25; // 0-25
+      const sentimentScore = sentimentExtremity * 20; // 0-20
+      const winProbScore = (s.winProbability / 100) * 25; // 0-25
+      const strength = Math.min(100, Math.round(convergenceScore + confidenceScore + sentimentScore + winProbScore));
+
+      // Detect type: liquidity gap when high volume diverges from sentiment
+      const volPercent = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0);
+      const isGap = (volPercent > 30 && sentimentExtremity < 0.3) || (liqFlow > 1.5 && s.convergence <= 2);
+
+      const typeLabel = isGap
+        ? "liquidity_gap" as const
+        : isBuy ? "institutional_buy" as const : "institutional_sell" as const;
+
+      const description = isGap
+        ? `فجوة سيولة عند ${s.entry} — تباين بين الحجم (${s.volume}) والمشاعر (${s.sentiment}%) يشير لحركة حادة`
+        : isBuy
+        ? `كتلة شرائية مؤسسية عند ${s.entry} — تقارب ${s.convergence}/5 مع ثقة ${s.confidence}% واحتمال فوز ${s.winProbability}%`
+        : `ضغط بيعي مؤسسي عند ${s.entry} — تقارب ${s.convergence}/5 مع مشاعر سلبية ${s.sentiment}%`;
+
+      return { pair: s.pair, type: typeLabel, level: s.entry, strength, description };
+    }).filter(b => b.strength >= 55).sort((a, b) => b.strength - a.strength);
   }, [signals]);
 
-  // === X-LOGIC: VOLATILITY ENGINE ===
+  // === X-LOGIC: VOLATILITY ENGINE (Enhanced — multi-factor stress calculation) ===
   const volatilityMetric: VolatilityMetric = useMemo(() => {
     if (signals.length === 0) return { stressLevel: 30, label: "مستقر", color: "text-success", trend: "stable", avgVolatility: 0, highVolPairs: [] };
 
+    // Factor 1: Volume intensity across all signals
     const volumes = signals.map(s => Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0));
     const avgVol = volumes.reduce((a, b) => a + b, 0) / volumes.length;
-    const highVolPairs = signals.filter(s => Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0) > avgVol * 1.5).map(s => s.pair).slice(0, 3);
 
+    // Factor 2: RSI extremes (overbought/oversold count)
     const rsiExtremes = signals.filter(s => s.rsi > 70 || s.rsi < 30).length;
-    const stressLevel = Math.min(100, Math.round(avgVol * 1.5 + rsiExtremes * 8 + (signals.filter(s => s.risk === "مرتفع").length * 5)));
+    const rsiExtremeRatio = rsiExtremes / signals.length;
 
-    let label = "مستقر", color = "text-success", trend: "rising" | "falling" | "stable" = "stable";
-    if (stressLevel >= 75) { label = "إجهاد عالي"; color = "text-destructive"; trend = "rising"; }
-    else if (stressLevel >= 50) { label = "متوسط"; color = "text-warning"; trend = "rising"; }
-    else if (stressLevel >= 25) { label = "منخفض"; color = "text-success"; trend = "stable"; }
+    // Factor 3: High-risk signal ratio
+    const highRiskCount = signals.filter(s => s.risk === "مرتفع").length;
+    const highRiskRatio = highRiskCount / signals.length;
 
-    return { stressLevel, label, color, trend, avgVolatility: avgVol, highVolPairs };
+    // Factor 4: Sentiment dispersion (how divided is the market?)
+    const sentiments = signals.map(s => s.sentiment);
+    const avgSentiment = sentiments.reduce((a, b) => a + b, 0) / sentiments.length;
+    const sentimentVariance = sentiments.reduce((sum, s) => sum + Math.pow(s - avgSentiment, 2), 0) / sentiments.length;
+    const sentimentDispersion = Math.min(1, Math.sqrt(sentimentVariance) / 30); // normalized 0..1
+
+    // Factor 5: Low convergence signals (conflicting indicators)
+    const lowConvergence = signals.filter(s => s.convergence <= 2).length;
+    const conflictRatio = lowConvergence / signals.length;
+
+    // Factor 6: MACD histogram extremes
+    const macdExtremes = signals.filter(s => Math.abs(parseFloat(s.macdHist.replace(/[^0-9.-]/g, "")) || 0) > 5).length;
+
+    // Composite stress level
+    const stressLevel = Math.min(100, Math.round(
+      avgVol * 1.2 +
+      rsiExtremeRatio * 25 +
+      highRiskRatio * 20 +
+      sentimentDispersion * 15 +
+      conflictRatio * 10 +
+      macdExtremes * 3
+    ));
+
+    // Identify high-volatility pairs (above-average volume + extreme RSI or high risk)
+    const highVolPairs = signals
+      .filter(s => {
+        const vol = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0);
+        return vol > avgVol * 1.3 || s.rsi > 75 || s.rsi < 25 || s.risk === "مرتفع";
+      })
+      .sort((a, b) => b.winProbability - a.winProbability)
+      .map(s => s.pair)
+      .slice(0, 5);
+
+    // Determine trend from sentiment and convergence balance
+    const bullishSentiment = signals.filter(s => s.sentiment > 60).length;
+    const bearishSentiment = signals.filter(s => s.sentiment < 40).length;
+    let trend: "rising" | "falling" | "stable" = "stable";
+    if (stressLevel >= 60 && (bullishSentiment > bearishSentiment * 1.5 || bearishSentiment > bullishSentiment * 1.5)) {
+      trend = "rising";
+    } else if (stressLevel < 35) {
+      trend = "falling";
+    }
+
+    let label = "مستقر", color = "text-success";
+    if (stressLevel >= 75) { label = "إجهاد حاد"; color = "text-destructive"; }
+    else if (stressLevel >= 55) { label = "إجهاد متوسط"; color = "text-warning"; }
+    else if (stressLevel >= 35) { label = "منخفض"; color = "text-success"; }
+
+    return { stressLevel, label, color, trend, avgVolatility: Math.round(avgVol * 10) / 10, highVolPairs };
   }, [signals]);
 
-  // === X-LOGIC: PROBABILITY ENGINE (Win Rate per signal) ===
-  // Adds computed winProbability to each signal based on backtesting simulation
+  // === X-LOGIC: PROBABILITY ENGINE — uses winProbability directly from signal engine ===
   const signalProbabilities: Map<string, number> = useMemo(() => {
     const map = new Map<string, number>();
     signals.forEach(s => {
-      // Simulated backtest probability based on convergence factors
-      let baseProb = 45;
-      if (s.convergence >= 4) baseProb += 15;
-      else if (s.convergence >= 3) baseProb += 8;
-      if (s.rsi > 55 && s.direction === "صعودي") baseProb += 5;
-      if (s.rsi < 45 && s.direction === "هبوطي") baseProb += 5;
-      if (s.macd === "صعودي" && s.direction === "صعودي") baseProb += 7;
-      if (s.macd === "هبوطي" && s.direction === "هبوطي") baseProb += 7;
-      if (s.confidence >= 85) baseProb += 8;
-      else if (s.confidence >= 75) baseProb += 4;
-      // Slight random variation to simulate real backtest
-      const prob = Math.min(92, Math.max(35, baseProb + Math.round((Math.sin(s.pair.charCodeAt(0) * 137) * 5))));
-      map.set(s.pair, prob);
+      map.set(s.pair, s.winProbability);
     });
     return map;
   }, [signals]);
