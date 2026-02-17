@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import {
   Zap, ChevronLeft, Gauge, Activity, Shield, TrendingUp,
   Crown, AlertTriangle, Calculator, BookOpen, ScanLine, Flame,
-  Brain, Sparkles,
+  Brain, Sparkles, Award, Bell, BarChart3, Target, Notebook, Wrench
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChallenges } from "@/hooks/useChallenges";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
+import { useSmartAlgorithms } from "@/hooks/useSmartAlgorithms";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import MarketMovers from "@/components/dashboard/MarketMovers";
 
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const { signals } = useSignals();
   const { latestScore } = useChallenges();
   const { stats } = useGoalPlanner();
+  const { traderScore, patterns, alerts, riskScore } = useSmartAlgorithms();
 
   const activeSignals = useMemo(() => signals.filter(s => s.confidence >= 70), [signals]);
 
@@ -37,14 +39,13 @@ const Dashboard = () => {
   }, [signals]);
 
   const wealthProgress = stats ? Math.round(stats.progress) : 36;
-
   const topSignals = useMemo(() => signals.slice(0, 3), [signals]);
 
   const quickAccess = [
-    { icon: Calculator, label: "الحاسبة", path: "/risk-calculator", bg: "bg-primary/10", border: "border-primary/20", color: "text-primary" },
-    { icon: BookOpen, label: "سجل الصفقات", path: "/trade-journal", bg: "bg-accent/10", border: "border-accent/20", color: "text-accent" },
-    { icon: ScanLine, label: "تحليل الشارت", path: "/chart-vision", bg: "bg-primary/10", border: "border-primary/20", color: "text-primary" },
-    { icon: Zap, label: "التوصيات", path: "/trade-center", bg: "bg-accent/10", border: "border-accent/20", color: "text-accent" },
+    { icon: Wrench, label: "الأدوات", path: "/tools", bg: "bg-warning/10", border: "border-warning/20", color: "text-warning" },
+    { icon: Notebook, label: "اليومية", path: "/journal", bg: "bg-accent/10", border: "border-accent/20", color: "text-accent" },
+    { icon: ScanLine, label: "تحليل الشارت", path: "/trade-center", bg: "bg-primary/10", border: "border-primary/20", color: "text-primary" },
+    { icon: Zap, label: "التوصيات", path: "/trade-center", bg: "bg-success/10", border: "border-success/20", color: "text-success" },
   ];
 
   return (
@@ -55,10 +56,7 @@ const Dashboard = () => {
       className="px-4 pt-3 pb-28 space-y-4 max-w-lg mx-auto"
     >
       {/* ═══ NEXUS CENTRAL CARD ═══ */}
-      <motion.div
-        variants={fadeUp}
-        className="rounded-2xl p-4 border border-border/20 bg-card/70 backdrop-blur-md"
-      >
+      <motion.div variants={fadeUp} className="rounded-2xl p-4 border border-border/20 bg-card/70 backdrop-blur-md">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">LIVE</span>
@@ -71,31 +69,12 @@ const Dashboard = () => {
         </h2>
         <div className="grid grid-cols-4 gap-2">
           {[
-            {
-              icon: Gauge, label: "نبض السوق",
-              value: `${marketPulse.index}%`,
-              color: marketPulse.index >= 55 ? "text-primary" : marketPulse.index <= 45 ? "text-destructive" : "text-warning",
-            },
-            {
-              icon: Activity, label: "إشارة نشطة",
-              value: `${activeSignals.length}`,
-              color: "text-primary",
-            },
-            {
-              icon: TrendingUp, label: "تقدم الثروة",
-              value: `${wealthProgress}%`,
-              color: "text-accent",
-            },
-            {
-              icon: Shield, label: "الانضباط",
-              value: `${latestScore?.score ?? 50}`,
-              color: (latestScore?.score ?? 50) >= 70 ? "text-primary" : (latestScore?.score ?? 50) >= 40 ? "text-warning" : "text-destructive",
-            },
+            { icon: Gauge, label: "نبض السوق", value: `${marketPulse.index}%`, color: marketPulse.index >= 55 ? "text-primary" : marketPulse.index <= 45 ? "text-destructive" : "text-warning" },
+            { icon: Activity, label: "إشارة نشطة", value: `${activeSignals.length}`, color: "text-primary" },
+            { icon: TrendingUp, label: "تقدم الثروة", value: `${wealthProgress}%`, color: "text-accent" },
+            { icon: Shield, label: "الانضباط", value: `${latestScore?.score ?? 50}`, color: (latestScore?.score ?? 50) >= 70 ? "text-primary" : (latestScore?.score ?? 50) >= 40 ? "text-warning" : "text-destructive" },
           ].map((item, i) => (
-            <div
-              key={i}
-              className="rounded-xl p-2.5 text-center border border-border/10 bg-secondary/30"
-            >
+            <div key={i} className="rounded-xl p-2.5 text-center border border-border/10 bg-secondary/30">
               <p className={cn("text-lg font-mono font-bold flex items-center justify-center gap-1", item.color)}>
                 {item.value}
                 <item.icon className={cn("w-3.5 h-3.5", item.color)} />
@@ -106,11 +85,75 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* ═══ QUICK ACCESS GRID (4 buttons) ═══ */}
+      {/* ═══ TRADER SCORE CARD ═══ */}
+      <motion.div variants={fadeUp} className="rounded-2xl p-4 border border-border/20 bg-card/70 backdrop-blur-md">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-primary" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider">تقييم المتداول</span>
+          </div>
+          <div className={cn("px-2.5 py-1 rounded-lg border text-[12px] font-mono font-bold", traderScore.color,
+            traderScore.overall >= 75 ? "bg-success/10 border-success/20" : traderScore.overall >= 50 ? "bg-warning/10 border-warning/20" : "bg-destructive/10 border-destructive/20"
+          )}>
+            {traderScore.grade} — {traderScore.gradeAr}
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "الإجمالي", value: traderScore.overall, color: traderScore.color },
+            { label: "الانضباط", value: traderScore.discipline, color: traderScore.discipline >= 70 ? "text-success" : "text-warning" },
+            { label: "إدارة المخاطر", value: traderScore.riskManagement, color: traderScore.riskManagement >= 70 ? "text-success" : "text-warning" },
+            { label: "الربحية", value: traderScore.profitability, color: traderScore.profitability >= 60 ? "text-success" : "text-warning" },
+          ].map((item, i) => (
+            <div key={i} className="text-center">
+              <div className="relative w-10 h-10 mx-auto mb-1">
+                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border) / 0.2)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3"
+                    strokeDasharray={`${item.value * 0.94} 100`}
+                    className={item.color} strokeLinecap="round" />
+                </svg>
+                <span className={cn("absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold", item.color)}>
+                  {item.value}
+                </span>
+              </div>
+              <p className="text-[7px] font-mono text-muted-foreground">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* ═══ SMART ALERTS ═══ */}
+      {alerts.length > 0 && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Bell className="w-3.5 h-3.5 text-warning" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider">تنبيهات ذكية</span>
+          </div>
+          <div className="space-y-1.5">
+            {alerts.slice(0, 3).map((alert) => (
+              <div key={alert.id} className={cn(
+                "rounded-xl px-3 py-2.5 border flex items-center gap-2.5",
+                alert.severity === "high" ? "border-destructive/20 bg-destructive/5" :
+                alert.severity === "medium" ? "border-warning/20 bg-warning/5" :
+                "border-primary/20 bg-primary/5"
+              )}>
+                <span className="text-base">{alert.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-mono font-bold text-foreground">{alert.title}</p>
+                  <p className="text-[9px] font-mono text-muted-foreground truncate">{alert.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ═══ QUICK ACCESS GRID ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
         {quickAccess.map((s, i) => (
           <motion.button
-            key={s.path}
+            key={`${s.path}-${i}`}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.03 }}
@@ -129,7 +172,7 @@ const Dashboard = () => {
       {/* ═══ AI MENTOR CARD ═══ */}
       <motion.button
         variants={fadeUp}
-        onClick={() => navigate("/mentor")}
+        onClick={() => navigate("/learning")}
         className="w-full rounded-2xl p-4 flex items-center gap-3 transition-all active:scale-[0.98] hover:brightness-110 border border-primary/15 bg-primary/5 backdrop-blur-md relative overflow-hidden group"
       >
         <div className="absolute inset-0 bg-gradient-to-l from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -145,6 +188,35 @@ const Dashboard = () => {
         </div>
         <ChevronLeft className="w-4 h-4 text-primary/60 shrink-0 relative z-10" />
       </motion.button>
+
+      {/* ═══ MARKET PATTERNS ═══ */}
+      {patterns.length > 0 && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-3.5 h-3.5 text-accent" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider">أنماط السوق المرصودة</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {patterns.map((p, i) => (
+              <div key={i} className={cn(
+                "rounded-xl p-3 border",
+                p.direction === "bullish" ? "border-success/20 bg-success/5" : p.direction === "bearish" ? "border-destructive/20 bg-destructive/5" : "border-border/20 bg-secondary/30"
+              )}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">{p.direction === "bullish" ? "📈" : "📉"}</span>
+                  <span className="text-[10px] font-mono font-bold">{p.nameAr}</span>
+                </div>
+                <p className="text-[8px] font-mono text-muted-foreground mb-1">{p.name} — ثقة {p.confidence}%</p>
+                <div className="flex flex-wrap gap-1">
+                  {p.pairs.map(pair => (
+                    <span key={pair} className="text-[8px] font-mono bg-secondary/50 px-1.5 py-0.5 rounded">{pair}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* ═══ UPGRADE BANNER ═══ */}
       <motion.button

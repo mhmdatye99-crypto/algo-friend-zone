@@ -2,9 +2,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, TrendingUp, Zap, Target, BookOpen,
-  Users, MessageSquare, GraduationCap, Calculator, Trophy,
+  Users, GraduationCap, Calculator, Wrench,
   FileText, X, Crown, Sun, Coins, Bell, Shield,
-  Palette, HelpCircle, Moon, Settings
+  HelpCircle, Moon, Settings, Lightbulb, Brain, Notebook
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -24,33 +24,24 @@ const menuSections = [
     title: "الرئيسية",
     items: [
       { path: "/", icon: LayoutDashboard, label: "لوحة التحكم", color: "text-primary", bg: "bg-primary/10" },
-      { path: "/markets", icon: TrendingUp, label: "الأسواق", color: "text-success", bg: "bg-success/10" },
-      { path: "/trade-center", icon: Zap, label: "توصيات AI", color: "text-warning", bg: "bg-warning/10" },
-      { path: "/goal-planner", icon: Target, label: "مسار النمو", color: "text-accent", bg: "bg-accent/10" },
-      { path: "/trade-journal", icon: BookOpen, label: "سجل الصفقات", color: "text-primary", bg: "bg-primary/10" },
+      { path: "/trade-center", icon: TrendingUp, label: "مركز التداول", color: "text-success", bg: "bg-success/10" },
+      { path: "/journal", icon: Notebook, label: "اليومية المالية", color: "text-accent", bg: "bg-accent/10" },
+      { path: "/tools", icon: Wrench, label: "الأدوات المالية", color: "text-warning", bg: "bg-warning/10" },
     ],
   },
   {
-    title: "اجتماعي",
+    title: "التعلم والمجتمع",
     items: [
+      { path: "/learning", icon: Lightbulb, label: "التعلم والإرشاد", color: "text-warning", bg: "bg-warning/10" },
       { path: "/community", icon: Users, label: "المجتمع", badge: "community" as const, color: "text-accent", bg: "bg-accent/10" },
-      { path: "/nexus-brain", icon: MessageSquare, label: "مركز الذكاء AI", color: "text-primary", bg: "bg-primary/10" },
-    ],
-  },
-  {
-    title: "تعلم وتطوير",
-    items: [
-      { path: "/academy", icon: GraduationCap, label: "الأكاديمية", color: "text-warning", bg: "bg-warning/10" },
-      { path: "/risk-calculator", icon: Calculator, label: "الحاسبات", color: "text-success", bg: "bg-success/10" },
-      { path: "/challenges", icon: Trophy, label: "التحديات", color: "text-destructive", bg: "bg-destructive/10" },
-      { path: "/my-analyses", icon: FileText, label: "سجل التحليلات", color: "text-primary", bg: "bg-primary/10" },
-      { path: "/morning-brief", icon: Sun, label: "الملخص الصباحي", color: "text-warning", bg: "bg-warning/10" },
+      { path: "/morning-brief", icon: Sun, label: "الملخص الصباحي", color: "text-primary", bg: "bg-primary/10" },
     ],
   },
   {
     title: "الحساب",
     items: [
-      { path: "/subscription", icon: Crown, label: "الاشتراك والترقية", color: "text-primary", bg: "bg-primary/10" },
+      { path: "/profile", icon: Shield, label: "المقر", color: "text-primary", bg: "bg-primary/10" },
+      { path: "/subscription", icon: Crown, label: "الاشتراك والترقية", color: "text-warning", bg: "bg-warning/10" },
     ],
   },
 ];
