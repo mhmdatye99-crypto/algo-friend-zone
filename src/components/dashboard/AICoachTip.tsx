@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, X, Sparkles, ChevronLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Brain, X, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -22,7 +21,6 @@ const AICoachTip = () => {
   const [dismissed, setDismissed] = useState(false);
 
   const loadTip = useCallback(async () => {
-    // Check cache first
     try {
       const cached = localStorage.getItem(TIPS_CACHE_KEY);
       if (cached) {
@@ -34,7 +32,6 @@ const AICoachTip = () => {
       }
     } catch {}
 
-    // Try AI-generated tip
     if (user) {
       try {
         const { data } = await supabase.functions.invoke("asset-consultant", {
@@ -52,7 +49,6 @@ const AICoachTip = () => {
       } catch {}
     }
 
-    // Fallback
     const fallback = FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
     setTip(fallback);
     localStorage.setItem(TIPS_CACHE_KEY, JSON.stringify({ tip: fallback, ts: Date.now() }));
@@ -67,38 +63,33 @@ const AICoachTip = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.97 }}
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -10, scale: 0.97 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-[12px] px-3.5 py-3 flex items-start gap-2.5 relative overflow-hidden"
+        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+        transition={{ duration: 0.3 }}
+        className="rounded-xl px-3 py-2.5 flex items-center gap-2.5 relative overflow-hidden backdrop-blur-sm"
         style={{
-          background: "linear-gradient(135deg, hsla(190, 100%, 50%, 0.06), hsla(43, 100%, 50%, 0.04))",
-          border: "1px solid hsla(190, 100%, 50%, 0.12)",
+          background: "linear-gradient(135deg, hsla(190, 100%, 50%, 0.04), hsla(43, 100%, 50%, 0.03))",
+          border: "1px solid hsla(190, 100%, 50%, 0.08)",
         }}
       >
-        {/* Glow accent */}
-        <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-20" style={{
-          background: "radial-gradient(circle, hsla(190, 100%, 50%, 0.4), transparent)",
-        }} />
-
-        <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 mt-0.5">
-          <Brain className="w-3.5 h-3.5 text-accent" />
+        <div className="w-6 h-6 rounded-lg bg-accent/8 border border-accent/15 flex items-center justify-center shrink-0">
+          <Brain className="w-3 h-3 text-accent" />
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-mono uppercase tracking-wider text-accent font-bold">AI Coach</span>
+          <div className="flex items-center gap-1 mb-0.5">
+            <Sparkles className="w-2.5 h-2.5 text-primary" />
+            <span className="text-[8px] font-mono uppercase tracking-wider text-accent font-bold">AI Coach</span>
           </div>
-          <p className="text-[11px] font-mono text-foreground/90 leading-relaxed">{tip}</p>
+          <p className="text-[10px] font-mono text-foreground/85 leading-relaxed">{tip}</p>
         </div>
 
         <button
           onClick={() => setDismissed(true)}
-          className="p-1 rounded-md hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          className="p-0.5 rounded-md hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3 h-3" />
         </button>
       </motion.div>
     </AnimatePresence>

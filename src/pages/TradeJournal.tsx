@@ -618,96 +618,100 @@ const TradeCard = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () =>
   const [closePrice, setClosePrice] = useState("");
 
   return (
-    <motion.div variants={fadeUp} className="glass rounded-[12px] p-3 space-y-2">
+    <motion.div
+      variants={fadeUp}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass rounded-xl p-2.5 space-y-1.5"
+    >
+      {/* Header Row - Compact */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <div className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center",
-            trade.direction === "long" ? "bg-success/15" : "bg-destructive/15"
+            "w-6 h-6 rounded-md flex items-center justify-center",
+            trade.direction === "long" ? "bg-success/12" : "bg-destructive/12"
           )}>
             {trade.direction === "long"
-              ? <TrendingUp className="w-3.5 h-3.5 text-success" />
-              : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+              ? <TrendingUp className="w-3 h-3 text-success" />
+              : <TrendingDown className="w-3 h-3 text-destructive" />}
           </div>
           <div>
-            <p className="text-[12px] font-mono font-bold">{trade.pair}</p>
-            <p className="text-[9px] font-mono text-muted-foreground">
-              {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+            <div className="flex items-center gap-1.5">
+              <p className="text-[11px] font-mono font-bold">{trade.pair}</p>
+              {trade.emotion && <span className="text-xs">{trade.emotion}</span>}
+              {trade.strategy && (
+                <span className="text-[7px] font-mono text-accent bg-accent/8 px-1 py-0.5 rounded">{trade.strategy}</span>
+              )}
+            </div>
+            <p className="text-[8px] font-mono text-muted-foreground">
+              {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <span className={cn(
-            "text-[9px] font-mono px-2 py-0.5 rounded-md",
-            trade.status === "open" ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground"
+            "text-[8px] font-mono px-1.5 py-0.5 rounded",
+            trade.status === "open" ? "bg-warning/12 text-warning" : "bg-muted text-muted-foreground"
           )}>
             {trade.status === "open" ? "مفتوحة" : "مغلقة"}
           </span>
-          {trade.emotion && <span className="text-sm">{trade.emotion}</span>}
+          {trade.pnl !== null && (
+            <span className={cn("text-[10px] font-mono font-bold tabular-nums", trade.pnl >= 0 ? "text-success" : "text-destructive")}>
+              {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <MiniStat label="الدخول" value={trade.entry_price.toFixed(2)} />
-        <MiniStat label="الخروج" value={trade.exit_price?.toFixed(2) ?? "—"} />
-        <MiniStat
-          label="الربح/الخسارة"
-          value={trade.pnl !== null ? `${trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}` : "—"}
-          color={trade.pnl !== null ? (trade.pnl >= 0 ? "text-success" : "text-destructive") : undefined}
-        />
+      {/* Price Row - Inline */}
+      <div className="flex items-center gap-1.5 text-[9px] font-mono">
+        <span className="text-muted-foreground">دخول:</span>
+        <span className="font-semibold tabular-nums">{trade.entry_price.toFixed(2)}</span>
+        {trade.exit_price && (
+          <>
+            <span className="text-muted-foreground">→</span>
+            <span className="font-semibold tabular-nums">{trade.exit_price.toFixed(2)}</span>
+          </>
+        )}
+        {trade.stop_loss && <span className="text-destructive tabular-nums">SL {trade.stop_loss.toFixed(2)}</span>}
+        {trade.take_profit && <span className="text-success tabular-nums">TP {trade.take_profit.toFixed(2)}</span>}
       </div>
-
-      {(trade.stop_loss || trade.take_profit) && (
-        <div className="grid grid-cols-2 gap-2">
-          {trade.stop_loss && <MiniStat label="SL" value={trade.stop_loss.toFixed(2)} color="text-destructive" />}
-          {trade.take_profit && <MiniStat label="TP" value={trade.take_profit.toFixed(2)} color="text-success" />}
-        </div>
-      )}
 
       {trade.entry_reason && (
-        <div className="bg-primary/5 rounded-lg px-2.5 py-1.5 border border-primary/10">
-          <p className="text-[8px] font-mono text-primary/70 uppercase tracking-wider mb-0.5">سبب الدخول</p>
-          <p className="text-[10px] font-mono text-foreground/80">{trade.entry_reason}</p>
-        </div>
-      )}
-
-      {trade.strategy && (
-        <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-mono text-muted-foreground">الاستراتيجية:</span>
-          <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md">{trade.strategy}</span>
-        </div>
+        <p className="text-[8px] font-mono text-foreground/70 bg-primary/4 rounded px-2 py-1 border border-primary/8 leading-relaxed">{trade.entry_reason}</p>
       )}
 
       {trade.notes && (
-        <p className="text-[10px] font-mono text-muted-foreground bg-secondary/30 rounded-lg px-2 py-1.5">{trade.notes}</p>
+        <p className="text-[8px] font-mono text-muted-foreground/80 leading-relaxed">{trade.notes}</p>
       )}
 
-      <div className="flex gap-2 pt-1">
+      {/* Actions */}
+      <div className="flex gap-1.5">
         {trade.status === "open" && (
           <>
             {showClose ? (
-              <div className="flex gap-1.5 flex-1">
+              <div className="flex gap-1 flex-1">
                 <input
                   type="number"
                   value={closePrice}
                   onChange={e => setClosePrice(e.target.value)}
                   placeholder="سعر الإغلاق"
-                  className="flex-1 h-8 rounded-lg bg-secondary/60 border border-border/20 px-2 text-[11px] font-mono focus:outline-none focus:border-primary/30"
+                  className="flex-1 h-7 rounded-md bg-secondary/50 border border-border/15 px-2 text-[10px] font-mono focus:outline-none focus:border-primary/30"
                 />
                 <button
                   onClick={() => { if (closePrice) onClose(parseFloat(closePrice)); }}
-                  className="px-3 h-8 rounded-lg bg-primary/15 text-primary text-[10px] font-mono font-bold border border-primary/30"
+                  className="px-2.5 h-7 rounded-md bg-primary/12 text-primary text-[9px] font-mono font-bold border border-primary/20"
                 >
-                  إغلاق
+                  تأكيد
                 </button>
-                <button onClick={() => setShowClose(false)} className="px-2 h-8 rounded-lg bg-secondary text-muted-foreground">
+                <button onClick={() => setShowClose(false)} className="px-1.5 h-7 rounded-md bg-secondary text-muted-foreground">
                   <X className="w-3 h-3" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setShowClose(true)}
-                className="flex-1 h-8 rounded-lg bg-accent/10 text-accent text-[10px] font-mono font-bold border border-accent/20"
+                className="flex-1 h-7 rounded-md bg-accent/8 text-accent text-[9px] font-mono font-bold border border-accent/15"
               >
                 إغلاق الصفقة
               </button>
@@ -716,7 +720,7 @@ const TradeCard = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () =>
         )}
         <button
           onClick={onDelete}
-          className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center border border-destructive/20"
+          className="w-7 h-7 rounded-md bg-destructive/8 flex items-center justify-center border border-destructive/15"
         >
           <Trash2 className="w-3 h-3 text-destructive" />
         </button>
