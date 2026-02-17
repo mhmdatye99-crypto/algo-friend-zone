@@ -1,11 +1,11 @@
-import { Home, ScanLine, TrendingUp, Trophy, User } from "lucide-react";
+import { Home, ScanLine, TrendingUp, Brain, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/profile", icon: User, label: "المقر" },
-  { path: "/community", icon: Trophy, label: "الساحة" },
+  { path: "/mentor", icon: Brain, label: "المُرشد" },
   { path: "/ai-scan", icon: ScanLine, label: "AI Scan" },
   { path: "/trade-center", icon: TrendingUp, label: "التوصيات" },
   { path: "/", icon: Home, label: "الرئيسية" },

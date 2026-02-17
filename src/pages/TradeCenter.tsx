@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Star, X, SlidersHorizontal, ArrowUpDown, TrendingUp, TrendingDown, Minus,
   Zap, BarChart, Brain, Layers, Shield, BarChart3, AlertTriangle, Crosshair,
+  Camera, Upload, Sparkles, Target, ArrowUp, ArrowDown, CheckCircle2, Loader2,
+  RotateCcw, Share2, Cpu, Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +14,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLivePrices, formatPrice, assetCategories, CRYPTO_LOGO_MAP, FOREX_FLAG_MAP, type AssetCategory } from "@/hooks/useLivePrices";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { useCommunity } from "@/hooks/useCommunity";
 import MiniChart from "@/components/MiniChart";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -25,13 +30,47 @@ const stagger = {
   show: { transition: { staggerChildren: 0.04 } },
 };
 
-type MainTab = "markets" | "signals" | "performance";
+type MainTab = "markets" | "signals" | "analysis" | "performance";
 type SortField = "name" | "price" | "change" | "vol";
 type SortDir = "asc" | "desc";
 type SignalFilter = "الكل" | "شراء" | "بيع" | "محايد" | "تشبع";
 
 const signalFilters: SignalFilter[] = ["الكل", "شراء", "بيع", "محايد", "تشبع"];
 const signalCategoryFilters = ["الكل", "فوركس", "كريبتو", "سلع", "مؤشرات"];
+
+interface AnalysisResult {
+  pair?: string;
+  timeframe?: string;
+  pattern?: string;
+  patternAr?: string;
+  patternConfidence?: number;
+  direction?: string;
+  directionAr?: string;
+  directionConfidence?: number;
+  supportLevels?: string[];
+  resistanceLevels?: string[];
+  indicators?: { name: string; value?: string; signal: string }[];
+  entry?: string;
+  stopLoss?: string;
+  takeProfit1?: string;
+  takeProfit2?: string;
+  riskReward?: string;
+  strategy?: string;
+  reasoning?: string[];
+  summary?: string;
+  error?: string;
+}
+
+type AnalysisStep = "idle" | "loading" | "results";
+
+const loadingSteps = [
+  { label: "رفع بيانات الصورة...", icon: Upload },
+  { label: "تحديد الزوج والإطار الزمني...", icon: Crosshair },
+  { label: "التعرف على الأنماط...", icon: Cpu },
+  { label: "تحليل المؤشرات الفنية...", icon: BarChart3 },
+  { label: "حساب مستويات الدعم والمقاومة...", icon: Target },
+  { label: "توليد التوصية...", icon: Sparkles },
+];
 
 const AssetLogo = ({ pair, icon, category }: { pair: string; icon: string; category: string }) => {
   const logoUrl = CRYPTO_LOGO_MAP[pair];
@@ -64,6 +103,8 @@ const TradeCenter = () => {
   const { signals } = useSignals();
   const assets = useLivePrices();
   const { favorites, toggle: toggleFavorite, isLoggedIn } = useFavorites();
+  const { spendCredits, canAfford, isFounder } = useCredits();
+  const { createPost } = useCommunity();
 
   // Main tab
   const [activeTab, setActiveTab] = useState<MainTab>("markets");
@@ -81,6 +122,17 @@ const TradeCenter = () => {
   // Signals state
   const [activeSignalFilter, setActiveSignalFilter] = useState("الكل");
   const [signalSearch, setSignalSearch] = useState("");
+
+  // Analysis state
+  const [analysisStep, setAnalysisStep] = useState<AnalysisStep>("idle");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [sharing, setSharing] = useState(false);
+  const [symbolSearch, setSymbolSearch] = useState("");
+  const [analysisMode, setAnalysisMode] = useState<"chart" | "symbol">("chart");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -121,6 +173,10 @@ const TradeCenter = () => {
       .filter(s => !signalSearch || s.pair.toLowerCase().includes(signalSearch.toLowerCase()));
   }, [signals, activeSignalFilter, signalSearch]);
 
+  const symbolFilteredAssets = useMemo(() => {
+    return assets.filter(a => !symbolSearch || a.pair.toLowerCase().includes(symbolSearch.toLowerCase())).slice(0, 8);
+  }, [assets, symbolSearch]);
+
   // Performance data
   const { data: closedTrades = [] } = useQuery({
     queryKey: ["trades-closed-all", user?.id],
@@ -142,9 +198,69 @@ const TradeCenter = () => {
   const losers = assets.length - gainers;
   const activeFiltersCount = [signalFilter !== "الكل", changeFilter !== "all", showFavOnly].filter(Boolean).length;
 
+  // Analysis handlers
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("يرجى اختيار صورة"); return; }
+    if (!isFounder && !canAfford(CREDIT_COSTS.chart_analysis)) { toast.error("رصيد غير كافٍ"); e.target.value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target?.result as string;
+      if (!isFounder) {
+        const success = await spendCredits(CREDIT_COSTS.chart_analysis, "chart_analysis", "تحليل شارت AI");
+        if (!success) return;
+      }
+      setImagePreview(base64);
+      analyzeChart(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const analyzeChart = async (imageBase64: string) => {
+    setAnalysisStep("loading"); setLoadingStep(0); setAnalysis(null);
+    const interval = setInterval(() => {
+      setLoadingStep(prev => { if (prev >= loadingSteps.length - 1) { clearInterval(interval); return prev; } return prev + 1; });
+    }, 800);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-chart", { body: { imageBase64 } });
+      clearInterval(interval); setLoadingStep(loadingSteps.length - 1);
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); setAnalysisStep("idle"); return; }
+      setAnalysis(data); setAnalysisStep("results");
+    } catch {
+      clearInterval(interval);
+      toast.error("فشل التحليل. حاول مرة أخرى.");
+      setAnalysisStep("idle");
+    }
+  };
+
+  const resetAnalysis = () => { setAnalysisStep("idle"); setImagePreview(null); setAnalysis(null); setLoadingStep(0); };
+
+  const shareToFeed = async () => {
+    if (!analysis || !user) return;
+    setSharing(true);
+    try {
+      await createPost({
+        pair: analysis.pair || "UNKNOWN",
+        prediction: (analysis.direction === "bullish" ? "bullish" : "bearish") as "bullish" | "bearish",
+        ai_confidence: analysis.directionConfidence || 50,
+        analysis_summary: analysis.summary || analysis.strategy || "",
+        timeframe: analysis.timeframe || "4H",
+      });
+      toast.success("تم نشر التحليل في المجتمع!");
+    } catch {
+      toast.error("فشل النشر");
+    }
+    setSharing(false);
+  };
+
+  const dirColor = analysis?.direction === "bullish" ? "text-success" : analysis?.direction === "bearish" ? "text-destructive" : "text-warning";
+
   const mainTabs: { key: MainTab; label: string; icon: React.ReactNode; count?: number }[] = [
     { key: "markets", label: "الأسواق", icon: <BarChart3 className="w-3.5 h-3.5" />, count: assets.length },
     { key: "signals", label: "X توصيات", icon: <Zap className="w-3.5 h-3.5" />, count: signals.length },
+    { key: "analysis", label: "التحليل", icon: <Cpu className="w-3.5 h-3.5" /> },
     { key: "performance", label: "الأداء", icon: <BarChart className="w-3.5 h-3.5" /> },
   ];
 
@@ -155,6 +271,9 @@ const TradeCenter = () => {
       animate="show"
       className="px-4 pt-3 pb-28 max-w-lg mx-auto space-y-3"
     >
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
+
       {/* ─── Market Summary Strip ─── */}
       <motion.div variants={fadeUp} className="flex items-center gap-2 text-[10px] font-mono">
         <div className="flex items-center gap-1 bg-primary/8 text-primary px-2 py-1 rounded-lg border border-primary/15">
@@ -174,13 +293,13 @@ const TradeCenter = () => {
       </motion.div>
 
       {/* ─── Main Tabs ─── */}
-      <motion.div variants={fadeUp} className="flex gap-1 bg-secondary/30 rounded-xl p-1 border border-border/10">
+      <motion.div variants={fadeUp} className="flex gap-1 bg-secondary/30 rounded-xl p-1 border border-border/10 overflow-x-auto scrollbar-hide">
         {mainTabs.map(t => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-mono font-bold transition-all relative",
+              "flex-1 flex items-center justify-center gap-1 py-2.5 rounded-[10px] text-[10px] font-mono font-bold transition-all relative whitespace-nowrap min-w-0",
               activeTab === t.key
                 ? "bg-background text-foreground shadow-sm border border-border/20"
                 : "text-muted-foreground hover:text-foreground/70"
@@ -190,7 +309,7 @@ const TradeCenter = () => {
             {t.label}
             {t.count !== undefined && (
               <span className={cn(
-                "text-[8px] px-1.5 py-0.5 rounded-full font-mono",
+                "text-[8px] px-1 py-0.5 rounded-full font-mono",
                 activeTab === t.key ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
               )}>
                 {t.count}
@@ -398,7 +517,6 @@ const TradeCenter = () => {
       {/* ═══════════════════════════════════════════ */}
       {activeTab === "signals" && (
         <div className="space-y-3">
-          {/* Search bar */}
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -415,7 +533,6 @@ const TradeCenter = () => {
             )}
           </div>
 
-          {/* Category filters */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-4 px-4">
             {signalCategoryFilters.map((f) => (
               <button
@@ -433,7 +550,6 @@ const TradeCenter = () => {
             ))}
           </div>
 
-          {/* Count */}
           <p className="text-[10px] font-mono text-muted-foreground px-1">
             {filteredSignals.length} توصية
             {signalSearch && ` — "${signalSearch}"`}
@@ -455,7 +571,6 @@ const TradeCenter = () => {
             <p className="text-center text-muted-foreground font-mono text-sm mt-10">لا توجد إشارات لهذا البحث</p>
           )}
 
-          {/* Risk Warning */}
           <div className="glass rounded-xl p-3 border-warning/20">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />
@@ -468,11 +583,260 @@ const TradeCenter = () => {
       )}
 
       {/* ═══════════════════════════════════════════ */}
+      {/* ─── ANALYSIS TAB ─── */}
+      {/* ═══════════════════════════════════════════ */}
+      {activeTab === "analysis" && (
+        <div className="space-y-3">
+          {/* Sub-tabs: Chart scan vs Symbol search */}
+          <div className="flex gap-1 bg-secondary/30 rounded-xl p-1 border border-border/10">
+            <button
+              onClick={() => setAnalysisMode("chart")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[11px] font-mono font-bold transition-all",
+                analysisMode === "chart" ? "bg-background text-foreground shadow-sm border border-border/20" : "text-muted-foreground"
+              )}
+            >
+              <Camera className="w-3.5 h-3.5" /> مسح شارت
+            </button>
+            <button
+              onClick={() => setAnalysisMode("symbol")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[11px] font-mono font-bold transition-all",
+                analysisMode === "symbol" ? "bg-background text-foreground shadow-sm border border-border/20" : "text-muted-foreground"
+              )}
+            >
+              <Search className="w-3.5 h-3.5" /> بحث بالرمز
+            </button>
+          </div>
+
+          {/* Chart Scan Mode */}
+          {analysisMode === "chart" && (
+            <AnimatePresence mode="wait">
+              {analysisStep === "idle" && (
+                <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { icon: Target, label: "اتجاه السوق" },
+                      { icon: Shield, label: "دعم ومقاومة" },
+                      { icon: BarChart3, label: "مناطق السيولة" },
+                      { icon: TrendingUp, label: "حالة التقلب" },
+                      { icon: Sparkles, label: "احتمالية الصفقة" },
+                      { icon: Cpu, label: "مستوى المخاطرة" },
+                    ].map((cap, i) => (
+                      <div key={i} className="rounded-xl p-3 bg-card/60 border border-border/10 text-center">
+                        <cap.icon className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <span className="text-[8px] font-mono text-muted-foreground">{cap.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-xl p-8 bg-card/40 border border-dashed border-border/30 text-center">
+                    <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-[11px] font-mono font-bold mb-1">ارفع صورة شارت للتحليل</p>
+                    <p className="text-[9px] font-mono text-muted-foreground">
+                      AI يكتشف الاتجاه، الدعم/المقاومة، السيولة، ومستوى المخاطرة
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => cameraInputRef.current?.click()}
+                      className="rounded-xl p-4 flex items-center gap-3 bg-primary/8 border border-primary/15 hover:bg-primary/12 transition-all">
+                      <Camera className="w-5 h-5 text-primary" />
+                      <div className="text-right">
+                        <p className="text-[11px] font-mono font-bold">التقاط مباشر</p>
+                        <p className="text-[8px] font-mono text-muted-foreground">كاميرا الجهاز</p>
+                      </div>
+                    </button>
+                    <button onClick={() => fileInputRef.current?.click()}
+                      className="rounded-xl p-4 flex items-center gap-3 bg-accent/8 border border-accent/15 hover:bg-accent/12 transition-all">
+                      <Upload className="w-5 h-5 text-accent" />
+                      <div className="text-right">
+                        <p className="text-[11px] font-mono font-bold">رفع صورة</p>
+                        <p className="text-[8px] font-mono text-muted-foreground">من المعرض</p>
+                      </div>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {analysisStep === "loading" && (
+                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                  {imagePreview && (
+                    <div className="rounded-xl overflow-hidden border border-primary/15 relative">
+                      <img src={imagePreview} alt="Chart" className="w-full h-40 object-cover opacity-50" />
+                      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+                        <motion.div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center"
+                          animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                          <Cpu className="w-6 h-6 text-primary" />
+                        </motion.div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="rounded-xl p-5 bg-card/60 border border-border/10 text-center">
+                    <h3 className="text-sm font-bold font-mono mb-4">جارٍ التحليل...</h3>
+                    <div className="space-y-2">
+                      {loadingSteps.map((s, i) => (
+                        <div key={i} className={cn("flex items-center gap-2 text-xs font-mono", i <= loadingStep ? "text-foreground" : "text-muted-foreground/40")}>
+                          {i < loadingStep ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" /> :
+                           i === loadingStep ? <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" /> :
+                           <div className="w-4 h-4 rounded border border-border/30 shrink-0" />}
+                          {s.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {analysisStep === "results" && analysis && (
+                <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                  {imagePreview && (
+                    <div className="rounded-xl overflow-hidden border border-primary/10 relative">
+                      <img src={imagePreview} alt="Chart" className="w-full h-36 object-cover" />
+                      <div className="absolute bottom-2 right-2 bg-background/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[8px] font-mono text-primary border border-primary/20">
+                        تحليل مكتمل
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h2 className="text-base font-bold font-mono">{analysis.pair || "—"}</h2>
+                        <span className="text-[9px] text-muted-foreground font-mono">{analysis.timeframe}</span>
+                      </div>
+                      <div className={cn("flex items-center gap-1 text-sm font-bold font-mono", dirColor)}>
+                        {analysis.direction === "bullish" ? <ArrowUp className="w-4 h-4" /> : analysis.direction === "bearish" ? <ArrowDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
+                        {analysis.directionAr || analysis.direction}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                      الثقة: {analysis.directionConfidence}%
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl p-3 bg-success/5 border border-success/10">
+                      <p className="text-[9px] font-mono font-bold text-success uppercase mb-1">سيناريو صعودي</p>
+                      {analysis.takeProfit1 && <p className="text-[10px] font-mono">TP1: {analysis.takeProfit1}</p>}
+                      {analysis.takeProfit2 && <p className="text-[10px] font-mono">TP2: {analysis.takeProfit2}</p>}
+                    </div>
+                    <div className="rounded-xl p-3 bg-destructive/5 border border-destructive/10">
+                      <p className="text-[9px] font-mono font-bold text-destructive uppercase mb-1">سيناريو هبوطي</p>
+                      {analysis.stopLoss && <p className="text-[10px] font-mono">SL: {analysis.stopLoss}</p>}
+                      {analysis.riskReward && <p className="text-[10px] font-mono">R:R {analysis.riskReward}</p>}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                      <p className="text-[8px] font-mono font-bold text-success uppercase mb-1">الدعم</p>
+                      {analysis.supportLevels?.map((l, i) => (
+                        <p key={i} className="text-[10px] font-mono text-success">{l}</p>
+                      ))}
+                    </div>
+                    <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                      <p className="text-[8px] font-mono font-bold text-destructive uppercase mb-1">المقاومة</p>
+                      {analysis.resistanceLevels?.map((l, i) => (
+                        <p key={i} className="text-[10px] font-mono text-destructive">{l}</p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {analysis.indicators && analysis.indicators.length > 0 && (
+                    <div className="rounded-xl p-3 bg-card/60 border border-border/10">
+                      <p className="text-[9px] font-mono font-bold uppercase mb-2">المؤشرات الفنية</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {analysis.indicators.map((ind, i) => (
+                          <span key={i} className={cn(
+                            "text-[9px] font-mono px-2 py-1 rounded-lg border",
+                            ind.signal === "buy" || ind.signal === "bullish" ? "bg-success/8 text-success border-success/15" :
+                            ind.signal === "sell" || ind.signal === "bearish" ? "bg-destructive/8 text-destructive border-destructive/15" :
+                            "bg-secondary text-muted-foreground border-border/15"
+                          )}>
+                            {ind.name} {ind.value && `• ${ind.value}`}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="rounded-xl p-3 bg-card/60 border border-warning/10">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-warning" />
+                      <div>
+                        <p className="text-[9px] font-mono text-muted-foreground">مستوى المخاطرة</p>
+                        <p className="text-[11px] font-mono font-bold text-warning">
+                          {(analysis.directionConfidence ?? 0) >= 75 ? "منخفض" : (analysis.directionConfidence ?? 0) >= 50 ? "متوسط" : "مرتفع"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button onClick={resetAnalysis}
+                      className="flex-1 py-2.5 rounded-xl bg-secondary/60 text-foreground text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-border/10">
+                      <RotateCcw className="w-3.5 h-3.5" /> تحليل جديد
+                    </button>
+                    <button onClick={shareToFeed} disabled={sharing}
+                      className="flex-1 py-2.5 rounded-xl bg-primary/10 text-primary text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-primary/20">
+                      <Share2 className="w-3.5 h-3.5" /> {sharing ? "جارٍ النشر..." : "شارك في المجتمع"}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+
+          {/* Symbol Search Mode */}
+          {analysisMode === "symbol" && (
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  value={symbolSearch}
+                  onChange={e => setSymbolSearch(e.target.value)}
+                  placeholder="ابحث عن رمز... BTC, EUR/USD"
+                  className="w-full bg-secondary/50 border border-border/20 rounded-xl pr-10 pl-4 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40 transition-colors"
+                  dir="rtl"
+                />
+              </div>
+              <div className="space-y-1">
+                {symbolFilteredAssets.map(asset => (
+                  <button
+                    key={asset.pair}
+                    onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-card/60 border border-border/10 hover:bg-card/80 transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      {CRYPTO_LOGO_MAP[asset.pair] ? (
+                        <img src={CRYPTO_LOGO_MAP[asset.pair]} alt={asset.pair} className="w-6 h-6 rounded-full" />
+                      ) : FOREX_FLAG_MAP[asset.pair] ? (
+                        <span className="text-sm">{FOREX_FLAG_MAP[asset.pair]}</span>
+                      ) : (
+                        <span className="text-sm">{asset.icon}</span>
+                      )}
+                      <span className="text-[11px] font-mono font-bold">{asset.pair}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono">{formatPrice(asset.price)}</span>
+                      <span className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
+                        {asset.up ? "+" : ""}{asset.change}%
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ */}
       {/* ─── PERFORMANCE TAB ─── */}
       {/* ═══════════════════════════════════════════ */}
       {activeTab === "performance" && (
         <div className="space-y-3">
-          {/* KPIs */}
           <div className="grid grid-cols-2 gap-2">
             <div className="glass rounded-xl p-4 text-center">
               <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Win Rate</p>
@@ -486,7 +850,6 @@ const TradeCenter = () => {
             </div>
           </div>
 
-          {/* Equity curve */}
           <div className="glass rounded-xl p-4">
             <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <BarChart3 className="w-3.5 h-3.5" /> Equity Curve
@@ -509,7 +872,6 @@ const TradeCenter = () => {
             )}
           </div>
 
-          {/* Last trades */}
           <div className="space-y-2">
             <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider px-1">آخر {closedTrades.length} صفقة</p>
             {closedTrades.length === 0 ? (
