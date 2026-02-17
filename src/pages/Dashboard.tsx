@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   Zap, ChevronLeft, Gauge, Activity, Shield, TrendingUp,
   Crown, AlertTriangle, Calculator, BookOpen, ScanLine, Flame,
+  Brain, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -125,6 +126,26 @@ const Dashboard = () => {
         ))}
       </motion.div>
 
+      {/* ═══ AI MENTOR CARD ═══ */}
+      <motion.button
+        variants={fadeUp}
+        onClick={() => navigate("/mentor")}
+        className="w-full rounded-2xl p-4 flex items-center gap-3 transition-all active:scale-[0.98] hover:brightness-110 border border-primary/15 bg-primary/5 backdrop-blur-md relative overflow-hidden group"
+      >
+        <div className="absolute inset-0 bg-gradient-to-l from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 relative z-10">
+          <Brain className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1 text-right relative z-10">
+          <p className="text-[12px] font-mono font-bold text-foreground flex items-center gap-1.5 justify-end">
+            المُرشد AI
+            <Sparkles className="w-3 h-3 text-primary" />
+          </p>
+          <p className="text-[9px] font-mono text-muted-foreground mt-0.5">اسأل مدربك الذكي عن أي زوج أو استراتيجية تداول</p>
+        </div>
+        <ChevronLeft className="w-4 h-4 text-primary/60 shrink-0 relative z-10" />
+      </motion.button>
+
       {/* ═══ UPGRADE BANNER ═══ */}
       <motion.button
         variants={fadeUp}
@@ -135,12 +156,12 @@ const Dashboard = () => {
           border: "1px solid hsla(43, 100%, 50%, 0.12)",
         }}
       >
-        <Crown className="w-5 h-5 text-amber-400 shrink-0" />
+        <Crown className="w-5 h-5 text-warning shrink-0" />
         <div className="flex-1 text-right">
           <p className="text-[11px] font-mono font-bold">ترقية إلى Pro — تحليلات وتوصيات بلا حدود</p>
           <p className="text-[8px] font-mono text-muted-foreground">وصول كامل لجميع الميزات المتقدمة</p>
         </div>
-        <ChevronLeft className="w-4 h-4 text-amber-400 shrink-0" />
+        <ChevronLeft className="w-4 h-4 text-warning shrink-0" />
       </motion.button>
 
       {/* ═══ HOT SIGNALS ═══ */}
