@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, TrendingDown, ChevronDown, Lock, Layers, Zap, Eye,
   BookOpen, Calculator, AlertTriangle, Target, Shield, ArrowDownUp,
-  Clock, Crosshair, Loader2, MapPin, Route, BarChart3, Save, MessageCircle
+  Clock, Crosshair, Loader2, MapPin, Route, BarChart3, Save, MessageCircle,
+  X as XIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -57,6 +58,225 @@ interface AIAnalysis {
 
 interface Props {
   signal: Signal;
+};
+
+/* ─── Intelligence Modules ─── */
+const IntelligenceModules = ({ aiAnalysis, signal }: { aiAnalysis: AIAnalysis; signal: Signal }) => {
+  const [openModule, setOpenModule] = useState<string | null>(null);
+  const toggle = (id: string) => setOpenModule(prev => prev === id ? null : id);
+
+  const modules: { id: string; icon: React.ReactNode; label: string; color: string; available: boolean }[] = [
+    { id: "entry", icon: <Crosshair className="w-3.5 h-3.5" />, label: "Entry Zone", color: "accent", available: !!aiAnalysis.entryZone },
+    { id: "exits", icon: <Target className="w-3.5 h-3.5" />, label: "Exit Targets", color: "primary", available: !!(aiAnalysis.exitZones && aiAnalysis.exitZones.length > 0) },
+    { id: "stoploss", icon: <Shield className="w-3.5 h-3.5" />, label: "Stop Loss", color: "destructive", available: !!aiAnalysis.stopLoss },
+    { id: "reasons", icon: <BookOpen className="w-3.5 h-3.5" />, label: "Entry Reasons", color: "accent", available: !!(aiAnalysis.entryReasons && aiAnalysis.entryReasons.length > 0) },
+    { id: "scenarios", icon: <Route className="w-3.5 h-3.5" />, label: "Scenarios", color: "warning", available: !!(aiAnalysis.scenarios && aiAnalysis.scenarios.length > 0) },
+    { id: "strategy", icon: <MapPin className="w-3.5 h-3.5" />, label: "Strategy", color: "accent", available: !!aiAnalysis.strategy },
+    { id: "levels", icon: <BarChart3 className="w-3.5 h-3.5" />, label: "Key Levels", color: "primary", available: !!aiAnalysis.keyLevels },
+  ];
+
+  const activeModules = modules.filter(m => m.available);
+
+  // R:R & Time always visible as compact stats
+  const stats = (
+    <div className="grid grid-cols-2 gap-2">
+      {aiAnalysis.riskReward && (
+        <div className="bg-secondary/30 rounded-xl px-3 py-2.5 text-center border border-accent/10">
+          <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-0.5"><ArrowDownUp className="w-3 h-3" /> R:R</p>
+          <p className="text-[18px] font-mono font-bold text-accent">{aiAnalysis.riskReward}</p>
+        </div>
+      )}
+      {aiAnalysis.timeHorizon && (
+        <div className="bg-secondary/30 rounded-xl px-3 py-2.5 text-center border border-border/10">
+          <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-0.5"><Clock className="w-3 h-3" /> المدة</p>
+          <p className="text-[13px] font-mono font-bold">{aiAnalysis.timeHorizon}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderModuleContent = (id: string) => {
+    switch (id) {
+      case "entry":
+        return aiAnalysis.entryZone && (
+          <div className="space-y-2">
+            <span className="text-[9px] font-mono bg-accent/10 text-accent px-2 py-0.5 rounded-full">{aiAnalysis.entryZone.type}</span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-accent/5 rounded-lg px-3 py-2.5 text-center border border-accent/10">
+                <p className="text-[8px] font-mono text-muted-foreground uppercase mb-0.5">من</p>
+                <p className="text-[15px] font-mono font-bold">{aiAnalysis.entryZone.from}</p>
+              </div>
+              <div className="bg-accent/5 rounded-lg px-3 py-2.5 text-center border border-accent/10">
+                <p className="text-[8px] font-mono text-muted-foreground uppercase mb-0.5">إلى</p>
+                <p className="text-[15px] font-mono font-bold">{aiAnalysis.entryZone.to}</p>
+              </div>
+            </div>
+          </div>
+        );
+      case "exits":
+        return aiAnalysis.exitZones && (
+          <div className="space-y-2">
+            {aiAnalysis.exitZones.map((zone, i) => (
+              <div key={i} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-accent">{zone.label}</span>
+                  <span className="text-[12px] font-mono font-bold">{zone.target}</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
+                  <motion.div
+                    className={cn("h-full rounded-full", i === 0 ? "bg-gradient-to-r from-accent to-primary" : i === 1 ? "bg-gradient-to-r from-accent/70 to-primary/70" : "bg-gradient-to-r from-accent/40 to-primary/40")}
+                    initial={{ width: 0 }} animate={{ width: `${zone.probability}%` }}
+                    transition={{ duration: 0.8, delay: i * 0.15 }}
+                  />
+                </div>
+                <p className="text-[8px] font-mono text-muted-foreground text-left">احتمالية: {zone.probability}%</p>
+              </div>
+            ))}
+          </div>
+        );
+      case "stoploss":
+        return aiAnalysis.stopLoss && (
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/15 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[9px] font-mono text-muted-foreground uppercase">سعر الوقف</p>
+                <p className="text-[15px] font-mono font-bold text-destructive">{aiAnalysis.stopLoss.price}</p>
+              </div>
+            </div>
+            <p className="text-[9px] font-mono text-muted-foreground mt-2 leading-relaxed border-t border-destructive/10 pt-2">{aiAnalysis.stopLoss.reason}</p>
+          </div>
+        );
+      case "reasons":
+        return aiAnalysis.entryReasons && (
+          <div className="space-y-1.5">
+            {aiAnalysis.entryReasons.map((reason, i) => (
+              <div key={i} className="flex items-start gap-2.5 bg-secondary/30 rounded-lg px-3 py-2.5">
+                <span className="w-5 h-5 rounded-md bg-accent/10 text-accent font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{reason}</p>
+              </div>
+            ))}
+          </div>
+        );
+      case "scenarios":
+        return aiAnalysis.scenarios && (
+          <div className="space-y-2">
+            {aiAnalysis.scenarios.map((scenario, i) => {
+              const isPositive = scenario.title.includes("إيجابي") || scenario.title.includes("صعود");
+              const isNegative = scenario.title.includes("سلبي") || scenario.title.includes("هبوط");
+              return (
+                <div key={i} className={cn("rounded-xl p-3 border space-y-2", isPositive ? "bg-primary/5 border-primary/12" : isNegative ? "bg-destructive/5 border-destructive/12" : "bg-warning/5 border-warning/12")}>
+                  <div className="flex items-center justify-between">
+                    <p className={cn("text-[11px] font-mono font-bold flex items-center gap-1.5", isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning")}>
+                      {isPositive ? "🟢" : isNegative ? "🔴" : "🟡"} {scenario.title}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-10 h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div className={cn("h-full rounded-full", isPositive ? "bg-primary" : isNegative ? "bg-destructive" : "bg-warning")} style={{ width: `${scenario.probability}%` }} />
+                      </div>
+                      <span className={cn("text-[10px] font-mono font-bold", isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning")}>{scenario.probability}%</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-mono text-foreground/70 leading-relaxed">{scenario.description}</p>
+                  {scenario.targets?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {scenario.targets.map((t, ti) => (
+                        <span key={ti} className="text-[9px] font-mono bg-secondary/40 px-2 py-0.5 rounded-md border border-border/10">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      case "strategy":
+        return aiAnalysis.strategy && (
+          <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{aiAnalysis.strategy}</p>
+        );
+      case "levels":
+        return aiAnalysis.keyLevels && (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingUp className="w-3 h-3 text-primary" /> Support</p>
+              {aiAnalysis.keyLevels.support?.map((s, i) => (
+                <p key={i} className="text-[12px] font-mono font-bold text-primary">{s}</p>
+              ))}
+            </div>
+            <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/10">
+              <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingDown className="w-3 h-3 text-destructive" /> Resistance</p>
+              {aiAnalysis.keyLevels.resistance?.map((r, i) => (
+                <p key={i} className="text-[12px] font-mono font-bold text-destructive">{r}</p>
+              ))}
+            </div>
+          </div>
+        );
+      default: return null;
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {stats}
+
+      {/* Module Grid — compact clickable boxes */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {activeModules.map((mod) => (
+          <motion.button
+            key={mod.id}
+            onClick={() => toggle(mod.id)}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 py-3 rounded-xl border transition-all text-center",
+              openModule === mod.id
+                ? `bg-${mod.color}/10 border-${mod.color}/25 shadow-[0_0_12px_hsla(210,100%,60%,0.06)]`
+                : "bg-secondary/20 border-border/10 hover:bg-secondary/40 hover:border-border/20"
+            )}
+            style={openModule === mod.id ? {
+              background: `hsla(var(--${mod.color}) / 0.08)`,
+              borderColor: `hsla(var(--${mod.color}) / 0.2)`,
+            } : undefined}
+          >
+            <span className={cn("transition-colors", openModule === mod.id ? `text-${mod.color}` : "text-muted-foreground")}>
+              {mod.icon}
+            </span>
+            <span className={cn("text-[8px] font-mono font-bold uppercase tracking-wider transition-colors", openModule === mod.id ? `text-${mod.color}` : "text-muted-foreground")}>
+              {mod.label}
+            </span>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Expanded Module Content */}
+      <AnimatePresence mode="wait">
+        {openModule && (
+          <motion.div
+            key={openModule}
+            initial={{ opacity: 0, height: 0, y: -4 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-xl bg-secondary/15 border border-border/10 p-3.5">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
+                  {modules.find(m => m.id === openModule)?.icon}
+                  X {modules.find(m => m.id === openModule)?.label}
+                </span>
+                <button onClick={() => setOpenModule(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <XIcon className="w-3 h-3" />
+                </button>
+              </div>
+              {renderModuleContent(openModule)}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 const stop = (e: React.MouseEvent | React.PointerEvent) => e.stopPropagation();
@@ -462,7 +682,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
           </div>
         )}
 
-        {/* ─── AI Analysis Results ─── */}
+        {/* ─── Intelligence Modules ─── */}
         <AnimatePresence>
           {aiAnalysis && !aiAnalysis.error && expanded && (
             <motion.div
@@ -482,7 +702,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   إخفاء التحليل
                 </button>
 
-                {/* Verdict */}
+                {/* Verdict — always visible */}
                 {aiAnalysis.verdict && (
                   <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                     className="rounded-xl bg-gradient-to-r from-accent/8 to-primary/5 border border-accent/15 p-3.5"
@@ -499,194 +719,8 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                   </motion.div>
                 )}
 
-                {/* Entry Zone */}
-                {aiAnalysis.entryZone && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-                    <div className="rounded-xl bg-secondary/20 border border-accent/10 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Crosshair className="w-3.5 h-3.5" /> X Entry Zone
-                        </span>
-                        <span className="text-[9px] font-mono bg-accent/10 text-accent px-2 py-0.5 rounded-full">{aiAnalysis.entryZone.type}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-accent/5 rounded-lg px-3 py-2.5 text-center border border-accent/10">
-                          <p className="text-[8px] font-mono text-muted-foreground uppercase mb-0.5">من</p>
-                          <p className="text-[15px] font-mono font-bold">{aiAnalysis.entryZone.from}</p>
-                        </div>
-                        <div className="bg-accent/5 rounded-lg px-3 py-2.5 text-center border border-accent/10">
-                          <p className="text-[8px] font-mono text-muted-foreground uppercase mb-0.5">إلى</p>
-                          <p className="text-[15px] font-mono font-bold">{aiAnalysis.entryZone.to}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Exit Zones with Goal Slider */}
-                {aiAnalysis.exitZones && aiAnalysis.exitZones.length > 0 && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
-                    <div className="rounded-xl bg-secondary/20 border border-border/10 p-3 space-y-2">
-                      <span className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Target className="w-3.5 h-3.5" /> X Exit Targets
-                      </span>
-                      <div className="space-y-2">
-                        {aiAnalysis.exitZones.map((zone, i) => (
-                          <div key={i} className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-mono font-bold text-accent">{zone.label}</span>
-                              <span className="text-[12px] font-mono font-bold">{zone.target}</span>
-                            </div>
-                            <div className="h-2 rounded-full bg-muted/20 overflow-hidden">
-                              <motion.div
-                                className={cn(
-                                  "h-full rounded-full",
-                                  i === 0 ? "bg-gradient-to-r from-accent to-primary" :
-                                  i === 1 ? "bg-gradient-to-r from-accent/70 to-primary/70" :
-                                  "bg-gradient-to-r from-accent/40 to-primary/40"
-                                )}
-                                initial={{ width: 0 }}
-                                animate={{ width: `${zone.probability}%` }}
-                                transition={{ duration: 0.8, delay: i * 0.15 }}
-                              />
-                            </div>
-                            <p className="text-[8px] font-mono text-muted-foreground text-left">احتمالية: {zone.probability}%</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Stop Loss */}
-                {aiAnalysis.stopLoss && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <div className="rounded-xl bg-destructive/5 border border-destructive/10 p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/15 flex items-center justify-center shrink-0">
-                          <Shield className="w-5 h-5 text-destructive" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-[9px] font-mono text-muted-foreground uppercase">X Stop Loss</p>
-                          <p className="text-[15px] font-mono font-bold text-destructive">{aiAnalysis.stopLoss.price}</p>
-                        </div>
-                      </div>
-                      <p className="text-[9px] font-mono text-muted-foreground mt-2 leading-relaxed border-t border-destructive/10 pt-2">{aiAnalysis.stopLoss.reason}</p>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* R:R & Time */}
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="grid grid-cols-2 gap-2">
-                  {aiAnalysis.riskReward && (
-                    <div className="bg-secondary/30 rounded-xl px-3 py-3 text-center border border-accent/10">
-                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><ArrowDownUp className="w-3 h-3" /> R:R</p>
-                      <p className="text-[18px] font-mono font-bold text-accent">{aiAnalysis.riskReward}</p>
-                    </div>
-                  )}
-                  {aiAnalysis.timeHorizon && (
-                    <div className="bg-secondary/30 rounded-xl px-3 py-3 text-center border border-border/10">
-                      <p className="text-[8px] font-mono text-muted-foreground uppercase flex items-center justify-center gap-1 mb-1"><Clock className="w-3 h-3" /> المدة</p>
-                      <p className="text-[13px] font-mono font-bold">{aiAnalysis.timeHorizon}</p>
-                    </div>
-                  )}
-                </motion.div>
-
-                {/* Entry Reasons */}
-                {aiAnalysis.entryReasons && aiAnalysis.entryReasons.length > 0 && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                    className="rounded-xl bg-secondary/20 border border-border/10 p-3 space-y-2"
-                  >
-                    <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5" /> X Entry Reasons
-                    </span>
-                    <div className="space-y-1.5">
-                      {aiAnalysis.entryReasons.map((reason, i) => (
-                        <div key={i} className="flex items-start gap-2.5 bg-secondary/30 rounded-lg px-3 py-2.5">
-                          <span className="w-5 h-5 rounded-md bg-accent/10 text-accent font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
-                          <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{reason}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Scenarios */}
-                {aiAnalysis.scenarios && aiAnalysis.scenarios.length > 0 && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-2">
-                    <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-wider flex items-center gap-1.5 px-1">
-                      <Route className="w-3.5 h-3.5" /> X Scenarios
-                    </span>
-                    {aiAnalysis.scenarios.map((scenario, i) => {
-                      const isPositive = scenario.title.includes("إيجابي") || scenario.title.includes("صعود");
-                      const isNegative = scenario.title.includes("سلبي") || scenario.title.includes("هبوط");
-                      return (
-                        <div key={i} className={cn(
-                          "rounded-xl p-3.5 border space-y-2",
-                          isPositive ? "bg-primary/5 border-primary/12" :
-                          isNegative ? "bg-destructive/5 border-destructive/12" :
-                          "bg-warning/5 border-warning/12"
-                        )}>
-                          <div className="flex items-center justify-between">
-                            <p className={cn("text-[11px] font-mono font-bold flex items-center gap-1.5",
-                              isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning"
-                            )}>
-                              {isPositive ? "🟢" : isNegative ? "🔴" : "🟡"} {scenario.title}
-                            </p>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-10 h-1.5 rounded-full bg-muted overflow-hidden">
-                                <div className={cn("h-full rounded-full",
-                                  isPositive ? "bg-primary" : isNegative ? "bg-destructive" : "bg-warning"
-                                )} style={{ width: `${scenario.probability}%` }} />
-                              </div>
-                              <span className={cn("text-[10px] font-mono font-bold",
-                                isPositive ? "text-primary" : isNegative ? "text-destructive" : "text-warning"
-                              )}>{scenario.probability}%</span>
-                            </div>
-                          </div>
-                          <p className="text-[10px] font-mono text-foreground/70 leading-relaxed">{scenario.description}</p>
-                          {scenario.targets?.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {scenario.targets.map((t, ti) => (
-                                <span key={ti} className="text-[9px] font-mono bg-secondary/40 px-2 py-0.5 rounded-md border border-border/10">{t}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </motion.div>
-                )}
-
-                {/* Strategy */}
-                {aiAnalysis.strategy && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                    className="rounded-xl bg-accent/5 border border-accent/10 p-3.5"
-                  >
-                    <p className="text-[10px] font-mono text-accent font-bold mb-1.5 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" /> X Strategy
-                    </p>
-                    <p className="text-[11px] font-mono text-foreground/80 leading-relaxed">{aiAnalysis.strategy}</p>
-                  </motion.div>
-                )}
-
-                {/* Key Levels */}
-                {aiAnalysis.keyLevels && (
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-2 gap-2">
-                    <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
-                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingUp className="w-3 h-3 text-primary" /> Support</p>
-                      {aiAnalysis.keyLevels.support?.map((s, i) => (
-                        <p key={i} className="text-[12px] font-mono font-bold text-primary">{s}</p>
-                      ))}
-                    </div>
-                    <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/10">
-                      <p className="text-[9px] font-mono text-muted-foreground uppercase mb-2 flex items-center gap-1"><TrendingDown className="w-3 h-3 text-destructive" /> Resistance</p>
-                      {aiAnalysis.keyLevels.resistance?.map((r, i) => (
-                        <p key={i} className="text-[12px] font-mono font-bold text-destructive">{r}</p>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+                {/* Intelligence Module Grid */}
+                <IntelligenceModules aiAnalysis={aiAnalysis} signal={signal} />
 
                 {/* Tools */}
                 <div className="space-y-2">
