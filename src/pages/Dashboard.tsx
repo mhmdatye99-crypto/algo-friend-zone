@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import MiniChart from "@/components/MiniChart";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
+import WealthProgressCircle from "@/components/dashboard/WealthProgressCircle";
 
 const fade = {
   hidden: { opacity: 0 },
@@ -150,6 +151,11 @@ const Dashboard = () => {
           </div>
         </motion.div>
       )}
+
+      {/* ═══ WEALTH PROGRESS CIRCLE ═══ */}
+      <motion.div variants={fade}>
+        <WealthProgressCircle />
+      </motion.div>
 
       {/* ═══ INSTITUTIONAL ALERTS ═══ */}
       {alerts.length > 0 && (
