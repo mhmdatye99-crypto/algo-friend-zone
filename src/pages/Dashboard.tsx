@@ -75,6 +75,39 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
       className="px-4 pt-3 pb-24 space-y-3 max-w-lg mx-auto"
     >
+      {/* ═══ DAILY INTELLIGENCE SUMMARY ═══ */}
+      <motion.div variants={fade} className="rounded-lg p-3 border border-border/15 bg-card/50 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Brain className="w-3.5 h-3.5 text-primary/70" />
+            <span className="text-[9px] font-mono font-semibold text-foreground/80">ملخص X اليومي</span>
+          </div>
+          <span className="text-[7px] font-mono text-muted-foreground/40">{new Date().toLocaleDateString("ar-EG", { weekday: "short", month: "short", day: "numeric" })}</span>
+        </div>
+        <div className="space-y-1.5">
+          {(() => {
+            const bullishCount = signals.filter(s => s.direction === "صعودي").length;
+            const bearishCount = signals.filter(s => s.direction === "هبوطي").length;
+            const avgConf = signals.length > 0 ? Math.round(signals.reduce((s, sig) => s + sig.confidence, 0) / signals.length) : 0;
+            const highVol = volatilityMetric.stressLevel >= 60;
+            const summaryItems = [
+              { icon: "📊", text: `هيكل السوق: ${bullishCount > bearishCount ? "ميل صعودي" : bearishCount > bullishCount ? "ميل هبوطي" : "محايد"} — ${bullishCount} إشارات شراء مقابل ${bearishCount} بيع`, tag: "STRUCTURE" },
+              { icon: "💧", text: `السيولة: ${liquidityBlocks.filter(b => b.type === "institutional_buy").length} كتل شراء مؤسسي مرصودة${highVol ? " · تقلب مرتفع يستدعي الحذر" : " · تقلب معتدل"}`, tag: "LIQUIDITY" },
+              { icon: "⚡", text: `الزخم: متوسط ثقة الإشارات ${avgConf}%${activeSignals.length > 0 ? ` · ${activeSignals.length} فرص عالية الجودة (≥70%)` : " · لا توجد فرص قوية حالياً"}`, tag: "MOMENTUM" },
+            ];
+            return summaryItems.map((item, i) => (
+              <div key={i} className="flex items-start gap-2 px-2 py-1.5 rounded-md bg-muted/15 border border-border/5">
+                <span className="text-xs shrink-0 mt-0.5">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[7px] font-mono font-bold text-primary/50 bg-primary/5 px-1 py-0.5 rounded-sm mr-1">{item.tag}</span>
+                  <p className="text-[9px] font-mono text-foreground/70 leading-relaxed mt-0.5">{item.text}</p>
+                </div>
+              </div>
+            ));
+          })()}
+        </div>
+      </motion.div>
+
       {/* ═══ SMART QUICK PANEL ═══ */}
       <motion.div variants={fade} className="rounded-lg p-3 border border-border/15 bg-card/50">
         <div className="grid grid-cols-4 gap-3">

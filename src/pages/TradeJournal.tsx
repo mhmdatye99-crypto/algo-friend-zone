@@ -150,6 +150,9 @@ const TradeJournal = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trades"] });
+      queryClient.invalidateQueries({ queryKey: ["dash-equity"] });
+      queryClient.invalidateQueries({ queryKey: ["trade-performance"] });
+      queryClient.invalidateQueries({ queryKey: ["trades-pnl-total"] });
       resetForm();
       setShowForm(false);
       toast.success("تم تسجيل الصفقة بنجاح");
@@ -164,6 +167,9 @@ const TradeJournal = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trades"] });
+      queryClient.invalidateQueries({ queryKey: ["dash-equity"] });
+      queryClient.invalidateQueries({ queryKey: ["trade-performance"] });
+      queryClient.invalidateQueries({ queryKey: ["trades-pnl-total"] });
       toast.success("تم حذف الصفقة");
     },
   });
@@ -187,6 +193,10 @@ const TradeJournal = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trades"] });
+      queryClient.invalidateQueries({ queryKey: ["dash-equity"] });
+      queryClient.invalidateQueries({ queryKey: ["trade-performance"] });
+      queryClient.invalidateQueries({ queryKey: ["trades-pnl-total"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-goal"] });
       toast.success("تم إغلاق الصفقة");
     },
   });
@@ -303,10 +313,12 @@ const TradeJournal = () => {
           ) : (
             <div className="space-y-1">
               {/* Statement Header */}
-              <div className="flex items-center gap-2 px-3 py-1 text-[7px] font-mono text-muted-foreground/40 uppercase">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[7px] font-mono text-muted-foreground/40 uppercase border-b border-border/10">
                 <span className="w-14">التاريخ</span>
-                <span className="flex-1">الزوج</span>
-                <span className="w-12 text-center">الرتبة</span>
+                <span className="flex-1">الأصل</span>
+                <span className="w-10 text-center">النتيجة</span>
+                <span className="w-10 text-center">R:R</span>
+                <span className="w-10 text-center">الرتبة</span>
                 <span className="w-16 text-left">P&L</span>
               </div>
               {filtered.map((trade) => (
@@ -516,10 +528,38 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
   const [closePrice, setClosePrice] = useState("");
   const { grade, color: gradeColor } = getTradeGrade(trade);
 
+  // Calculate achieved R:R
+  const achievedRR = (() => {
+    if (trade.status !== "closed" || !trade.exit_price || !trade.stop_loss) return null;
+    const riskDist = Math.abs(trade.entry_price - trade.stop_loss);
+    if (riskDist === 0) return null;
+    const rewardDist = trade.direction === "long"
+      ? trade.exit_price - trade.entry_price
+      : trade.entry_price - trade.exit_price;
+    return parseFloat((rewardDist / riskDist).toFixed(1));
+  })();
+
+  const isWin = trade.pnl !== null && trade.pnl > 0;
+  const isLoss = trade.pnl !== null && trade.pnl < 0;
+
+  // Discipline score: compare exit vs TP
+  const disciplineNote = (() => {
+    if (trade.status !== "closed" || !trade.exit_price || !trade.take_profit) return null;
+    const tpDist = Math.abs(trade.take_profit - trade.entry_price);
+    const exitDist = trade.direction === "long"
+      ? trade.exit_price - trade.entry_price
+      : trade.entry_price - trade.exit_price;
+    const ratio = tpDist > 0 ? (exitDist / tpDist) * 100 : 0;
+    if (ratio >= 90) return { text: "ممتاز", color: "text-success" };
+    if (ratio >= 60) return { text: "جيد", color: "text-primary" };
+    if (ratio >= 30) return { text: "مقبول", color: "text-warning" };
+    return { text: "ضعيف", color: "text-destructive" };
+  })();
+
   return (
     <div className="rounded-md border border-border/10 bg-card/30 overflow-hidden">
-      {/* Main Row */}
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-2 px-3 py-2 text-right hover-lift">
+      {/* Main Row — Table style */}
+      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-2 px-3 py-2.5 text-right hover-lift">
         <span className="text-[8px] font-mono text-muted-foreground/40 tabular-nums w-14 shrink-0">
           {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
         </span>
@@ -529,13 +569,22 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
           )} />
           <span className="text-[10px] font-mono font-semibold truncate">{trade.pair}</span>
           {trade.emotion && <span className="text-xs">{trade.emotion}</span>}
-          <span className={cn("text-[7px] font-mono px-1 py-0.5 rounded-sm",
-            trade.status === "open" ? "bg-warning/8 text-warning" : "bg-muted/30 text-muted-foreground/50"
-          )}>
-            {trade.status === "open" ? "مفتوحة" : "مغلقة"}
-          </span>
         </div>
-        <span className={cn("text-[10px] font-mono font-bold w-12 text-center", gradeColor)}>{grade}</span>
+        {/* Result */}
+        <span className={cn("text-[8px] font-mono font-semibold w-10 text-center px-1 py-0.5 rounded-sm",
+          trade.status === "open" ? "bg-warning/8 text-warning" : isWin ? "bg-success/8 text-success" : isLoss ? "bg-destructive/8 text-destructive" : "text-muted-foreground/40"
+        )}>
+          {trade.status === "open" ? "مفتوح" : isWin ? "WIN" : isLoss ? "LOSS" : "—"}
+        </span>
+        {/* R:R achieved */}
+        <span className={cn("text-[9px] font-mono font-semibold w-10 text-center tabular-nums",
+          achievedRR === null ? "text-muted-foreground/30" : achievedRR >= 2 ? "text-success" : achievedRR >= 1 ? "text-primary" : "text-destructive"
+        )}>
+          {achievedRR !== null ? `${achievedRR > 0 ? "+" : ""}${achievedRR}` : "—"}
+        </span>
+        {/* Grade */}
+        <span className={cn("text-[10px] font-mono font-bold w-10 text-center", gradeColor)}>{grade}</span>
+        {/* P&L */}
         <span className={cn("text-[10px] font-mono font-semibold tabular-nums w-16 text-left",
           trade.pnl === null ? "text-muted-foreground/30" : trade.pnl >= 0 ? "text-success" : "text-destructive"
         )}>
@@ -563,6 +612,12 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
               )}
               {trade.notes && (
                 <p className="text-[8px] font-mono text-muted-foreground/50">{trade.notes}</p>
+              )}
+              {disciplineNote && (
+                <div className="flex items-center gap-2 px-2 py-1 rounded-sm bg-primary/3 border border-primary/8">
+                  <span className="text-[7px] font-mono text-muted-foreground/50">انضباط الخروج:</span>
+                  <span className={cn("text-[9px] font-mono font-semibold", disciplineNote.color)}>{disciplineNote.text}</span>
+                </div>
               )}
               <div className="flex gap-1">
                 {trade.status === "open" && (
