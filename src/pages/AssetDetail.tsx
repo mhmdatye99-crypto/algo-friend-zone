@@ -721,7 +721,7 @@ const AssetDetail = () => {
       {/* Disclaimer */}
       <motion.div variants={fadeUp} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-secondary/30 border border-border/10">
         <p className="text-[10px] text-muted-foreground font-mono">
-          البيانات للأغراض التعليمية فقط — ليست نصيحة مالية
+          بيانات السوق للأغراض التعليمية فقط — ليست إشارة دخول مالية
         </p>
       </motion.div>
     </motion.div>

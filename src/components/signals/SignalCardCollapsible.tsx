@@ -817,7 +817,7 @@ const SignalCardCollapsible = ({ signal }: Props) => {
                 <div className="flex items-start gap-1.5 pt-1">
                   <AlertTriangle className="w-3 h-3 text-warning/60 shrink-0 mt-0.5" />
                   <p className="text-[8px] font-mono text-muted-foreground/60 leading-relaxed">
-                    تحليل X تعليمي ولا يشكل نصيحة مالية. التداول ينطوي على مخاطر خسارة رأس المال.
+                    تحليل X تعليمي ولا يشكل إشارة دخول مالية. التداول ينطوي على مخاطر خسارة رأس المال.
                   </p>
                 </div>
               </div>

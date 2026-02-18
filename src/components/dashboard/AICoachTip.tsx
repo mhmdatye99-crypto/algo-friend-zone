@@ -36,7 +36,7 @@ const AICoachTip = () => {
       try {
         const { data } = await supabase.functions.invoke("asset-consultant", {
           body: {
-            messages: [{ role: "user", content: "أعطني نصيحة تداول واحدة قصيرة (جملة واحدة فقط) مع إيموجي مناسب في البداية. كن مبتكراً ومختلفاً كل مرة." }],
+            messages: [{ role: "user", content: "أعطني إشارة دخول تداول واحدة قصيرة (جملة واحدة فقط) مع إيموجي مناسب في البداية. كن مبتكراً ومختلفاً كل مرة." }],
             assetContext: { pair: "عام", price: 0, change: 0, rsi: 50, macd: "محايد", signal: "محايد", vol: "", category: "عام", up: true },
           },
         });
