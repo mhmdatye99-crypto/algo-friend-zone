@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
-import AIScan from "./pages/AIScan";
+import Markets from "./pages/Markets";
 import CommunityPage from "./pages/CommunityPage";
 import ProfilePage from "./pages/ProfilePage";
 import Auth from "./pages/Auth";
@@ -58,36 +58,37 @@ const App = () => (
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               {/* 5 Main Sections */}
               <Route path="/" element={<Dashboard />} />
-              <Route path="/trade-center" element={<TradeCenter />} />
-              <Route path="/learning" element={<LearningPage />} />
+              <Route path="/markets" element={<Markets />} />
+              <Route path="/signals" element={<TradeCenter />} />
+              <Route path="/portfolio" element={<ProfilePage />} />
               <Route path="/community" element={<CommunityPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
 
-              {/* Unified pages */}
-              <Route path="/tools" element={<ToolsPage />} />
+              {/* Side menu pages */}
               <Route path="/journal" element={<JournalPage />} />
+              <Route path="/learning" element={<LearningPage />} />
+              <Route path="/tools" element={<ToolsPage />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
-
-              {/* Supporting pages */}
-              <Route path="/asset/*" element={<AssetDetail />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/admin" element={<AdminPanel />} />
 
+              {/* Supporting pages */}
+              <Route path="/asset/*" element={<AssetDetail />} />
+
               {/* Legacy redirects */}
-              <Route path="/hub" element={<Navigate to="/profile" replace />} />
-              <Route path="/signals" element={<Navigate to="/trade-center" replace />} />
-              <Route path="/markets" element={<Navigate to="/trade-center" replace />} />
+              <Route path="/hub" element={<Navigate to="/" replace />} />
+              <Route path="/trade-center" element={<Navigate to="/signals" replace />} />
+              <Route path="/profile" element={<Navigate to="/portfolio" replace />} />
               <Route path="/nexus-brain" element={<Navigate to="/learning" replace />} />
               <Route path="/mentor" element={<Navigate to="/learning" replace />} />
               <Route path="/academy" element={<Navigate to="/learning" replace />} />
               <Route path="/challenges" element={<Navigate to="/community" replace />} />
-              <Route path="/more" element={<Navigate to="/profile" replace />} />
+              <Route path="/more" element={<Navigate to="/portfolio" replace />} />
               <Route path="/goal-planner" element={<Navigate to="/tools" replace />} />
               <Route path="/risk-calculator" element={<Navigate to="/tools" replace />} />
               <Route path="/trade-journal" element={<Navigate to="/journal" replace />} />
               <Route path="/my-analyses" element={<Navigate to="/journal" replace />} />
-              <Route path="/chart-vision" element={<Navigate to="/trade-center" replace />} />
-              <Route path="/ai-scan" element={<Navigate to="/trade-center" replace />} />
+              <Route path="/chart-vision" element={<Navigate to="/signals" replace />} />
+              <Route path="/ai-scan" element={<Navigate to="/signals" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

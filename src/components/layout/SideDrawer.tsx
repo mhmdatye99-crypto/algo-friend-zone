@@ -1,9 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, TrendingUp, Wrench,
-  Users, X, Crown, Sun, Coins, Bell, Shield,
-  Moon, Settings, Lightbulb, Notebook, BarChart3
+  X, Sun, Moon, Bell, Notebook, GraduationCap,
+  Settings, HelpCircle, Crown, Coins
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -20,32 +19,17 @@ interface SideDrawerProps {
 
 const menuSections = [
   {
-    title: "القيادة",
-    items: [
-      { path: "/", icon: LayoutDashboard, label: "المحور" },
-      { path: "/trade-center", icon: BarChart3, label: "المحطة" },
-      { path: "/profile", icon: Shield, label: "الخزنة" },
-    ],
-  },
-  {
     title: "أدوات",
     items: [
-      { path: "/journal", icon: Notebook, label: "اليومية" },
-      { path: "/tools", icon: Wrench, label: "الأدوات" },
-      { path: "/morning-brief", icon: Sun, label: "الملخص الصباحي" },
-    ],
-  },
-  {
-    title: "مجتمع",
-    items: [
-      { path: "/learning", icon: Lightbulb, label: "الأكاديمية" },
-      { path: "/community", icon: Users, label: "الساحة", badge: "community" as const },
+      { path: "/journal", icon: Notebook, label: "سجل الصفقات" },
+      { path: "/learning", icon: GraduationCap, label: "الأكاديمية" },
     ],
   },
   {
     title: "الحساب",
     items: [
       { path: "/subscription", icon: Crown, label: "الاشتراك" },
+      { path: "/tools", icon: Settings, label: "الإعدادات" },
     ],
   },
 ];
@@ -57,11 +41,6 @@ const SideDrawer = ({ open, onClose }: SideDrawerProps) => {
   const { credits } = useCredits();
   const { isDark, toggle: toggleTheme } = useThemeMode();
   const [showNotifications, setShowNotifications] = useState(false);
-
-  const getBadge = (badge?: string) => {
-    if (badge === "community" && unreadCount > 0) return unreadCount;
-    return null;
-  };
 
   const handleNav = (path: string) => { navigate(path); onClose(); };
 
@@ -95,19 +74,17 @@ const SideDrawer = ({ open, onClose }: SideDrawerProps) => {
               </div>
 
               <div className="flex-1 overflow-y-auto py-2 px-2.5 space-y-2">
-                {menuSections.map((section, sIdx) => (
+                {menuSections.map((section) => (
                   <div key={section.title}>
                     <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em] px-2 mb-1 text-right">{section.title}</p>
                     {section.items.map((item) => {
                       const Icon = item.icon;
                       const active = location.pathname === item.path;
-                      const badge = getBadge(item.badge);
                       return (
                         <button key={item.path} onClick={() => handleNav(item.path)}
                           className={cn("w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all text-right",
                             active ? "bg-accent/8 border border-accent/15" : "hover:bg-secondary/30 border border-transparent"
                           )}>
-                          {badge && <span className="min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center text-[8px] font-mono font-bold">{badge > 9 ? "9+" : badge}</span>}
                           <span className={cn("text-[11px] font-mono flex-1 text-right", active ? "font-bold text-accent" : "text-foreground/60")}>{item.label}</span>
                           <Icon className={cn("w-4 h-4", active ? "text-accent" : "text-muted-foreground/40")} strokeWidth={active ? 2 : 1.5} />
                         </button>
@@ -119,9 +96,12 @@ const SideDrawer = ({ open, onClose }: SideDrawerProps) => {
                 {/* Settings */}
                 <div className="pt-1 border-t border-border/10">
                   <div className="flex gap-1">
-                    <button onClick={() => { setShowNotifications(true); }} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg hover:bg-secondary/30 transition-colors">
+                    <button onClick={() => { setShowNotifications(true); }} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg hover:bg-secondary/30 transition-colors relative">
                       <Bell className="w-3.5 h-3.5 text-muted-foreground/40" />
                       <span className="text-[9px] font-mono text-muted-foreground/50">تنبيهات</span>
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-3 min-w-[14px] h-3.5 px-1 rounded-full bg-destructive text-white flex items-center justify-center text-[7px] font-mono font-bold">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                      )}
                     </button>
                     <button onClick={() => { toggleTheme(); toast.success(isDark ? "☀️" : "🌙"); }} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg hover:bg-secondary/30 transition-colors">
                       {isDark ? <Sun className="w-3.5 h-3.5 text-accent/50" /> : <Moon className="w-3.5 h-3.5 text-muted-foreground/40" />}

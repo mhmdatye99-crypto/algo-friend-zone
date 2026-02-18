@@ -250,7 +250,7 @@ const Dashboard = () => {
             <Zap className="w-3 h-3 text-primary/60" />
             <span className="text-[8px] font-mono font-semibold text-muted-foreground/70">توصيات X</span>
           </div>
-          <button onClick={() => navigate("/trade-center")} className="text-[8px] font-mono text-primary/60 flex items-center gap-0.5 hover:text-primary transition-colors">
+          <button onClick={() => navigate("/signals")} className="text-[8px] font-mono text-primary/60 flex items-center gap-0.5 hover:text-primary transition-colors">
             الكل <ChevronLeft className="w-3 h-3" />
           </button>
         </div>
@@ -258,7 +258,7 @@ const Dashboard = () => {
           {topSignals.map((signal) => {
             const prob = signalProbabilities.get(signal.pair) ?? 50;
             return (
-              <div key={signal.pair} onClick={() => navigate("/trade-center")}
+              <div key={signal.pair} onClick={() => navigate("/signals")}
                 className="rounded-lg p-2.5 border border-border/10 bg-card/40 flex items-center gap-2 cursor-pointer hover-lift">
                 {signal.icon && <span className="text-sm w-6 text-center shrink-0">{signal.icon}</span>}
                 <div className="flex-1 min-w-0">
@@ -293,7 +293,7 @@ const Dashboard = () => {
             <Activity className="w-3 h-3 text-warning/60" />
             <span className="text-[8px] font-mono font-semibold text-muted-foreground/70">أبرز التحركات</span>
           </div>
-          <button onClick={() => navigate("/trade-center")} className="text-[8px] font-mono text-primary/60 flex items-center gap-0.5 hover:text-primary transition-colors">
+          <button onClick={() => navigate("/markets")} className="text-[8px] font-mono text-primary/60 flex items-center gap-0.5 hover:text-primary transition-colors">
             الأسواق <ChevronLeft className="w-3 h-3" />
           </button>
         </div>
