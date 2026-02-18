@@ -7,9 +7,9 @@ import NexusSplash from "./NexusSplash";
 import LiveTickerBar from "./LiveTickerBar";
 
 const pageVariants = {
-  initial: { opacity: 0, y: 6 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -6 },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 0 },
 };
 
 const AppLayout = () => {
@@ -28,7 +28,7 @@ const AppLayout = () => {
     <div className="min-h-screen bg-background relative" dir="rtl">
       {showSplash && <NexusSplash onComplete={handleSplashComplete} />}
       <TopBar />
-      <div className="relative z-10 border-b border-border/5 bg-card/30 backdrop-blur-sm">
+      <div className="relative z-10 border-b border-border/10">
         <LiveTickerBar />
       </div>
       <main className="relative z-10">
@@ -39,7 +39,7 @@ const AppLayout = () => {
             animate="in"
             exit="out"
             variants={pageVariants}
-            transition={{ duration: 0.15, ease: "easeOut" }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
           >
             <Outlet />
           </motion.div>
