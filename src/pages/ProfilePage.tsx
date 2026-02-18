@@ -219,11 +219,11 @@ const ProfilePage = () => {
 
       {/* Quick Links */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
-        <button onClick={() => navigate("/trade-journal")} className="flex items-center gap-2 p-3 rounded-xl bg-primary/8 border border-primary/15 hover:bg-primary/12 transition-all">
+        <button onClick={() => navigate("/journal")} className="flex items-center gap-2 p-3 rounded-xl bg-primary/8 border border-primary/15 hover:bg-primary/12 transition-all">
           <BookOpen className="w-4 h-4 text-primary" />
           <span className="text-[10px] font-mono font-bold">سجل الصفقات</span>
         </button>
-        <button onClick={() => navigate("/risk-calculator")} className="flex items-center gap-2 p-3 rounded-xl bg-accent/8 border border-accent/15 hover:bg-accent/12 transition-all">
+        <button onClick={() => navigate("/tools")} className="flex items-center gap-2 p-3 rounded-xl bg-accent/8 border border-accent/15 hover:bg-accent/12 transition-all">
           <Target className="w-4 h-4 text-accent" />
           <span className="text-[10px] font-mono font-bold">حاسبة المخاطر</span>
         </button>
