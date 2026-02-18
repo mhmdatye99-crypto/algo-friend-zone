@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import {
   Gauge, Activity, Shield, TrendingUp, TrendingDown,
   AlertTriangle, Flame, Brain, Sparkles, Award, Bell,
-  BarChart3, Target, ChevronLeft, Zap, Droplets, Cpu
+  BarChart3, Target, ChevronLeft, Zap, Droplets, Cpu,
+  Eye, Crosshair, ArrowUpDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -18,8 +19,19 @@ import MiniChart from "@/components/MiniChart";
 import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.18 } },
+};
+
+// Institutional alert tag colors
+const alertTagColors: Record<string, string> = {
+  "[LIQ-SHIFT]": "bg-accent/12 text-accent border-accent/20",
+  "[VOL-EXP]": "bg-destructive/12 text-destructive border-destructive/20",
+  "[VOL-MOD]": "bg-warning/12 text-warning border-warning/20",
+  "[STR-BRK]": "bg-primary/12 text-primary border-primary/20",
+  "[DIV]": "bg-warning/12 text-warning border-warning/20",
+  "[ORD-FLW]": "bg-success/12 text-success border-success/20",
+  "[DISC]": "bg-destructive/12 text-destructive border-destructive/20",
 };
 
 const Dashboard = () => {
@@ -29,7 +41,7 @@ const Dashboard = () => {
   const assets = useLivePrices();
   const { latestScore } = useChallenges();
   const { stats } = useGoalPlanner();
-  const { traderScore, patterns, alerts, riskScore, volatilityMetric, liquidityBlocks, signalProbabilities } = useSmartAlgorithms();
+  const { traderScore, patterns, alerts, riskScore, volatilityMetric, liquidityBlocks, signalProbabilities, disciplineStreak } = useSmartAlgorithms();
 
   const activeSignals = useMemo(() => signals.filter(s => s.confidence >= 70), [signals]);
 
@@ -43,7 +55,6 @@ const Dashboard = () => {
 
   const wealthProgress = stats ? Math.round(stats.progress) : 0;
 
-  // Equity curve from trades
   const { data: closedTrades = [] } = useQuery({
     queryKey: ["dash-equity", user?.id],
     queryFn: async () => {
@@ -55,30 +66,22 @@ const Dashboard = () => {
 
   const equityCurve = useMemo(() => {
     let running = 0;
-    return closedTrades.map((t: any) => {
-      running += (t.pnl ?? 0);
-      return running;
-    });
+    return closedTrades.map((t: any) => { running += (t.pnl ?? 0); return running; });
   }, [closedTrades]);
 
   const topSignals = useMemo(() => signals.slice(0, 4), [signals]);
-
-  const topMovers = useMemo(() => {
-    const sorted = [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
-    return sorted.slice(0, 4);
-  }, [assets]);
+  const topMovers = useMemo(() => [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 4), [assets]);
 
   return (
     <motion.div
       initial="hidden"
       animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.03 } } }}
+      variants={{ show: { transition: { staggerChildren: 0.025 } } }}
       className="px-3 pt-2 pb-24 space-y-3 max-w-lg mx-auto"
     >
-      {/* ═══ WEALTH INTELLIGENCE STRIP ═══ */}
+      {/* ═══ SMART QUICK PANEL ═══ */}
       <motion.div variants={fadeUp} className="rounded-xl p-3 border border-border/10 bg-card/60 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          {/* Market Pulse */}
           <div className="flex-1 text-center">
             <div className={cn("text-lg font-mono font-black tabular-nums", marketPulse.index >= 55 ? "text-success" : marketPulse.index <= 45 ? "text-destructive" : "text-warning")}>
               {marketPulse.index}%
@@ -86,7 +89,6 @@ const Dashboard = () => {
             <p className="text-[7px] font-mono text-muted-foreground/70 uppercase">نبض السوق</p>
           </div>
           <div className="w-px h-8 bg-border/20" />
-          {/* Volatility */}
           <div className="flex-1 text-center">
             <div className={cn("text-lg font-mono font-black tabular-nums", volatilityMetric.color)}>
               {volatilityMetric.stressLevel}%
@@ -94,13 +96,11 @@ const Dashboard = () => {
             <p className="text-[7px] font-mono text-muted-foreground/70 uppercase">إجهاد السوق</p>
           </div>
           <div className="w-px h-8 bg-border/20" />
-          {/* Active Signals */}
           <div className="flex-1 text-center">
             <div className="text-lg font-mono font-black tabular-nums text-accent">{activeSignals.length}</div>
             <p className="text-[7px] font-mono text-muted-foreground/70 uppercase">إشارة نشطة</p>
           </div>
           <div className="w-px h-8 bg-border/20" />
-          {/* Wealth */}
           <div className="flex-1 text-center">
             <div className="text-lg font-mono font-black tabular-nums text-primary">{wealthProgress}%</div>
             <p className="text-[7px] font-mono text-muted-foreground/70 uppercase">تقدم الثروة</p>
@@ -108,7 +108,28 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* ═══ EQUITY CURVE (mini) ═══ */}
+      {/* ═══ DISCIPLINE STREAK ═══ */}
+      {disciplineStreak.currentStreak > 0 && (
+        <motion.div variants={fadeUp} className="rounded-xl p-3 border border-accent/12 bg-accent/3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center border border-accent/15">
+                <Flame className="w-4 h-4 text-accent" />
+              </div>
+              <div>
+                <p className="text-[10px] font-mono font-bold text-accent">سلسلة الانضباط</p>
+                <p className="text-[8px] font-mono text-muted-foreground">{disciplineStreak.levelAr} · {disciplineStreak.unlockedRewards.length} مكافآت</p>
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-mono font-black text-accent">{disciplineStreak.currentStreak}</p>
+              <p className="text-[7px] font-mono text-muted-foreground/60">يوم</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ═══ EQUITY CURVE ═══ */}
       {equityCurve.length > 2 && (
         <motion.div variants={fadeUp} className="rounded-xl p-3 border border-border/10 bg-card/60">
           <div className="flex items-center justify-between mb-2">
@@ -129,22 +150,18 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* ═══ TRADER SCORE + RISK COMPACT ═══ */}
+      {/* ═══ TRADER SCORE + RISK ═══ */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
-        {/* Trader Grade */}
         <div className="rounded-xl p-3 border border-border/10 bg-card/60">
           <div className="flex items-center justify-between mb-2">
             <Award className="w-3.5 h-3.5 text-accent" />
             <div className={cn("text-[11px] font-mono font-black px-2 py-0.5 rounded-md",
               traderScore.overall >= 75 ? "bg-success/10 text-success" : traderScore.overall >= 50 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-            )}>
-              {traderScore.grade}
-            </div>
+            )}>{traderScore.grade}</div>
           </div>
           <p className={cn("text-2xl font-mono font-black tabular-nums", traderScore.color)}>{traderScore.overall}</p>
           <p className="text-[7px] font-mono text-muted-foreground/60 uppercase">تقييم المتداول</p>
         </div>
-        {/* Risk Score */}
         <div className="rounded-xl p-3 border border-border/10 bg-card/60">
           <div className="flex items-center justify-between mb-2">
             <Shield className="w-3.5 h-3.5 text-accent" />
@@ -155,31 +172,36 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* ═══ SMART ALERTS ═══ */}
+      {/* ═══ INSTITUTIONAL CONTEXT ALERTS ═══ */}
       {alerts.length > 0 && (
         <motion.div variants={fadeUp} className="space-y-1.5">
           <div className="flex items-center gap-1.5 px-1">
-            <Bell className="w-3 h-3 text-warning" />
-            <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-muted-foreground">تنبيهات X</span>
+            <Crosshair className="w-3 h-3 text-accent" />
+            <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-muted-foreground">تنبيهات السياق المؤسسي</span>
           </div>
-          {alerts.slice(0, 3).map((alert) => (
+          {alerts.slice(0, 4).map((alert) => (
             <div key={alert.id} className={cn(
-              "rounded-lg px-3 py-2 border flex items-center gap-2",
-              alert.severity === "high" ? "border-destructive/15 bg-destructive/3" :
-              alert.severity === "medium" ? "border-warning/15 bg-warning/3" :
+              "rounded-lg px-3 py-2.5 border flex items-start gap-2.5",
+              alert.severity === "critical" ? "border-destructive/20 bg-destructive/4" :
+              alert.severity === "high" ? "border-warning/15 bg-warning/3" :
               "border-accent/15 bg-accent/3"
             )}>
-              <span className="text-sm">{alert.icon}</span>
+              <span className="text-sm mt-0.5">{alert.icon}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-mono font-bold text-foreground">{alert.title}</p>
-                <p className="text-[8px] font-mono text-muted-foreground/70 truncate">{alert.message}</p>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className={cn("text-[7px] font-mono font-black px-1.5 py-0.5 rounded border", alertTagColors[alert.tag] || "bg-secondary text-muted-foreground border-border/20")}>
+                    {alert.tag}
+                  </span>
+                  <p className="text-[9px] font-mono font-bold text-foreground">{alert.title}</p>
+                </div>
+                <p className="text-[8px] font-mono text-muted-foreground/80 leading-relaxed">{alert.message}</p>
               </div>
             </div>
           ))}
         </motion.div>
       )}
 
-      {/* ═══ X LIQUIDITY BLOCKS ═══ */}
+      {/* ═══ LIQUIDITY BLOCKS ═══ */}
       {liquidityBlocks.length > 0 && (
         <motion.div variants={fadeUp} className="space-y-1.5">
           <div className="flex items-center gap-1.5 px-1">
@@ -209,7 +231,7 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* ═══ HOT SIGNALS (Compact) ═══ */}
+      {/* ═══ HOT SIGNALS ═══ */}
       <motion.div variants={fadeUp} className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5">
@@ -225,7 +247,7 @@ const Dashboard = () => {
             const prob = signalProbabilities.get(signal.pair) ?? 50;
             return (
               <div key={signal.pair} onClick={() => navigate("/trade-center")}
-                className="rounded-lg p-2.5 border border-border/10 bg-card/50 flex items-center gap-2.5 cursor-pointer hover:bg-card/70 transition-colors active:scale-[0.99]">
+                className="rounded-lg p-2.5 border border-border/10 bg-card/50 flex items-center gap-2.5 cursor-pointer hover:bg-card/70 transition-colors">
                 {signal.icon && <span className="text-base w-7 text-center">{signal.icon}</span>}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
@@ -252,11 +274,11 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* ═══ MARKET MOVERS (Compact) ═══ */}
+      {/* ═══ MARKET MOVERS ═══ */}
       <motion.div variants={fadeUp} className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5">
-            <Flame className="w-3 h-3 text-warning" />
+            <Activity className="w-3 h-3 text-warning" />
             <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-muted-foreground">أبرز التحركات</span>
           </div>
           <button onClick={() => navigate("/trade-center")} className="text-[8px] font-mono text-accent flex items-center gap-0.5 hover:underline">
@@ -312,11 +334,27 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* ═══ AI MENTOR QUICK ACCESS ═══ */}
+      {/* ═══ MORNING BRIEF ═══ */}
+      <motion.button
+        variants={fadeUp}
+        onClick={() => navigate("/morning-brief")}
+        className="w-full rounded-xl p-3 flex items-center gap-3 transition-all hover:brightness-110 border border-warning/10 bg-warning/3"
+      >
+        <div className="w-9 h-9 rounded-lg bg-warning/10 border border-warning/15 flex items-center justify-center shrink-0">
+          <Eye className="w-4 h-4 text-warning" />
+        </div>
+        <div className="flex-1 text-right">
+          <p className="text-[10px] font-mono font-bold text-foreground">الإحاطة الصباحية الخاصة</p>
+          <p className="text-[8px] font-mono text-muted-foreground/60">تقرير مكتب التداول اليومي</p>
+        </div>
+        <ChevronLeft className="w-3.5 h-3.5 text-warning/50 shrink-0" />
+      </motion.button>
+
+      {/* ═══ AI MENTOR ═══ */}
       <motion.button
         variants={fadeUp}
         onClick={() => navigate("/learning")}
-        className="w-full rounded-xl p-3 flex items-center gap-3 transition-all active:scale-[0.98] hover:brightness-110 border border-accent/10 bg-accent/3 backdrop-blur-md"
+        className="w-full rounded-xl p-3 flex items-center gap-3 transition-all hover:brightness-110 border border-accent/10 bg-accent/3"
       >
         <div className="w-9 h-9 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center shrink-0">
           <Brain className="w-4 h-4 text-accent" />

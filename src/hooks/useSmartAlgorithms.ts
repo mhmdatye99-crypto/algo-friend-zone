@@ -22,13 +22,17 @@ export interface MarketPattern {
   pairs: string[];
 }
 
+// === INSTITUTIONAL ALERT TYPES ===
+export type InstitutionalAlertType = "liquidity_shift" | "volatility_expansion" | "structure_break" | "divergence" | "order_flow";
+
 export interface SmartAlert {
   id: string;
-  type: "risk" | "opportunity" | "behavior" | "pattern" | "liquidity" | "volatility";
+  type: InstitutionalAlertType;
   title: string;
   message: string;
-  severity: "low" | "medium" | "high";
+  severity: "low" | "medium" | "high" | "critical";
   icon: string;
+  tag: string; // Institutional tag like [LIQ-SHIFT], [VOL-EXP]
 }
 
 export interface RiskScore {
@@ -53,6 +57,15 @@ export interface VolatilityMetric {
   trend: "rising" | "falling" | "stable";
   avgVolatility: number;
   highVolPairs: string[];
+}
+
+// === DISCIPLINE STREAK ===
+export interface DisciplineStreak {
+  currentStreak: number;
+  longestStreak: number;
+  level: string;
+  levelAr: string;
+  unlockedRewards: string[];
 }
 
 export function useSmartAlgorithms() {
@@ -87,135 +100,80 @@ export function useSmartAlgorithms() {
 
     if (bullishSignals.length >= 3) {
       result.push({
-        name: "Bullish Momentum",
-        nameAr: "زخم صعودي قوي",
+        name: "Bullish Momentum", nameAr: "زخم صعودي قوي",
         confidence: Math.round(bullishSignals.reduce((s, sig) => s + sig.confidence, 0) / bullishSignals.length),
-        direction: "bullish",
-        pairs: bullishSignals.slice(0, 3).map(s => s.pair),
+        direction: "bullish", pairs: bullishSignals.slice(0, 3).map(s => s.pair),
       });
     }
-
     if (bearishSignals.length >= 3) {
       result.push({
-        name: "Bearish Pressure",
-        nameAr: "ضغط هبوطي",
+        name: "Bearish Pressure", nameAr: "ضغط هبوطي",
         confidence: Math.round(bearishSignals.reduce((s, sig) => s + sig.confidence, 0) / bearishSignals.length),
-        direction: "bearish",
-        pairs: bearishSignals.slice(0, 3).map(s => s.pair),
+        direction: "bearish", pairs: bearishSignals.slice(0, 3).map(s => s.pair),
       });
     }
 
     const overbought = signals.filter(s => (s.rsi ?? 50) > 70);
     const oversold = signals.filter(s => (s.rsi ?? 50) < 30);
+    if (overbought.length >= 2) result.push({ name: "RSI Overbought Zone", nameAr: "منطقة تشبع شرائي", confidence: 72, direction: "bearish", pairs: overbought.slice(0, 3).map(s => s.pair) });
+    if (oversold.length >= 2) result.push({ name: "RSI Oversold Zone", nameAr: "منطقة تشبع بيعي", confidence: 68, direction: "bullish", pairs: oversold.slice(0, 3).map(s => s.pair) });
 
-    if (overbought.length >= 2) {
-      result.push({ name: "RSI Overbought Zone", nameAr: "منطقة تشبع شرائي", confidence: 72, direction: "bearish", pairs: overbought.slice(0, 3).map(s => s.pair) });
-    }
-    if (oversold.length >= 2) {
-      result.push({ name: "RSI Oversold Zone", nameAr: "منطقة تشبع بيعي", confidence: 68, direction: "bullish", pairs: oversold.slice(0, 3).map(s => s.pair) });
-    }
-
-    // MACD Convergence detection
     const macdBullish = signals.filter(s => s.macd === "صعودي" && s.confidence >= 65);
-    if (macdBullish.length >= 4) {
-      result.push({ name: "MACD Convergence", nameAr: "تقارب MACD إيجابي", confidence: 74, direction: "bullish", pairs: macdBullish.slice(0, 3).map(s => s.pair) });
-    }
+    if (macdBullish.length >= 4) result.push({ name: "MACD Convergence", nameAr: "تقارب MACD إيجابي", confidence: 74, direction: "bullish", pairs: macdBullish.slice(0, 3).map(s => s.pair) });
 
     return result;
   }, [signals]);
 
-  // === X-LOGIC: LIQUIDITY ENGINE (Enhanced — uses convergence, sentiment, winProbability) ===
+  // === LIQUIDITY ENGINE ===
   const liquidityBlocks: LiquidityBlock[] = useMemo(() => {
     return signals.slice(0, 12).map(s => {
       const isBuy = s.direction === "صعودي";
-
-      // Parse liquidity flow value from signal
       const liqFlow = parseFloat(s.liquidity.replace(/[^0-9.]/g, "")) || 0;
-
-      // Strength = weighted combination of convergence, confidence, sentiment extremity, and win probability
-      const sentimentExtremity = Math.abs(s.sentiment - 50) / 50; // 0..1
-      const convergenceScore = (s.convergence / 5) * 30; // 0-30
-      const confidenceScore = (s.confidence / 100) * 25; // 0-25
-      const sentimentScore = sentimentExtremity * 20; // 0-20
-      const winProbScore = (s.winProbability / 100) * 25; // 0-25
+      const sentimentExtremity = Math.abs(s.sentiment - 50) / 50;
+      const convergenceScore = (s.convergence / 5) * 30;
+      const confidenceScore = (s.confidence / 100) * 25;
+      const sentimentScore = sentimentExtremity * 20;
+      const winProbScore = (s.winProbability / 100) * 25;
       const strength = Math.min(100, Math.round(convergenceScore + confidenceScore + sentimentScore + winProbScore));
-
-      // Detect type: liquidity gap when high volume diverges from sentiment
       const volPercent = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0);
       const isGap = (volPercent > 30 && sentimentExtremity < 0.3) || (liqFlow > 1.5 && s.convergence <= 2);
-
-      const typeLabel = isGap
-        ? "liquidity_gap" as const
-        : isBuy ? "institutional_buy" as const : "institutional_sell" as const;
-
+      const typeLabel = isGap ? "liquidity_gap" as const : isBuy ? "institutional_buy" as const : "institutional_sell" as const;
       const description = isGap
-        ? `فجوة سيولة عند ${s.entry} — تباين بين الحجم (${s.volume}) والمشاعر (${s.sentiment}%) يشير لحركة حادة`
+        ? `فجوة سيولة عند ${s.entry} — تباين حجم/مشاعر يشير لحركة حادة`
         : isBuy
-        ? `كتلة شرائية مؤسسية عند ${s.entry} — تقارب ${s.convergence}/5 مع ثقة ${s.confidence}% واحتمال فوز ${s.winProbability}%`
-        : `ضغط بيعي مؤسسي عند ${s.entry} — تقارب ${s.convergence}/5 مع مشاعر سلبية ${s.sentiment}%`;
-
+        ? `كتلة شرائية مؤسسية عند ${s.entry} — تقارب ${s.convergence}/5`
+        : `ضغط بيعي مؤسسي عند ${s.entry} — مشاعر سلبية ${s.sentiment}%`;
       return { pair: s.pair, type: typeLabel, level: s.entry, strength, description };
     }).filter(b => b.strength >= 55).sort((a, b) => b.strength - a.strength);
   }, [signals]);
 
-  // === X-LOGIC: VOLATILITY ENGINE (Enhanced — multi-factor stress calculation) ===
+  // === VOLATILITY ENGINE ===
   const volatilityMetric: VolatilityMetric = useMemo(() => {
     if (signals.length === 0) return { stressLevel: 30, label: "مستقر", color: "text-success", trend: "stable", avgVolatility: 0, highVolPairs: [] };
-
-    // Factor 1: Volume intensity across all signals
     const volumes = signals.map(s => Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0));
     const avgVol = volumes.reduce((a, b) => a + b, 0) / volumes.length;
-
-    // Factor 2: RSI extremes (overbought/oversold count)
     const rsiExtremes = signals.filter(s => s.rsi > 70 || s.rsi < 30).length;
     const rsiExtremeRatio = rsiExtremes / signals.length;
-
-    // Factor 3: High-risk signal ratio
     const highRiskCount = signals.filter(s => s.risk === "مرتفع").length;
     const highRiskRatio = highRiskCount / signals.length;
-
-    // Factor 4: Sentiment dispersion (how divided is the market?)
     const sentiments = signals.map(s => s.sentiment);
     const avgSentiment = sentiments.reduce((a, b) => a + b, 0) / sentiments.length;
     const sentimentVariance = sentiments.reduce((sum, s) => sum + Math.pow(s - avgSentiment, 2), 0) / sentiments.length;
-    const sentimentDispersion = Math.min(1, Math.sqrt(sentimentVariance) / 30); // normalized 0..1
-
-    // Factor 5: Low convergence signals (conflicting indicators)
+    const sentimentDispersion = Math.min(1, Math.sqrt(sentimentVariance) / 30);
     const lowConvergence = signals.filter(s => s.convergence <= 2).length;
     const conflictRatio = lowConvergence / signals.length;
-
-    // Factor 6: MACD histogram extremes
     const macdExtremes = signals.filter(s => Math.abs(parseFloat(s.macdHist.replace(/[^0-9.-]/g, "")) || 0) > 5).length;
 
-    // Composite stress level
-    const stressLevel = Math.min(100, Math.round(
-      avgVol * 1.2 +
-      rsiExtremeRatio * 25 +
-      highRiskRatio * 20 +
-      sentimentDispersion * 15 +
-      conflictRatio * 10 +
-      macdExtremes * 3
-    ));
-
-    // Identify high-volatility pairs (above-average volume + extreme RSI or high risk)
+    const stressLevel = Math.min(100, Math.round(avgVol * 1.2 + rsiExtremeRatio * 25 + highRiskRatio * 20 + sentimentDispersion * 15 + conflictRatio * 10 + macdExtremes * 3));
     const highVolPairs = signals
-      .filter(s => {
-        const vol = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0);
-        return vol > avgVol * 1.3 || s.rsi > 75 || s.rsi < 25 || s.risk === "مرتفع";
-      })
-      .sort((a, b) => b.winProbability - a.winProbability)
-      .map(s => s.pair)
-      .slice(0, 5);
+      .filter(s => { const vol = Math.abs(parseFloat(s.volume.replace(/[^0-9.]/g, "")) || 0); return vol > avgVol * 1.3 || s.rsi > 75 || s.rsi < 25 || s.risk === "مرتفع"; })
+      .sort((a, b) => b.winProbability - a.winProbability).map(s => s.pair).slice(0, 5);
 
-    // Determine trend from sentiment and convergence balance
     const bullishSentiment = signals.filter(s => s.sentiment > 60).length;
     const bearishSentiment = signals.filter(s => s.sentiment < 40).length;
     let trend: "rising" | "falling" | "stable" = "stable";
-    if (stressLevel >= 60 && (bullishSentiment > bearishSentiment * 1.5 || bearishSentiment > bullishSentiment * 1.5)) {
-      trend = "rising";
-    } else if (stressLevel < 35) {
-      trend = "falling";
-    }
+    if (stressLevel >= 60 && (bullishSentiment > bearishSentiment * 1.5 || bearishSentiment > bullishSentiment * 1.5)) trend = "rising";
+    else if (stressLevel < 35) trend = "falling";
 
     let label = "مستقر", color = "text-success";
     if (stressLevel >= 75) { label = "إجهاد حاد"; color = "text-destructive"; }
@@ -225,49 +183,122 @@ export function useSmartAlgorithms() {
     return { stressLevel, label, color, trend, avgVolatility: Math.round(avgVol * 10) / 10, highVolPairs };
   }, [signals]);
 
-  // === X-LOGIC: PROBABILITY ENGINE — uses winProbability directly from signal engine ===
+  // === PROBABILITY ENGINE ===
   const signalProbabilities: Map<string, number> = useMemo(() => {
     const map = new Map<string, number>();
-    signals.forEach(s => {
-      map.set(s.pair, s.winProbability);
-    });
+    signals.forEach(s => map.set(s.pair, s.winProbability));
     return map;
   }, [signals]);
 
-  // === SMART ALERTS ===
+  // === INSTITUTIONAL CONTEXT ALERTS ===
   const alerts: SmartAlert[] = useMemo(() => {
     const result: SmartAlert[] = [];
 
-    if (traderScore.discipline < 40) {
-      result.push({ id: "low-discipline", type: "behavior", title: "تحذير انضباط", message: "مستوى الانضباط منخفض — راجع خطة التداول", severity: "high", icon: "⚠️" });
-    }
-
-    const highConfSignals = signals.filter(s => s.confidence >= 85);
-    if (highConfSignals.length > 0) {
-      result.push({ id: "high-conf", type: "opportunity", title: "فرصة ذهبية", message: `${highConfSignals.length} إشارة بثقة عالية (+85%) متاحة الآن`, severity: "medium", icon: "🔥" });
-    }
-
-    // Liquidity alerts
+    // Liquidity Shift Detection
     const gaps = liquidityBlocks.filter(b => b.type === "liquidity_gap");
     if (gaps.length > 0) {
-      result.push({ id: "liq-gap", type: "liquidity", title: "فجوة سيولة", message: `تم رصد فجوات سيولة في ${gaps.map(g => g.pair).join("، ")}`, severity: "high", icon: "💧" });
+      result.push({
+        id: "liq-shift", type: "liquidity_shift",
+        title: "تحول سيولة مؤسسي",
+        message: `رصد فجوات سيولة في ${gaps.map(g => g.pair).join("، ")} — احتمال حركة سعرية حادة`,
+        severity: "critical", icon: "💧", tag: "[LIQ-SHIFT]",
+      });
     }
 
-    // Volatility alerts
+    // Volatility Expansion
     if (volatilityMetric.stressLevel >= 70) {
-      result.push({ id: "vol-stress", type: "volatility", title: "إجهاد سوق عالي", message: `مستوى الإجهاد ${volatilityMetric.stressLevel}% — تقليل حجم المراكز مُوصى`, severity: "high", icon: "⚡" });
+      result.push({
+        id: "vol-expansion", type: "volatility_expansion",
+        title: "توسع تقلب مؤسسي",
+        message: `مستوى الإجهاد ${volatilityMetric.stressLevel}% — تقليل حجم المراكز وتوسيع وقف الخسارة`,
+        severity: "critical", icon: "⚡", tag: "[VOL-EXP]",
+      });
+    } else if (volatilityMetric.stressLevel >= 55) {
+      result.push({
+        id: "vol-moderate", type: "volatility_expansion",
+        title: "تقلب متصاعد",
+        message: `إجهاد السوق ${volatilityMetric.stressLevel}% — مراقبة الأزواج عالية التقلب`,
+        severity: "high", icon: "📊", tag: "[VOL-MOD]",
+      });
     }
 
-    patterns.forEach(p => {
-      result.push({ id: `pattern-${p.name}`, type: "pattern", title: p.nameAr, message: `تم رصد ${p.name} في ${p.pairs.join("، ")}`, severity: p.confidence >= 75 ? "high" : "medium", icon: p.direction === "bullish" ? "📈" : "📉" });
-    });
-
-    if (stats && stats.progress >= 80) {
-      result.push({ id: "goal-near", type: "opportunity", title: "اقتربت من هدفك!", message: `تقدمك ${Math.round(stats.progress)}% — استمر بالانضباط`, severity: "low", icon: "🎯" });
+    // Structure Break Detection
+    const highConfSignals = signals.filter(s => s.confidence >= 85 && s.convergence >= 4);
+    if (highConfSignals.length > 0) {
+      const dirs = highConfSignals.map(s => s.direction);
+      const dominantDir = dirs.filter(d => d === "صعودي").length > dirs.filter(d => d === "هبوطي").length ? "صعودي" : "هبوطي";
+      result.push({
+        id: "structure-break", type: "structure_break",
+        title: `كسر هيكلي ${dominantDir === "صعودي" ? "صاعد" : "هابط"}`,
+        message: `${highConfSignals.length} إشارة بتقارب عالي (≥4/5) تؤكد ${dominantDir === "صعودي" ? "اختراق" : "كسر"} هيكلي`,
+        severity: "high", icon: dominantDir === "صعودي" ? "🔺" : "🔻", tag: "[STR-BRK]",
+      });
     }
 
-    return result.slice(0, 6);
-  }, [traderScore, signals, patterns, stats, liquidityBlocks, volatilityMetric]);
+    // Divergence Detection (RSI vs Price)
+    const divergences = signals.filter(s =>
+      (s.direction === "صعودي" && s.rsi > 70) || (s.direction === "هبوطي" && s.rsi < 30)
+    );
+    if (divergences.length >= 2) {
+      result.push({
+        id: "divergence", type: "divergence",
+        title: "انحراف فني مرصود",
+        message: `تباين RSI/السعر في ${divergences.slice(0, 3).map(d => d.pair).join("، ")} — احتمال انعكاس`,
+        severity: "high", icon: "🔄", tag: "[DIV]",
+      });
+    }
+
+    // Order Flow Imbalance
+    const strongBlocks = liquidityBlocks.filter(b => b.strength >= 75);
+    if (strongBlocks.length >= 2) {
+      const buyBlocks = strongBlocks.filter(b => b.type === "institutional_buy").length;
+      const sellBlocks = strongBlocks.filter(b => b.type === "institutional_sell").length;
+      if (buyBlocks > sellBlocks * 1.5 || sellBlocks > buyBlocks * 1.5) {
+        result.push({
+          id: "order-flow", type: "order_flow",
+          title: `خلل في تدفق الأوامر ${buyBlocks > sellBlocks ? "شرائي" : "بيعي"}`,
+          message: `${strongBlocks.length} كتلة مؤسسية بقوة ≥75% — ضغط ${buyBlocks > sellBlocks ? "شراء" : "بيع"} واضح`,
+          severity: "medium", icon: "📈", tag: "[ORD-FLW]",
+        });
+      }
+    }
+
+    // Discipline Alert
+    if (traderScore.discipline < 40) {
+      result.push({
+        id: "discipline-warning", type: "structure_break",
+        title: "تحذير انضباط",
+        message: "مستوى الانضباط منخفض — مراجعة خطة التداول ضرورية قبل أي مركز جديد",
+        severity: "high", icon: "🛡️", tag: "[DISC]",
+      });
+    }
+
+    return result.slice(0, 5);
+  }, [signals, liquidityBlocks, volatilityMetric, traderScore]);
+
+  // === DISCIPLINE STREAK ===
+  const disciplineStreak: DisciplineStreak = useMemo(() => {
+    const score = latestScore?.score ?? 50;
+    // Simulated streak based on current discipline score
+    const currentStreak = score >= 70 ? Math.floor(score / 10) : score >= 50 ? Math.floor(score / 15) : 0;
+    const longestStreak = Math.max(currentStreak, Math.floor(traderScore.overall / 8));
+
+    let level = "مبتدئ", levelAr = "مبتدئ";
+    const unlockedRewards: string[] = [];
+
+    if (currentStreak >= 30) {
+      level = "elite"; levelAr = "محترف";
+      unlockedRewards.push("تحليل Volume Profile", "Order Flow العميق", "HTF Confirmation", "استراتيجيات متقدمة");
+    } else if (currentStreak >= 14) {
+      level = "advanced"; levelAr = "متقدم";
+      unlockedRewards.push("تحليل Volume Profile", "Order Flow العميق");
+    } else if (currentStreak >= 7) {
+      level = "intermediate"; levelAr = "متوسط";
+      unlockedRewards.push("تحليل Volume Profile");
+    }
+
+    return { currentStreak, longestStreak, level, levelAr, unlockedRewards };
+  }, [latestScore, traderScore]);
 
   // === RISK SCORE ===
   const riskScore: RiskScore = useMemo(() => {
@@ -276,7 +307,6 @@ export function useSmartAlgorithms() {
       ? Math.round(100 - (signals.filter(s => s.confidence < 50).length / signals.length) * 100)
       : 70;
     const diversificationFactor = Math.min(100, signals.length * 10);
-
     const score = Math.round(disciplineFactor * 0.4 + volatilityFactor * 0.35 + diversificationFactor * 0.25);
 
     let label = "خطر عالي", color = "text-destructive";
@@ -293,5 +323,5 @@ export function useSmartAlgorithms() {
     };
   }, [traderScore, signals]);
 
-  return { traderScore, patterns, alerts, riskScore, liquidityBlocks, volatilityMetric, signalProbabilities };
+  return { traderScore, patterns, alerts, riskScore, liquidityBlocks, volatilityMetric, signalProbabilities, disciplineStreak };
 }
