@@ -12,7 +12,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/asset-consul
 const quickChips = [
   { label: "ملخص فني", icon: Sparkles, prompt: "قدم لي ملخصاً فنياً شاملاً لهذا الأصل مع مستويات الدعم والمقاومة" },
   { label: "اختبار استراتيجيتي", icon: FlaskConical, prompt: "اختبر استراتيجية تداول بناءً على المؤشرات الحالية لهذا الأصل واقترح نقاط دخول وخروج" },
-  { label: "ربط بهدف $1M", icon: Target, prompt: "كيف يمكن لهذا الأصل أن يساهم في تحقيق هدفي المالي (مليون دولار)؟ اقترح خطة عملية" },
+  { label: "ربط بمستهدفات النمو", icon: Target, prompt: "كيف يمكن لهذا الأصل أن يساهم في تحقيق مستهدفات النمو المالية (مليون دولار)؟ اقترح خطة عملية" },
 ];
 
 interface Props {
@@ -267,7 +267,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                   </button>
                 </div>
                 <p className="text-[9px] text-muted-foreground font-mono text-center mt-2">
-                  ليست نصيحة مالية — للأغراض التعليمية فقط
+                  ليست إشارة دخول مالية — للأغراض التعليمية فقط
                 </p>
               </div>
             </motion.div>

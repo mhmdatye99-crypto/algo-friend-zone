@@ -676,7 +676,7 @@ const TradeCenter = () => {
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />
               <p className="text-[9px] font-mono text-muted-foreground/70 leading-relaxed">
-                جميع التوصيات لأغراض تعليمية فقط ولا تشكل نصيحة مالية. التداول ينطوي على مخاطر عالية.
+                جميع التوصيات لأغراض تعليمية فقط ولا تشكل إشارة دخول مالية. التداول ينطوي على مخاطر عالية.
               </p>
             </div>
           </div>
