@@ -110,7 +110,7 @@ const TradeCenter = () => {
   const { isPro } = useSubscription();
 
   // Main tab
-  const [activeTab, setActiveTab] = useState<MainTab>("markets");
+  const [activeTab, setActiveTab] = useState<MainTab>("signals");
 
   // Markets state
   const [activeCategory, setActiveCategory] = useState<AssetCategory>("الكل");
@@ -524,16 +524,7 @@ const TradeCenter = () => {
       {/* ═══════════════════════════════════════════ */}
       {/* ─── SIGNALS TAB ─── */}
       {/* ═══════════════════════════════════════════ */}
-      {activeTab === "signals" && !isPro && (
-        <SubscriptionGate featureName="إشارات التداول الحية">
-          <div className="space-y-3 py-16">
-            {[1,2,3].map(i => (
-              <div key={i} className="rounded-xl p-4 bg-card/60 border border-border/10 h-24" />
-            ))}
-          </div>
-        </SubscriptionGate>
-      )}
-      {activeTab === "signals" && isPro && (
+      {activeTab === "signals" && (
         <div className="space-y-3">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
