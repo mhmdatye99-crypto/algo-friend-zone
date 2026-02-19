@@ -10,15 +10,17 @@ import SideDrawer from "@/components/layout/SideDrawer";
 
 const pageTitles: Record<string, string> = {
   "/": "",
-  "/trade-center": "المحطة",
-  "/community": "الساحة",
+  "/markets": "الأسواق",
+  "/signals": "الإشارات",
+  "/community": "المجتمع",
+  "/portfolio": "المحفظة",
   "/learning": "الأكاديمية",
-  "/profile": "الخزنة",
   "/subscription": "الاشتراك",
   "/admin": "لوحة الإدارة",
   "/tools": "الأدوات",
   "/journal": "اليومية",
-  "/morning-brief": "الملخص الصباحي",
+  "/morning-brief": "الإحاطة الصباحية",
+  "/chart-analysis": "تحليل الشارت",
 };
 
 const TopBar = () => {

@@ -6,18 +6,19 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Markets from "./pages/Markets";
+import SignalsPage from "./pages/SignalsPage";
 import CommunityPage from "./pages/CommunityPage";
 import ProfilePage from "./pages/ProfilePage";
 import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
 import Subscription from "./pages/Subscription";
 import AdminPanel from "./pages/AdminPanel";
-import TradeCenter from "./pages/TradeCenter";
 import MorningBrief from "./pages/MorningBrief";
 import NotFound from "./pages/NotFound";
 import ToolsPage from "./pages/ToolsPage";
 import JournalPage from "./pages/JournalPage";
 import LearningPage from "./pages/LearningPage";
+import ChartAnalysisPage from "./pages/ChartAnalysisPage";
 
 const queryClient = new QueryClient();
 
@@ -56,10 +57,10 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthRoute />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-              {/* 5 Main Sections */}
+              {/* 5 Main Tabs */}
               <Route path="/" element={<Dashboard />} />
               <Route path="/markets" element={<Markets />} />
-              <Route path="/signals" element={<TradeCenter />} />
+              <Route path="/signals" element={<SignalsPage />} />
               <Route path="/portfolio" element={<ProfilePage />} />
               <Route path="/community" element={<CommunityPage />} />
 
@@ -67,11 +68,12 @@ const App = () => (
               <Route path="/journal" element={<JournalPage />} />
               <Route path="/learning" element={<LearningPage />} />
               <Route path="/tools" element={<ToolsPage />} />
+              <Route path="/chart-analysis" element={<ChartAnalysisPage />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/admin" element={<AdminPanel />} />
 
-              {/* Supporting pages */}
+              {/* Supporting */}
               <Route path="/asset/*" element={<AssetDetail />} />
 
               {/* Legacy redirects */}
@@ -87,8 +89,8 @@ const App = () => (
               <Route path="/risk-calculator" element={<Navigate to="/tools" replace />} />
               <Route path="/trade-journal" element={<Navigate to="/journal" replace />} />
               <Route path="/my-analyses" element={<Navigate to="/journal" replace />} />
-              <Route path="/chart-vision" element={<Navigate to="/signals" replace />} />
-              <Route path="/ai-scan" element={<Navigate to="/signals" replace />} />
+              <Route path="/chart-vision" element={<Navigate to="/chart-analysis" replace />} />
+              <Route path="/ai-scan" element={<Navigate to="/chart-analysis" replace />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
