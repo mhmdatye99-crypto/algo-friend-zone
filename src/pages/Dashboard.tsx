@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   const totalPnl = useMemo(() => closedTrades.reduce((s: number, t: any) => s + (t.pnl ?? 0), 0), [closedTrades]);
   const topSignals = useMemo(() => signals.slice(0, 3), [signals]);
-  const topMovers = useMemo(() => [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 4), [assets]);
+  const trendingAssets = useMemo(() => [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 8), [assets]);
 
   return (
     <motion.div
@@ -159,33 +159,39 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* ═══ TOP MOVERS ═══ */}
+      {/* ═══ TRENDING ASSETS (Horizontal Scroll) ═══ */}
       <motion.div variants={fade} className="space-y-1.5">
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-1.5">
             <Activity className="w-3 h-3 text-warning/60" />
-            <span className="text-[9px] font-mono font-semibold text-muted-foreground/70">أبرز التحركات</span>
+            <span className="text-[9px] font-mono font-semibold text-muted-foreground/70">الأصول الرائجة</span>
           </div>
           <button onClick={() => navigate("/markets")} className="text-[9px] font-mono text-primary/60 flex items-center gap-0.5 hover:text-primary transition-colors">
             الأسواق <ChevronLeft className="w-3 h-3" />
           </button>
         </div>
-        <div className="space-y-0.5">
-          {topMovers.map((asset) => (
-            <div key={asset.pair} onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
-              className="rounded-xl px-3 py-2.5 border border-border/8 bg-card/30 flex items-center gap-3 cursor-pointer hover-lift">
-              <span className="text-base shrink-0">{asset.icon}</span>
-              <span className="text-[11px] font-mono font-semibold w-16 truncate">{asset.pair.replace("/USDT", "")}</span>
-              <div className="flex-1">
-                <MiniChart data={asset.sparkline} up={asset.up} width={60} height={16} />
-              </div>
-              <div className="text-left shrink-0">
-                <p className="text-[11px] font-mono font-semibold tabular-nums">{formatPrice(asset.price)}</p>
-                <p className={cn("text-[10px] font-mono tabular-nums", asset.up ? "text-success" : "text-destructive")}>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
+          {trendingAssets.map((asset) => (
+            <button
+              key={asset.pair}
+              onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
+              className="shrink-0 w-[130px] rounded-xl p-2.5 border border-border/10 bg-card/40 hover-lift transition-all text-right"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className={cn(
+                  "text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md tabular-nums",
+                  asset.up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                )}>
                   {asset.up ? "+" : ""}{asset.change}%
-                </p>
+                </span>
+                <span className="text-lg">{asset.icon}</span>
               </div>
-            </div>
+              <p className="text-[11px] font-mono font-bold truncate">{asset.pair.replace("/USDT", "")}</p>
+              <p className="text-[10px] font-mono text-muted-foreground/50 tabular-nums">{formatPrice(asset.price)}</p>
+              <div className="mt-1.5">
+                <MiniChart data={asset.sparkline} up={asset.up} width={105} height={24} />
+              </div>
+            </button>
           ))}
         </div>
       </motion.div>
