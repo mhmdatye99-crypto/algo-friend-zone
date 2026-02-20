@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useLocation } from "react-router-dom";
+import { useLivePnl } from "@/hooks/useLivePnl";
 
 type Trade = {
   id: string;
@@ -77,6 +78,7 @@ const TradeJournal = () => {
   const queryClient = useQueryClient();
   const { goal, addEntry } = useGoalPlanner();
   const location = useLocation();
+  const { calculateLivePnl, getLivePrice } = useLivePnl();
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "closed" | "wins" | "losses">("all");
   const [tab, setTab] = useState<"trades" | "analytics">("trades");
@@ -321,11 +323,18 @@ const TradeJournal = () => {
                 <span className="w-10 text-center">الرتبة</span>
                 <span className="w-16 text-left">P&L</span>
               </div>
-              {filtered.map((trade) => (
-                <TradeRow key={trade.id} trade={trade}
-                  onDelete={() => deleteTrade.mutate(trade.id)}
-                  onClose={(exitP) => closeTrade.mutate({ id: trade.id, exitP })} />
-              ))}
+              {filtered.map((trade) => {
+                const livePnl = trade.status === "open"
+                  ? calculateLivePnl(trade.pair, trade.direction, trade.entry_price, trade.position_size)
+                  : null;
+                const livePrice = trade.status === "open" ? getLivePrice(trade.pair) : null;
+                return (
+                  <TradeRow key={trade.id} trade={trade}
+                    livePnl={livePnl} livePrice={livePrice}
+                    onDelete={() => deleteTrade.mutate(trade.id)}
+                    onClose={(exitP) => closeTrade.mutate({ id: trade.id, exitP })} />
+                );
+              })}
             </div>
           )}
         </>
@@ -523,7 +532,7 @@ const FormInput = ({ label, value, onChange, placeholder }: { label: string; val
 );
 
 /* ─── Trade Row — Bank Statement Style ─── */
-const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => void; onClose: (exitP: number) => void }) => {
+const TradeRow = ({ trade, livePnl, livePrice, onDelete, onClose }: { trade: Trade; livePnl?: number | null; livePrice?: number | null; onDelete: () => void; onClose: (exitP: number) => void }) => {
   const [expanded, setExpanded] = useState(false);
   const [closePrice, setClosePrice] = useState("");
   const { grade, color: gradeColor } = getTradeGrade(trade);
@@ -539,8 +548,10 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
     return parseFloat((rewardDist / riskDist).toFixed(1));
   })();
 
-  const isWin = trade.pnl !== null && trade.pnl > 0;
-  const isLoss = trade.pnl !== null && trade.pnl < 0;
+  // Use live PnL for open trades, stored PnL for closed
+  const displayPnl = trade.status === "open" && livePnl !== null && livePnl !== undefined ? livePnl : trade.pnl;
+  const isWin = displayPnl !== null && displayPnl > 0;
+  const isLoss = displayPnl !== null && displayPnl < 0;
 
   // Discipline score: compare exit vs TP
   const disciplineNote = (() => {
@@ -585,10 +596,10 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
         {/* Grade */}
         <span className={cn("text-[10px] font-mono font-bold w-10 text-center", gradeColor)}>{grade}</span>
         {/* P&L */}
-        <span className={cn("text-[10px] font-mono font-semibold tabular-nums w-16 text-left",
-          trade.pnl === null ? "text-muted-foreground/30" : trade.pnl >= 0 ? "text-success" : "text-destructive"
+        <span className={cn("text-[10px] font-mono font-semibold tabular-nums w-16 text-left transition-colors",
+          displayPnl === null ? "text-muted-foreground/30" : displayPnl >= 0 ? "text-success" : "text-destructive"
         )}>
-          {trade.pnl !== null ? `${trade.pnl >= 0 ? "+" : ""}$${trade.pnl.toFixed(2)}` : "—"}
+          {displayPnl !== null ? `${displayPnl >= 0 ? "+" : ""}$${displayPnl.toFixed(2)}` : "—"}
         </span>
       </button>
 
@@ -598,8 +609,11 @@ const TradeRow = ({ trade, onDelete, onClose }: { trade: Trade; onDelete: () => 
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.15 }} className="overflow-hidden">
             <div className="px-3 pb-2.5 pt-0.5 space-y-1.5 border-t border-border/5">
-              <div className="flex items-center gap-2 text-[8px] font-mono text-muted-foreground/50">
+              <div className="flex items-center gap-2 text-[8px] font-mono text-muted-foreground/50 flex-wrap">
                 <span>دخول: <span className="text-foreground/70 font-semibold">{trade.entry_price.toFixed(2)}</span></span>
+                {trade.status === "open" && livePrice != null && (
+                  <span>الآن: <span className={cn("font-semibold animate-pulse", livePrice > trade.entry_price ? "text-success" : livePrice < trade.entry_price ? "text-destructive" : "text-foreground/70")}>{livePrice.toFixed(2)}</span></span>
+                )}
                 {trade.exit_price && <span>→ <span className="text-foreground/70 font-semibold">{trade.exit_price.toFixed(2)}</span></span>}
                 {trade.stop_loss && <span className="text-destructive/60">SL {trade.stop_loss.toFixed(2)}</span>}
                 {trade.take_profit && <span className="text-success/60">TP {trade.take_profit.toFixed(2)}</span>}
