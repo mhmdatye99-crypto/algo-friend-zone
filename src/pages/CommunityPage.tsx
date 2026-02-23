@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Trophy, Shield, Target, Award, Crown, TrendingUp,
   CheckCircle, Zap, Lock, Users, BarChart3, Sparkles
@@ -14,9 +14,9 @@ import WarRoomPost from "@/components/community/WarRoomPost";
 import CreatePostDialog from "@/components/community/CreatePostDialog";
 import CommentsSheet from "@/components/community/CommentsSheet";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+const fade = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.1 } },
 };
 
 const challengeIcons: Record<string, typeof Shield> = {
@@ -35,39 +35,32 @@ const CommunityPage = () => {
 
   const isJoined = (id: string) => userChallenges.some(uc => uc.challenge_id === id);
   const getUserChallenge = (id: string) => userChallenges.find(uc => uc.challenge_id === id);
-  const score = latestScore?.score ?? 50;
 
   return (
     <motion.div
       initial="hidden" animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-      className="px-4 pt-3 pb-28 space-y-4 max-w-lg mx-auto"
+      variants={{ show: { transition: { staggerChildren: 0.03 } } }}
+      className="px-4 pt-3 pb-28 space-y-3 max-w-lg mx-auto"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp}>
-        <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.2em]">التحديات والتصنيف</p>
-        <h1 className="text-lg font-bold"><span className="text-gradient-gold">Community</span> Hub</h1>
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fade}>
         <Tabs defaultValue="challenges" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 bg-secondary/30 border border-border/20 rounded-xl h-10 p-1">
-            <TabsTrigger value="challenges" className="text-[9px] font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg">
-              <Trophy className="w-3 h-3 mr-1" />تحديات
+          <TabsList className="w-full grid grid-cols-4 bg-card border border-border/15 h-9 p-0.5 gap-0.5" style={{ borderRadius: '4px' }}>
+            <TabsTrigger value="challenges" className="text-[8px] font-mono font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1" style={{ borderRadius: '3px' }}>
+              <Trophy className="w-3 h-3" />تحديات
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="text-[9px] font-mono data-[state=active]:bg-success/10 data-[state=active]:text-success rounded-lg">
-              <Crown className="w-3 h-3 mr-1" />ترتيب
+            <TabsTrigger value="leaderboard" className="text-[8px] font-mono font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1" style={{ borderRadius: '3px' }}>
+              <Crown className="w-3 h-3" />ترتيب
             </TabsTrigger>
-            <TabsTrigger value="badges" className="text-[9px] font-mono data-[state=active]:bg-warning/10 data-[state=active]:text-warning rounded-lg">
-              <Award className="w-3 h-3 mr-1" />شارات
+            <TabsTrigger value="badges" className="text-[8px] font-mono font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1" style={{ borderRadius: '3px' }}>
+              <Award className="w-3 h-3" />شارات
             </TabsTrigger>
-            <TabsTrigger value="feed" className="text-[9px] font-mono data-[state=active]:bg-accent/10 data-[state=active]:text-accent rounded-lg">
-              <Users className="w-3 h-3 mr-1" />النقاش
+            <TabsTrigger value="feed" className="text-[8px] font-mono font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1" style={{ borderRadius: '3px' }}>
+              <Users className="w-3 h-3" />النقاش
             </TabsTrigger>
           </TabsList>
 
           {/* Challenges */}
-          <TabsContent value="challenges" className="mt-4 space-y-3">
+          <TabsContent value="challenges" className="mt-3 space-y-2">
             {challenges.map((c) => {
               const Icon = challengeIcons[c.challenge_type] || Target;
               const joined = isJoined(c.id);
@@ -75,38 +68,39 @@ const CommunityPage = () => {
               const progress = uc ? Math.min((uc.progress / c.target_value) * 100, 100) : 0;
 
               return (
-                <div key={c.id} className="rounded-xl p-4 bg-card/60 border border-border/10">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                      <span className="text-lg">{c.icon}</span>
+                <div key={c.id} className="p-3 bg-card/60 border border-border/10" style={{ borderRadius: '4px' }}>
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 bg-primary/8 border border-primary/15 flex items-center justify-center shrink-0" style={{ borderRadius: '4px' }}>
+                      <span className="text-base">{c.icon}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-mono font-bold">{c.name_ar}</p>
-                      <p className="text-[9px] font-mono text-muted-foreground mt-0.5">{c.description}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[8px] font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md">
+                      <p className="text-[10px] font-mono font-bold">{c.name_ar}</p>
+                      <p className="text-[8px] font-mono text-muted-foreground/50 mt-0.5">{c.description}</p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <span className="text-[7px] font-mono text-muted-foreground/40 bg-secondary/30 px-1.5 py-0.5" style={{ borderRadius: '2px' }}>
                           {c.target_value} {c.metric === "days" ? "يوم" : c.metric === "trades" ? "صفقة" : "%"}
                         </span>
-                        <span className="text-[8px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md">{c.badge_name_ar}</span>
+                        <span className="text-[7px] font-mono text-primary/70 bg-primary/8 px-1.5 py-0.5" style={{ borderRadius: '2px' }}>{c.badge_name_ar}</span>
                       </div>
                     </div>
                   </div>
                   {joined && uc && (
-                    <div className="mt-3 space-y-1">
+                    <div className="mt-2.5 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[8px] font-mono text-muted-foreground">التقدم</span>
-                        <span className="text-[9px] font-mono font-bold text-primary">{progress.toFixed(0)}%</span>
+                        <span className="text-[7px] font-mono text-muted-foreground/40">التقدم</span>
+                        <span className="text-[8px] font-mono font-bold text-primary tabular-nums">{progress.toFixed(0)}%</span>
                       </div>
-                      <Progress value={progress} className="h-1.5 bg-secondary/50" />
+                      <Progress value={progress} className="h-1 bg-secondary/30" />
                       {uc.status === "completed" && (
-                        <p className="text-success text-[9px] font-mono font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> مكتمل!</p>
+                        <p className="text-success text-[8px] font-mono font-bold flex items-center gap-1"><CheckCircle className="w-2.5 h-2.5" /> مكتمل</p>
                       )}
                     </div>
                   )}
                   {!joined && (
                     <button onClick={() => joinChallenge.mutate(c.id)} disabled={joinChallenge.isPending}
-                      className="mt-3 w-full py-2 rounded-xl bg-primary/10 text-primary text-[10px] font-mono font-bold border border-primary/20 hover:bg-primary/15 transition-colors flex items-center justify-center gap-1">
-                      <Zap className="w-3 h-3" /> انضم
+                      className="mt-2.5 w-full py-2 bg-primary/8 text-primary text-[9px] font-mono font-bold border border-primary/15 hover:bg-primary/12 transition-colors flex items-center justify-center gap-1"
+                      style={{ borderRadius: '3px' }}>
+                      <Zap className="w-3 h-3" /> انضم للتحدي
                     </button>
                   )}
                 </div>
@@ -115,27 +109,27 @@ const CommunityPage = () => {
           </TabsContent>
 
           {/* Leaderboard */}
-          <TabsContent value="leaderboard" className="mt-4 space-y-2">
-            <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-              <Users className="w-3 h-3" /> التصنيف بالانضباط — وليس الأرباح
+          <TabsContent value="leaderboard" className="mt-3 space-y-2">
+            <p className="text-[7px] font-mono text-muted-foreground/30 uppercase tracking-[0.15em]">
+              التصنيف بالانضباط — وليس الأرباح
             </p>
             {leaderboard.length === 0 ? (
-              <div className="rounded-xl p-8 bg-card/40 border border-border/10 text-center">
-                <Crown className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-[11px] font-mono text-muted-foreground">لا توجد بيانات بعد</p>
+              <div className="p-8 bg-card/30 border border-border/8 text-center" style={{ borderRadius: '4px' }}>
+                <Crown className="w-6 h-6 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-[10px] font-mono text-muted-foreground/30">لا توجد بيانات بعد</p>
               </div>
             ) : (
-              <div className="rounded-xl overflow-hidden bg-card/60 border border-border/10 divide-y divide-border/10">
+              <div className="overflow-hidden bg-card/50 border border-border/10 divide-y divide-border/5" style={{ borderRadius: '4px' }}>
                 {leaderboard.slice(0, 10).map((entry: any, i: number) => {
                   const medals = ["🥇", "🥈", "🥉"];
                   const isMe = entry.user_id === user?.id;
                   return (
-                    <div key={`${entry.user_id}-${i}`} className={cn("flex items-center justify-between px-3 py-2.5", isMe && "bg-primary/5")}>
+                    <div key={`${entry.user_id}-${i}`} className={cn("flex items-center justify-between px-3 py-2", isMe && "bg-primary/5")}>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm w-6 text-center font-mono font-bold">{i < 3 ? medals[i] : `#${i + 1}`}</span>
-                        <p className="text-[10px] font-mono font-bold">{isMe ? "أنت" : `متداول ${i + 1}`}</p>
+                        <span className="text-xs w-5 text-center font-mono font-bold">{i < 3 ? medals[i] : `#${i + 1}`}</span>
+                        <p className="text-[9px] font-mono font-bold">{isMe ? "أنت" : `متداول ${i + 1}`}</p>
                       </div>
-                      <span className={cn("text-[12px] font-mono font-bold",
+                      <span className={cn("text-[11px] font-mono font-bold tabular-nums",
                         entry.score >= 70 ? "text-success" : entry.score >= 40 ? "text-warning" : "text-destructive"
                       )}>{entry.score}</span>
                     </div>
@@ -146,34 +140,34 @@ const CommunityPage = () => {
           </TabsContent>
 
           {/* Badges */}
-          <TabsContent value="badges" className="mt-4">
+          <TabsContent value="badges" className="mt-3">
             {badges.length === 0 ? (
-              <div className="rounded-xl p-8 bg-card/40 border border-border/10 text-center">
-                <Award className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-[11px] font-mono text-muted-foreground">أكمل التحديات لكسب شارات</p>
+              <div className="p-8 bg-card/30 border border-border/8 text-center" style={{ borderRadius: '4px' }}>
+                <Award className="w-6 h-6 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-[10px] font-mono text-muted-foreground/30">أكمل التحديات لكسب شارات</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {badges.map((b) => (
-                  <div key={b.id} className="rounded-xl p-3 bg-card/60 border border-primary/10 text-center">
-                    <span className="text-2xl block mb-1">{b.badge_icon}</span>
-                    <p className="text-[9px] font-mono font-bold">{b.badge_name_ar}</p>
+                  <div key={b.id} className="p-3 bg-card/50 border border-primary/8 text-center" style={{ borderRadius: '4px' }}>
+                    <span className="text-xl block mb-1">{b.badge_icon}</span>
+                    <p className="text-[8px] font-mono font-bold">{b.badge_name_ar}</p>
                   </div>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          {/* Community Feed */}
-          <TabsContent value="feed" className="mt-4 space-y-3">
+          {/* Feed */}
+          <TabsContent value="feed" className="mt-3 space-y-2">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             ) : posts.length === 0 ? (
-              <div className="rounded-xl p-8 bg-card/40 border border-border/10 text-center">
-                <Sparkles className="w-7 h-7 text-primary mx-auto mb-2 opacity-50" />
-                <p className="text-[11px] font-mono font-bold">كن أول من ينشر تحليلاً</p>
+              <div className="p-8 bg-card/30 border border-border/8 text-center" style={{ borderRadius: '4px' }}>
+                <Sparkles className="w-5 h-5 text-primary/30 mx-auto mb-2" />
+                <p className="text-[10px] font-mono font-bold text-muted-foreground/40">كن أول من ينشر تحليلاً</p>
               </div>
             ) : (
               posts.slice(0, 10).map(post => (
@@ -184,11 +178,12 @@ const CommunityPage = () => {
         </Tabs>
       </motion.div>
 
-      {/* Floating Create Button */}
+      {/* Floating Create */}
       <motion.button onClick={() => setShowCreate(true)}
-        className="fixed bottom-28 right-5 z-30 w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
-        whileTap={{ scale: 0.9 }}>
-        <span className="text-xl font-bold">+</span>
+        className="fixed bottom-20 right-4 z-30 w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center shadow-lg border border-primary/30"
+        style={{ borderRadius: '4px' }}
+        whileTap={{ scale: 0.95 }}>
+        <span className="text-lg font-bold">+</span>
       </motion.button>
 
       <CreatePostDialog open={showCreate} onClose={() => setShowCreate(false)} onCreate={createPost} />

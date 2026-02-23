@@ -8,9 +8,9 @@ import { useSignals } from "@/hooks/useSignals";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+const fade = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.1 } },
 };
 
 const categoryFilters = ["الكل", "فوركس", "كريبتو", "سلع", "مؤشرات"];
@@ -40,52 +40,54 @@ const SignalsPage = () => {
     <motion.div
       initial="hidden"
       animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.04 } } }}
-      className="px-4 pt-3 pb-28 max-w-lg mx-auto space-y-3"
+      variants={{ show: { transition: { staggerChildren: 0.03 } } }}
+      className="px-4 pt-3 pb-28 max-w-lg mx-auto space-y-2.5"
     >
       {/* Summary Strip */}
-      <motion.div variants={fadeUp} className="flex items-center gap-2 text-[10px] font-mono">
-        <div className="flex items-center gap-1 bg-success/8 text-success px-2 py-1 rounded-lg border border-success/15">
-          <span className="font-bold">{bullish}</span>
-          <span className="text-success/70">شراء</span>
+      <motion.div variants={fade} className="flex items-center gap-2 text-[9px] font-mono">
+        <div className="flex items-center gap-1 text-success px-2 py-1 border border-success/10" style={{ borderRadius: '3px' }}>
+          <span className="font-bold tabular-nums">{bullish}</span>
+          <span className="text-success/60">LONG</span>
         </div>
-        <div className="flex items-center gap-1 bg-destructive/8 text-destructive px-2 py-1 rounded-lg border border-destructive/15">
-          <span className="font-bold">{bearish}</span>
-          <span className="text-destructive/70">بيع</span>
+        <div className="flex items-center gap-1 text-destructive px-2 py-1 border border-destructive/10" style={{ borderRadius: '3px' }}>
+          <span className="font-bold tabular-nums">{bearish}</span>
+          <span className="text-destructive/60">SHORT</span>
         </div>
-        <div className="mr-auto flex items-center gap-1 text-muted-foreground">
-          <Zap className="w-3 h-3 text-primary" />
-          {signals.length} إشارة نشطة
+        <div className="mr-auto flex items-center gap-1 text-muted-foreground/40">
+          <div className="w-1 h-1 rounded-full bg-primary gold-glow" />
+          <span className="tabular-nums">{signals.length} إشارة نشطة</span>
         </div>
       </motion.div>
 
       {/* Search */}
-      <motion.div variants={fadeUp} className="flex items-center gap-2">
+      <motion.div variants={fade} className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ابحث... BTC, GOLD, EUR"
-            className="w-full bg-secondary/60 border border-border/30 rounded-xl pr-10 pl-10 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+            className="w-full bg-card border border-border/30 pr-9 pl-9 py-2 text-[11px] font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors"
+            style={{ borderRadius: '4px' }}
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              <X className="w-4 h-4" />
+            <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground">
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            "relative w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
-            showFilters ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+            "relative w-9 h-9 flex items-center justify-center transition-colors shrink-0 border",
+            showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground/50 border-border/30"
           )}
+          style={{ borderRadius: '4px' }}
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal className="w-3.5 h-3.5" />
           {activeFilters > 0 && (
-            <span className="absolute -top-1 -left-1 w-4 h-4 bg-primary text-primary-foreground text-[9px] rounded-full flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -left-1 w-3.5 h-3.5 bg-primary text-primary-foreground text-[7px] flex items-center justify-center font-bold" style={{ borderRadius: '2px' }}>
               {activeFilters}
             </span>
           )}
@@ -93,17 +95,18 @@ const SignalsPage = () => {
       </motion.div>
 
       {/* Category tabs */}
-      <motion.div variants={fadeUp} className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+      <motion.div variants={fade} className="flex gap-1 overflow-x-auto scrollbar-hide">
         {categoryFilters.map((f) => (
           <button
             key={f}
             onClick={() => setCategory(f)}
             className={cn(
-              "px-3.5 py-1.5 rounded-lg text-[11px] font-mono font-medium whitespace-nowrap transition-all",
+              "px-3 py-1.5 text-[9px] font-mono font-semibold whitespace-nowrap transition-all border",
               category === f
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-transparent text-muted-foreground/50 border-border/15 hover:border-border/30"
             )}
+            style={{ borderRadius: '3px' }}
           >
             {f}
           </button>
@@ -117,15 +120,15 @@ const SignalsPage = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-xl p-3 space-y-3 border border-border/20">
+            <div className="p-3 space-y-3 border border-border/15 bg-card/80" style={{ borderRadius: '4px' }}>
               <div>
-                <p className="text-[10px] font-mono text-muted-foreground mb-1.5 flex items-center gap-1">
-                  <Shield className="w-3 h-3" /> نسبة الثقة
+                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                  <Shield className="w-2.5 h-2.5" /> نسبة الثقة
                 </p>
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1 flex-wrap">
                   {([
                     { key: "all" as const, label: "الكل" },
                     { key: "80+" as const, label: "80%+" },
@@ -134,19 +137,20 @@ const SignalsPage = () => {
                   ]).map(({ key, label }) => (
                     <button key={key} onClick={() => setConfidenceFilter(key)}
                       className={cn(
-                        "px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all",
-                        confidenceFilter === key ? "bg-primary text-primary-foreground" : "bg-secondary/80 text-muted-foreground"
-                      )}>
+                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
+                        confidenceFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground/50 border-border/15"
+                      )}
+                      style={{ borderRadius: '3px' }}>
                       {label}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-mono text-muted-foreground mb-1.5 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> المخاطرة
+                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5" /> المخاطرة
                 </p>
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1 flex-wrap">
                   {([
                     { key: "all" as const, label: "الكل" },
                     { key: "منخفض" as const, label: "منخفض" },
@@ -155,9 +159,10 @@ const SignalsPage = () => {
                   ]).map(({ key, label }) => (
                     <button key={key} onClick={() => setRiskFilter(key)}
                       className={cn(
-                        "px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all",
-                        riskFilter === key ? "bg-primary text-primary-foreground" : "bg-secondary/80 text-muted-foreground"
-                      )}>
+                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
+                        riskFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground/50 border-border/15"
+                      )}
+                      style={{ borderRadius: '3px' }}>
                       {label}
                     </button>
                   ))}
@@ -165,7 +170,7 @@ const SignalsPage = () => {
               </div>
               {activeFilters > 0 && (
                 <button onClick={() => { setConfidenceFilter("all"); setRiskFilter("all"); }}
-                  className="text-[10px] font-mono text-destructive hover:underline">
+                  className="text-[9px] font-mono text-destructive/70 hover:text-destructive transition-colors">
                   إعادة تعيين
                 </button>
               )}
@@ -175,8 +180,8 @@ const SignalsPage = () => {
       </AnimatePresence>
 
       {/* Count */}
-      <motion.div variants={fadeUp}>
-        <p className="text-[10px] font-mono text-muted-foreground">
+      <motion.div variants={fade}>
+        <p className="text-[8px] font-mono text-muted-foreground/30 uppercase tracking-wider">
           {filtered.length} إشارة
           {search && ` — "${search}"`}
           {confidenceFilter !== "all" && ` • ثقة ${confidenceFilter}`}
@@ -185,11 +190,11 @@ const SignalsPage = () => {
 
       {/* Signal Cards */}
       {signals.length === 0 ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+        <div className="space-y-2">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" style={{ borderRadius: '4px' }} />)}
         </div>
       ) : (
-        <motion.div className="space-y-3" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.03 } } }}>
+        <motion.div className="space-y-2" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.02 } } }}>
           {filtered.map((signal) => (
             <SignalCardCollapsible key={signal.pair} signal={signal} />
           ))}
@@ -197,16 +202,16 @@ const SignalsPage = () => {
       )}
 
       {filtered.length === 0 && signals.length > 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground font-mono text-sm">لا توجد إشارات مطابقة</p>
+        <div className="text-center py-10">
+          <p className="text-muted-foreground/40 font-mono text-[11px]">لا توجد إشارات مطابقة</p>
         </div>
       )}
 
       {/* Disclaimer */}
-      <div className="glass rounded-xl p-3 border-warning/20">
+      <div className="p-3 border border-border/10 bg-card/30" style={{ borderRadius: '4px' }}>
         <div className="flex items-start gap-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />
-          <p className="text-[9px] font-mono text-muted-foreground/70 leading-relaxed">
+          <AlertTriangle className="w-3 h-3 text-muted-foreground/20 shrink-0 mt-0.5" />
+          <p className="text-[7px] font-mono text-muted-foreground/25 leading-relaxed">
             جميع الإشارات لأغراض تعليمية فقط ولا تشكل نصيحة مالية. التداول ينطوي على مخاطر عالية.
           </p>
         </div>
