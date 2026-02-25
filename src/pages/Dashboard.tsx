@@ -1,17 +1,15 @@
 import { motion } from "framer-motion";
 import {
   ChevronLeft, Zap, Camera, BookOpen, Brain,
-  TrendingUp, TrendingDown, AlertTriangle, Target
+  TrendingUp, TrendingDown, AlertTriangle, Target, Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/contexts/AuthContext";
-import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useSmartAlgorithms } from "@/hooks/useSmartAlgorithms";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { usePortfolioSync } from "@/hooks/usePortfolioSync";
 import { Progress } from "@/components/ui/progress";
 
 const fade = {
@@ -23,25 +21,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { signals } = useSignals();
-  const { stats } = useGoalPlanner();
   const { signalProbabilities } = useSmartAlgorithms();
+  const {
+    totalEquity, realizedPnl, unrealizedPnl,
+    goalProgress, targetGoal, openTradesCount
+  } = usePortfolioSync();
 
-  const wealthProgress = stats ? Math.round(stats.progress) : 0;
-
-  const { data: closedTrades = [] } = useQuery({
-    queryKey: ["dash-equity", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase.from("trades").select("pnl, closed_at").eq("status", "closed").order("closed_at", { ascending: true }).limit(30);
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  const totalPnl = useMemo(() => closedTrades.reduce((s: number, t: any) => s + (t.pnl ?? 0), 0), [closedTrades]);
   const topSignals = useMemo(() => signals.filter(s => s.confidence >= 65).slice(0, 3), [signals]);
-
-  const currentBalance = stats?.effectiveBalance ?? 0;
-  const targetGoal = 10000;
 
   return (
     <motion.div
@@ -52,20 +38,42 @@ const Dashboard = () => {
     >
       {/* ═══ PORTFOLIO EQUITY ═══ */}
       <motion.div variants={fade} className="space-y-1">
-        <p className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-[0.15em]">Portfolio Balance</p>
-        <p className="text-3xl font-mono font-bold tabular-nums tracking-tight">
-          ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-        </p>
         <div className="flex items-center gap-2">
-          {closedTrades.length > 0 && (
-            <span className={cn(
-              "text-[11px] font-mono font-semibold tabular-nums",
-              totalPnl >= 0 ? "text-success" : "text-destructive"
-            )}>
-              {totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)}
+          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-[0.15em]">Portfolio Equity</p>
+          {openTradesCount > 0 && (
+            <span className="text-[7px] font-mono font-bold px-1.5 py-0.5 bg-warning/10 text-warning tabular-nums" style={{ borderRadius: '2px' }}>
+              {openTradesCount} OPEN
             </span>
           )}
-          <span className="text-[9px] font-mono text-muted-foreground/40">ALL TIME</span>
+        </div>
+        <p className="text-3xl font-mono font-bold tabular-nums tracking-tight">
+          ${totalEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <span className={cn(
+              "text-[11px] font-mono font-semibold tabular-nums",
+              realizedPnl >= 0 ? "text-success" : "text-destructive"
+            )}>
+              {realizedPnl >= 0 ? "+" : ""}${realizedPnl.toFixed(2)}
+            </span>
+            <span className="text-[7px] font-mono text-muted-foreground/30">REALIZED</span>
+          </div>
+          {unrealizedPnl !== 0 && (
+            <>
+              <div className="h-3 w-px bg-border/10" />
+              <div className="flex items-center gap-1">
+                <Activity className="w-2.5 h-2.5 text-warning animate-pulse" />
+                <span className={cn(
+                  "text-[11px] font-mono font-semibold tabular-nums",
+                  unrealizedPnl >= 0 ? "text-success" : "text-destructive"
+                )}>
+                  {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toFixed(2)}
+                </span>
+                <span className="text-[7px] font-mono text-muted-foreground/30">UNREALIZED</span>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
@@ -73,16 +81,16 @@ const Dashboard = () => {
       <motion.div variants={fade} className="space-y-2.5 p-4 border border-border/20 bg-card" style={{ borderRadius: '4px' }}>
         <div className="flex items-center justify-between">
           <p className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-[0.15em]">Monthly Goal</p>
-          <p className="text-[11px] font-mono font-semibold text-primary tabular-nums">{wealthProgress}%</p>
+          <p className="text-[11px] font-mono font-semibold text-primary tabular-nums">{Math.round(goalProgress)}%</p>
         </div>
-        <Progress value={wealthProgress} className="h-1.5 bg-secondary" />
+        <Progress value={goalProgress} className="h-1.5 bg-secondary" />
         <div className="flex justify-between">
-          <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">${currentBalance.toLocaleString()}</span>
+          <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">${totalEquity.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
           <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">${targetGoal.toLocaleString()}</span>
         </div>
       </motion.div>
 
-      {/* ═══ ACTION GRID (4 essential tools) ═══ */}
+      {/* ═══ ACTION GRID ═══ */}
       <motion.div variants={fade} className="grid grid-cols-4 gap-2">
         {[
           { icon: Zap, label: "Signals", path: "/signals" },
