@@ -127,9 +127,9 @@ const SignalsPage = () => {
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "px-2 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider",
-                      sniperSignal.ACTION === "BUY" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                      sniperSignal.DIRECTION === "BUY" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                     )} style={{ borderRadius: '2px' }}>
-                      {sniperSignal.ACTION}
+                      {sniperSignal.DIRECTION}
                     </span>
                     <span className="text-[11px] font-mono font-bold text-foreground">{sniperSignal.PAIR}</span>
                   </div>
@@ -142,10 +142,10 @@ const SignalsPage = () => {
                 {/* Levels Grid */}
                 <div className="grid grid-cols-4 gap-1.5">
                   {[
-                    { label: "ENTRY", value: sniperSignal.ENTRY, color: "text-foreground" },
-                    { label: "SL", value: sniperSignal.SL, color: "text-destructive" },
-                    { label: "TP1", value: sniperSignal.TP1, color: "text-success" },
-                    { label: "TP2", value: sniperSignal.TP2, color: "text-success" },
+                    { label: "ENTRY", value: sniperSignal.ENTRY_ZONE, color: "text-foreground" },
+                    { label: "SL", value: sniperSignal.STOP_LOSS, color: "text-destructive" },
+                    { label: "TP1", value: sniperSignal.TAKE_PROFIT_1, color: "text-success" },
+                    { label: "TP2", value: sniperSignal.TAKE_PROFIT_2, color: "text-success" },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="border border-border/10 p-1.5 text-center" style={{ borderRadius: '3px' }}>
                       <p className="text-[7px] font-mono text-muted-foreground/40 uppercase">{label}</p>
@@ -154,13 +154,13 @@ const SignalsPage = () => {
                   ))}
                 </div>
 
-                {/* Confidence + Reason */}
+                {/* Confluence Score + Logic */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 px-2 py-1 border border-primary/15" style={{ borderRadius: '3px' }}>
                     <Zap className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[9px] font-mono font-bold text-primary tabular-nums">{sniperSignal.CONFIDENCE}%</span>
+                    <span className="text-[9px] font-mono font-bold text-primary tabular-nums">{sniperSignal.CONFLUENCE_SCORE}%</span>
                   </div>
-                  <p className="text-[8px] font-mono text-muted-foreground/50 leading-relaxed flex-1">{sniperSignal.REASON}</p>
+                  <p className="text-[8px] font-mono text-muted-foreground/50 leading-relaxed flex-1">{sniperSignal.LOGIC}</p>
                 </div>
               </div>
             )}

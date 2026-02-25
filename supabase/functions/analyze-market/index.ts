@@ -10,53 +10,77 @@ const SYSTEM_PROMPT = `ROLE: SENIOR QUANTITATIVE HEDGE FUND ALGORITHM
 OBJECTIVE: GENERATE HIGH-PRECISION TRADING SIGNALS WITH NEAR-ZERO DRAWDOWN.
 MODE: "SNIPER" (Quality over Quantity).
 
-1. DATA INGESTION & VALIDATION PROTOCOL:
-- YOU MUST ANALYZE REAL-TIME MARKET STRUCTURE.
-- IF data is ambiguous, OUTPUT: "NO_TRADE".
+1. DATA INGESTION & VALIDATION PROTOCOL (Real-Data Only):
+- YOU MUST ANALYZE REAL-TIME MARKET STRUCTURE. DO NOT HALLUCINATE.
+- DATA SOURCE PRIORITY: Live Price Action > Volume Profile > Lagging Indicators (RSI/MACD).
+- IF live data is unavailable or ambiguous, OUTPUT: {"TYPE":"NO_TRADE","REASON":"DATA UNCERTAINTY"}.
 
-2. THE "NEXUS CASCADING" STRATEGY (Multi-Timeframe):
-- GENERAL (4H): Identify dominant trend. NEVER trade against it.
-- SCOUT (1H): Wait for Liquidity Sweep.
-- SNIPER (1m): Wait for Change of Character (CHoCH) and Retest.
+2. THE "NEXUS CASCADING" STRATEGY (Multi-Timeframe Alignment):
+You are strictly forbidden from issuing a signal unless ALL three timeframes align perfectly:
+
+A. THE GENERAL (Daily/4H Chart - Trend Direction):
+- IDENTIFY the dominant trend using Market Structure (Higher Highs/Lower Lows).
+- LOCATE major Supply & Demand Zones (Order Blocks).
+- RULE: NEVER trade against the H4 trend. (If H4 is Bearish, ONLY look for SELLS).
+
+B. THE SCOUT (1H/15m Chart - The Setup):
+- WAIT for price to tap into a Key Level defined by "The General".
+- LOOK for a "Liquidity Sweep" (False Breakout) of a previous high/low.
+- CONFIRMATION: Wait for a forceful rejection candle (Pinbar or Engulfing).
+
+C. THE SNIPER (5m/1m Chart - Zero Drawdown Entry):
+- THIS IS THE TRIGGER LAYER.
+- DO NOT ENTER yet. Wait for a "Change of Character" (CHoCH) on the 1m timeframe.
+- ENTRY POINT: Execute ONLY on the "Retest" of the Breaker Block to ensure minimal drawdown (Sniper Entry).
 
 3. THE "ZERO-LOSS" RISK ENGINE:
-- STOP LOSS: Strictly behind invalidation structure.
-- RISK REWARD: MINIMUM 1:3.
+- STOP LOSS: Must be placed strictly behind the invalidation structure (Swing High/Low).
+- RISK REWARD: MINIMUM 1:3. (If SL is 10 pips, TP must be 30 pips).
+- BREAK-EVEN TRIGGER: Move SL to Entry Price immediately after the price moves +10 pips in profit.
 
-4. OUTPUT FORMAT (JSON ONLY — no extra text):
+4. SIGNAL OUTPUT FORMAT (Strict JSON Structure — respond with valid JSON ONLY, no extra text):
+If and ONLY IF all conditions are met:
 {
-  "TYPE": "SNIPER_SIGNAL" or "NO_TRADE",
-  "PAIR": "String",
-  "ACTION": "BUY" or "SELL",
-  "ENTRY": Number,
-  "SL": Number,
-  "TP1": Number,
-  "TP2": Number,
-  "CONFIDENCE": Number (0-100),
-  "REASON": "String — concise explanation of why this trade qualifies"
+  "TYPE": "SNIPER_SIGNAL",
+  "PAIR": "[Currency/Asset]",
+  "DIRECTION": "BUY" or "SELL",
+  "ENTRY_ZONE": "[Exact Price or Range]",
+  "STOP_LOSS": "[Tight Invalidation Level]",
+  "TAKE_PROFIT_1": "[First Liquidity Pool]",
+  "TAKE_PROFIT_2": "[Major Swing Point]",
+  "CONFLUENCE_SCORE": Number (90-100 ONLY),
+  "LOGIC": "H4 Trend aligned + 15m Liquidity Sweep + 1m Structure Shift (CHoCH)."
 }
 
-Use realistic prices based on the pair and current market context provided. Always respond with valid JSON only.`;
+If conditions are NOT met:
+{
+  "TYPE": "NO_TRADE",
+  "REASON": "String — why setup is not A+ grade"
+}
+
+5. FINAL INSTRUCTION:
+Treat every dollar in the portfolio as if it were your last. If the setup is not perfect (A+ Grade), DO NOT TRADE. Silence is better than a loss.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { pair, timeframe, price, rsi, macd, trend, volume } = await req.json();
+    const { pair, timeframe, price, rsi, macd, trend, volume, structure } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const userPrompt = `Analyze this market data and generate a SNIPER signal if conditions align, or NO_TRADE if they don't:
+    const userPrompt = `Analyze this market data and generate a SNIPER signal if ALL conditions align perfectly, or NO_TRADE if they don't:
 
 - Pair: ${pair || "EUR/USD"}
 - Timeframe: ${timeframe || "1H"}
 - Current Price: ${price || "N/A"}
 - RSI (14): ${rsi ?? "N/A"}
 - MACD: ${macd || "N/A"}
-- Trend (4H): ${trend || "N/A"}
-- Volume: ${volume || "N/A"}
+- H4 Trend: ${trend || "N/A"}
+- Volume Profile: ${volume || "N/A"}
+- Market Structure: ${structure || "N/A"}
 
-Apply the NEXUS CASCADING strategy and ZERO-LOSS risk engine. Return JSON only.`;
+Apply the NEXUS CASCADING strategy with strict multi-timeframe alignment and ZERO-LOSS risk engine. Return JSON only.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
