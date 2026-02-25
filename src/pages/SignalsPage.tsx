@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, X, SlidersHorizontal, Zap, Shield, AlertTriangle,
+  Search, X, SlidersHorizontal, Zap, Shield, AlertTriangle, Crosshair, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignals } from "@/hooks/useSignals";
 import SignalCardCollapsible from "@/components/signals/SignalCardCollapsible";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const fade = {
   hidden: { opacity: 0 },
@@ -22,6 +24,8 @@ const SignalsPage = () => {
   const [confidenceFilter, setConfidenceFilter] = useState<"all" | "80+" | "70+" | "60+">("all");
   const [riskFilter, setRiskFilter] = useState<"all" | "منخفض" | "متوسط" | "مرتفع">("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [sniperSignal, setSniperSignal] = useState<any>(null);
 
   const filtered = useMemo(() => {
     const confMin = confidenceFilter === "80+" ? 80 : confidenceFilter === "70+" ? 70 : confidenceFilter === "60+" ? 60 : 0;
@@ -35,6 +39,28 @@ const SignalsPage = () => {
   const activeFilters = [confidenceFilter !== "all", riskFilter !== "all"].filter(Boolean).length;
   const bullish = signals.filter(s => s.direction === "صعودي").length;
   const bearish = signals.length - bullish;
+
+  const handleScanMarket = async () => {
+    setScanning(true);
+    setSniperSignal(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-market", {
+        body: { pair: "EUR/USD", timeframe: "1H", price: 1.0842, rsi: 58, macd: "bullish crossover", trend: "uptrend", volume: "above average" },
+      });
+      if (error) throw error;
+      setSniperSignal(data);
+      if (data?.TYPE === "NO_TRADE") {
+        toast.info("لا توجد فرصة تداول حالياً — الخوارزمية في وضع الانتظار");
+      } else {
+        toast.success("تم رصد إشارة SNIPER بنجاح");
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "فشل في المسح");
+    } finally {
+      setScanning(false);
+    }
+  };
 
   return (
     <motion.div
@@ -59,6 +85,88 @@ const SignalsPage = () => {
         </div>
       </motion.div>
 
+      {/* Scan Market Button */}
+      <motion.div variants={fade}>
+        <button
+          onClick={handleScanMarket}
+          disabled={scanning}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 py-2.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all border",
+            scanning
+              ? "bg-muted text-muted-foreground border-border/20 cursor-wait"
+              : "bg-primary text-primary-foreground border-primary hover:opacity-90"
+          )}
+          style={{ borderRadius: '4px' }}
+        >
+          {scanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5" />}
+          {scanning ? "جاري المسح..." : "Scan Market — SNIPER Mode"}
+        </button>
+      </motion.div>
+
+      {/* Sniper Signal Result Card */}
+      <AnimatePresence>
+        {sniperSignal && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="border border-border/20 bg-card/90 overflow-hidden"
+            style={{ borderRadius: '4px' }}
+          >
+            {sniperSignal.TYPE === "NO_TRADE" ? (
+              <div className="p-4 text-center">
+                <Shield className="w-5 h-5 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-wider">NO TRADE — STANDBY</p>
+                <p className="text-[9px] font-mono text-muted-foreground/40 mt-1">{sniperSignal.REASON}</p>
+              </div>
+            ) : (
+              <div className="p-3 space-y-2.5">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-2 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider",
+                      sniperSignal.ACTION === "BUY" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                    )} style={{ borderRadius: '2px' }}>
+                      {sniperSignal.ACTION}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-foreground">{sniperSignal.PAIR}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Crosshair className="w-2.5 h-2.5 text-primary" />
+                    <span className="text-[8px] font-mono text-primary font-bold uppercase">SNIPER</span>
+                  </div>
+                </div>
+
+                {/* Levels Grid */}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { label: "ENTRY", value: sniperSignal.ENTRY, color: "text-foreground" },
+                    { label: "SL", value: sniperSignal.SL, color: "text-destructive" },
+                    { label: "TP1", value: sniperSignal.TP1, color: "text-success" },
+                    { label: "TP2", value: sniperSignal.TP2, color: "text-success" },
+                  ].map(({ label, value, color }) => (
+                    <div key={label} className="border border-border/10 p-1.5 text-center" style={{ borderRadius: '3px' }}>
+                      <p className="text-[7px] font-mono text-muted-foreground/40 uppercase">{label}</p>
+                      <p className={cn("text-[10px] font-mono font-bold tabular-nums", color)}>{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Confidence + Reason */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 px-2 py-1 border border-primary/15" style={{ borderRadius: '3px' }}>
+                    <Zap className="w-2.5 h-2.5 text-primary" />
+                    <span className="text-[9px] font-mono font-bold text-primary tabular-nums">{sniperSignal.CONFIDENCE}%</span>
+                  </div>
+                  <p className="text-[8px] font-mono text-muted-foreground/50 leading-relaxed flex-1">{sniperSignal.REASON}</p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Search */}
       <motion.div variants={fade} className="flex items-center gap-2">
         <div className="relative flex-1">
