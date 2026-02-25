@@ -1,146 +1,115 @@
-- خطة إعادة هيكلة وتنظيم تطبيق Nexus Trade AI
 
-## الرؤية
 
-تحويل التطبيق إلى تجربة مؤسسية احترافية مشابهة لـ MEXC مع تنظيم كامل للصفحات، إزالة التكرار، وضمان عمل جميع الميزات بتناسق.
+# Upgrade: Live Trade Tracking & Portfolio Synchronization Engine
 
----
-
-## المشاكل المكتشفة
-
-### 1. صفحات مكررة ومتداخلة
-
-- **Profile.tsx** و **Hub.tsx**: كلاهما يعرض بطاقة المستخدم + سجل صفقات + إعدادات. Hub هو الأكمل.
-- **More.tsx** و **Hub.tsx**: نفس القائمة تقريبا (أكاديمية، حاسبة، اشتراك). More قديم ومكرر.
-- **Signals.tsx** و **TradeCenter.tsx**: كلاهما يعرض نفس الإشارات. TradeCenter هو الأشمل (يحتوي تبويبات أداء + كيف يعمل).
-- **Index.tsx**: صفحة فارغة تماما (fallback لم تُحدث).
-- **NexusBrain.tsx**: صفحة مستقلة لكن يمكن الوصول لها فقط من URL مباشر - لا رابط في التنقل.
-
-### 2. مسارات تنقل مكسورة
-
-- BottomNav يوجه `/profile` لكن لا يوجد `/hub` في التنقل السفلي (Hub هو الصفحة الرئيسية للملف الشخصي).
-- QuickAccessGrid يوجه `/signals` الذي يعيد التوجيه لـ `/trade-center` (خطوة زائدة).
-- `/more` و `/hub` يؤديان لنفس المكون.
-
-### 3. عدم تناسق بصري
-
-- بعض الصفحات تستخدم `pb-24` وبعضها `pb-28` (تداخل مع BottomNav).
-- أنماط animation مختلفة بين الصفحات (fadeUp بقيم مختلفة).
+## Problem Summary
+The current system has three critical weaknesses:
+1. **No automatic TP/SL detection** -- Open trades don't auto-close when price hits Take Profit or Stop Loss
+2. **Portfolio balance ignores open trades** -- Dashboard and Goal Progress only count closed trades; unrealized PnL from open positions is invisible
+3. **Forex pairs have no live PnL** -- Only crypto pairs (via Binance WebSocket) update in real-time; forex pairs stay static
 
 ---
 
-## خطة التنفيذ
-
-### المرحلة 1: تنظيف الصفحات المكررة
-
-
-| الإجراء                        | التفاصيل                                             |
-| ------------------------------ | ---------------------------------------------------- |
-| حذف `Signals.tsx`              | مكرر مع TradeCenter - الإبقاء على redirect فقط       |
-| دمج `Profile.tsx` في `Hub.tsx` | نقل محتوى الإنجازات والنفسية إلى Hub كتبويبات إضافية |
-| حذف `More.tsx`                 | مكرر تماما مع Hub                                    |
-| تحديث `Index.tsx`              | إعادة توجيه لـ Dashboard أو حذفه                     |
-
-
-### المرحلة 2: إعادة هيكلة التنقل
-
-**التنقل السفلي (5 تبويبات نهائية):**
+## Solution Architecture
 
 ```text
-[الرئيسية] [التوصيات] [(+) AI Scan] [الساحة] [المقر]
-    /          /trade-center    action      /community   /hub
+Live Prices (WebSocket/Simulated)
+         |
+         v
+  +------------------+
+  | useLivePnl (v2)  |  <-- Enhanced: forex mapping + TP/SL monitor
+  +------------------+
+         |
+    +----+----+
+    |         |
+    v         v
+ TradeRow   usePortfolioSync (NEW)
+ (Journal)       |
+              +--+--+
+              |     |
+              v     v
+         Dashboard  ProfilePage
+         (Balance)  (Equity)
 ```
-
-- تغيير `/profile` إلى `/hub` في BottomNav
-- تحديث التسمية من "الملف" إلى "المقر"
-
-### المرحلة 3: إعادة تنظيم Hub كمركز شامل (مثل MEXC)
-
-Hub سيصبح المركز الرئيسي ويحتوي:9
-
-1. بطاقة المستخدم + الإحصائيات
-2. تبويبات: [الأداء | الإنجازات | النفسية]
-3. أقسام مرتبة: أدوات التداول، AI، الحساب، الإعدادات
-4. Credits + اشتراك
-
-### المرحلة 4: تنظيف المسارات في App.tsx
-
-```text
-الصفحات النهائية:
-/              -> Dashboard (الرئيسية)
-/trade-center  -> TradeCenter (التوصيات + الأداء)
-/community     -> Community (الساحة)
-/hub           -> Hub (المقر الشامل)
-/chart-vision  -> ChartVision
-/trade-journal -> TradeJournal
-/risk-calculator -> RiskCalculator
-/goal-planner  -> GoalPlanner
-/academy       -> Academy
-/morning-brief -> MorningBrief
-/markets       -> Markets
-/challenges    -> Challenges
-/subscription  -> Subscription
-/my-analyses   -> MyAnalyses
-/nexus-brain   -> NexusBrain
-/asset/*       -> AssetDetail
-/auth          -> Auth
-/admin         -> AdminPanel
-
-Redirects:
-/signals       -> /trade-center
-/profile       -> /hub
-/more          -> /hub
-```
-
-### المرحلة 5: تناسق بصري شامل
-
-- توحيد `pb-28` في جميع الصفحات لمنع تداخل BottomNav
-- توحيد fadeUp animation: `{ opacity: 0, y: 12 } -> { opacity: 1, y: 0, duration: 0.3 }`
-- توحيد `max-w-lg mx-auto` في كل الصفحات
-- إضافة عناوين صفحات مفقودة في TopBar (`/challenges`)
-
-### المرحلة 6: تحسين QuickAccessGrid
-
-تحديث المسارات لتوجيه مباشر بدون redirects:
-
-- `/signals` -> `/trade-center`
-- إضافة اختصار للتحديات `/challenges`
-- إضافة NexusBrain `/nexus-brain` كاختصار
-
-### المرحلة 7: ضمان عمل جميع الميزات
-
-- التأكد من أن كل صفحة قابلة للوصول من التنقل
-- التأكد من أن جميع الروابط تعمل بشكل صحيح
-- التأكد من أن RLS policies تعمل لكل الجداول
-- إضافة حالات فارغة (empty states) واضحة لكل صفحة
 
 ---
 
-## القسم التقني
+## Implementation Plan
 
-### الملفات المتأثرة:
+### 1. Enhance `useLivePnl` -- Add Forex Price Mapping & TP/SL Auto-Close
 
+**File: `src/hooks/useLivePnl.ts`**
 
-| الملف                                          | الإجراء                             |
-| ---------------------------------------------- | ----------------------------------- |
-| `src/App.tsx`                                  | تنظيف routes + إضافة redirects      |
-| `src/components/layout/BottomNav.tsx`          | تحديث tab الملف -> المقر (/hub)     |
-| `src/pages/Hub.tsx`                            | دمج محتوى Profile (إنجازات + نفسية) |
-| `src/pages/Profile.tsx`                        | تحويل لـ redirect إلى /hub          |
-| `src/pages/More.tsx`                           | تحويل لـ redirect إلى /hub          |
-| `src/pages/Signals.tsx`                        | إبقاء كـ redirect فقط (موجود أصلا)  |
-| `src/pages/Index.tsx`                          | redirect إلى /                      |
-| `src/components/dashboard/QuickAccessGrid.tsx` | تحديث المسارات                      |
-| `src/components/layout/TopBar.tsx`             | إضافة عناوين مفقودة                 |
-| `src/pages/Dashboard.tsx`                      | تحسينات بصرية + توحيد spacing       |
-| `src/pages/TradeCenter.tsx`                    | توحيد spacing                       |
-| `src/pages/Community.tsx`                      | توحيد spacing                       |
-| `src/pages/TradeJournal.tsx`                   | توحيد spacing                       |
-| جميع الصفحات الأخرى                            | توحيد pb-28 و max-w-lg              |
+- Extend `priceMap` to also map forex pairs directly (e.g., `EUR/USD` from `useLivePrices` already has these)
+- Add a new function `checkTPSL(trade, currentPrice)` that returns `"tp_hit" | "sl_hit" | null`
+- Add `useAutoCloseMonitor(trades, closeTradeFn)` -- a `useEffect` loop that checks every open trade against its TP/SL on each price tick, and auto-closes the trade when triggered (with toast notification)
 
+### 2. Create `usePortfolioSync` -- Unified Live Balance Hook
 
-### لا يتم حذف أي ميزة:
+**File: `src/hooks/usePortfolioSync.ts` (NEW)**
 
-- كل ميزة موجودة حاليا ستبقى
-- فقط إزالة التكرار ودمج المحتوى المتشابه
-- إضافة redirects للمسارات القديمة لضمان عدم كسر أي رابط
+- Combines closed-trade PnL (from DB) with open-trade unrealized PnL (from live prices)
+- Exports:
+  - `totalEquity` = initial capital + closed PnL + unrealized PnL
+  - `unrealizedPnl` = sum of all open trades' live PnL
+  - `realizedPnl` = sum of all closed trades' PnL
+  - `goalProgress` = recalculated using totalEquity instead of just closed PnL
+- Uses `useLivePnl` internally to get live prices for open trades
+
+### 3. Update Dashboard -- Live Portfolio Balance
+
+**File: `src/pages/Dashboard.tsx`**
+
+- Replace static `currentBalance` (from `useGoalPlanner`) with `usePortfolioSync().totalEquity`
+- Show unrealized PnL separately with a pulsing indicator
+- Monthly Goal progress bar uses the new total equity (realized + unrealized)
+- Add open positions count badge
+
+### 4. Update Trade Journal -- Auto-Close Engine
+
+**File: `src/pages/TradeJournal.tsx`**
+
+- Integrate the TP/SL auto-close monitor from `useLivePnl`
+- When a trade is auto-closed:
+  - Update DB with exit price and PnL
+  - Invalidate all relevant queries (trades, equity, goal)
+  - Show toast: "Trade X hit TP/SL -- auto-closed"
+- Add visual indicators on open trades showing proximity to TP/SL (progress bar: how close price is to TP vs SL)
+
+### 5. Update Profile Page -- Consistent Live Equity
+
+**File: `src/pages/ProfilePage.tsx`**
+
+- Use `usePortfolioSync` for `totalEquity` display
+- Show breakdown: Realized PnL + Unrealized PnL
+- Open trades section shows live PnL per position
+
+### 6. Forex Price Simulation Enhancement
+
+**File: `src/hooks/useLivePrices.ts`**
+
+- The forex simulation interval (currently every 3-5 seconds) will be kept but ensure the price updates propagate correctly to `useLivePnl`'s `priceMap` so forex open trades also show moving PnL
+
+---
+
+## Technical Details
+
+**TP/SL Detection Logic:**
+```text
+For LONG trades:
+  - TP Hit: currentPrice >= take_profit
+  - SL Hit: currentPrice <= stop_loss
+
+For SHORT trades:
+  - TP Hit: currentPrice <= take_profit  
+  - SL Hit: currentPrice >= stop_loss
+```
+
+**Portfolio Equity Formula:**
+```text
+totalEquity = initial_capital + SUM(closed_trades.pnl) + SUM(open_trades.live_pnl)
+goalProgress = (totalEquity - initial_capital) / (target_goal - initial_capital) * 100
+```
+
+**Auto-Close Throttle:** Check runs on every price update but with a 2-second debounce per trade to prevent duplicate closes.
+
