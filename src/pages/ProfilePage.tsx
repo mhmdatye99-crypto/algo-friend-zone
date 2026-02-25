@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTradePerformance } from "@/hooks/useTradePerformance";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
+import { usePortfolioSync } from "@/hooks/usePortfolioSync";
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 
@@ -28,7 +29,7 @@ const ProfilePage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { data: perf } = useTradePerformance();
   const { goal, stats } = useGoalPlanner();
-
+  const { totalEquity, realizedPnl, unrealizedPnl, openTradesCount } = usePortfolioSync();
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user) return;
@@ -56,11 +57,7 @@ const ProfilePage = () => {
     enabled: !!user,
   });
 
-  const totalEquity = useMemo(() => {
-    const capital = goal?.initial_capital ?? 0;
-    const pnl = perf?.totalPnl ?? 0;
-    return capital + pnl;
-  }, [goal, perf]);
+  // totalEquity now comes from usePortfolioSync (realized + unrealized)
 
   const pairAllocation = useMemo(() => {
     if (!perf?.pairBreakdown || perf.pairBreakdown.length === 0) return [];
@@ -98,18 +95,32 @@ const ProfilePage = () => {
         </p>
         <div className="flex items-center gap-4 mt-2">
           <div className="flex items-center gap-1">
-            {(perf?.totalPnl ?? 0) >= 0 ? (
+            {realizedPnl >= 0 ? (
               <ArrowUpRight className="w-3 h-3 text-success" />
             ) : (
               <ArrowDownRight className="w-3 h-3 text-destructive" />
             )}
             <span className={cn("text-[11px] font-mono font-bold tabular-nums",
-              (perf?.totalPnl ?? 0) >= 0 ? "text-success" : "text-destructive"
+              realizedPnl >= 0 ? "text-success" : "text-destructive"
             )}>
-              {(perf?.totalPnl ?? 0) >= 0 ? "+" : ""}${(perf?.totalPnl ?? 0).toLocaleString()}
+              {realizedPnl >= 0 ? "+" : ""}${realizedPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </span>
-            <span className="text-[7px] font-mono text-muted-foreground/30">P&L</span>
+            <span className="text-[7px] font-mono text-muted-foreground/30">REALIZED</span>
           </div>
+          {unrealizedPnl !== 0 && (
+            <>
+              <div className="h-3 w-px bg-border/10" />
+              <div className="flex items-center gap-1">
+                <Activity className="w-2.5 h-2.5 text-warning animate-pulse" />
+                <span className={cn("text-[11px] font-mono font-bold tabular-nums",
+                  unrealizedPnl >= 0 ? "text-success" : "text-destructive"
+                )}>
+                  {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+                <span className="text-[7px] font-mono text-muted-foreground/30">LIVE</span>
+              </div>
+            </>
+          )}
           <div className="h-3 w-px bg-border/10" />
           <div>
             <span className={cn("text-[10px] font-mono font-bold tabular-nums",
@@ -118,11 +129,6 @@ const ProfilePage = () => {
               {(perf?.winRate ?? 0).toFixed(1)}%
             </span>
             <span className="text-[7px] font-mono text-muted-foreground/30 mr-1">WIN</span>
-          </div>
-          <div className="h-3 w-px bg-border/10" />
-          <div>
-            <span className="text-[10px] font-mono font-bold tabular-nums text-foreground/60">{perf?.closedTrades ?? 0}</span>
-            <span className="text-[7px] font-mono text-muted-foreground/30 mr-1">TRADES</span>
           </div>
         </div>
       </motion.div>

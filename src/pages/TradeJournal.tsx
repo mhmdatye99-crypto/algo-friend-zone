@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, TrendingUp, TrendingDown, X, BarChart3, Clock, DollarSign,
@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useGoalPlanner } from "@/hooks/useGoalPlanner";
 import { useLocation } from "react-router-dom";
-import { useLivePnl } from "@/hooks/useLivePnl";
+import { useLivePnl, useAutoCloseMonitor } from "@/hooks/useLivePnl";
 
 type Trade = {
   id: string;
@@ -78,7 +78,7 @@ const TradeJournal = () => {
   const queryClient = useQueryClient();
   const { goal, addEntry } = useGoalPlanner();
   const location = useLocation();
-  const { calculateLivePnl, getLivePrice } = useLivePnl();
+  const { calculateLivePnl, getLivePrice, priceMap } = useLivePnl();
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "closed" | "wins" | "losses">("all");
   const [tab, setTab] = useState<"trades" | "analytics">("trades");
@@ -208,6 +208,66 @@ const TradeJournal = () => {
     setStopLoss(""); setTakeProfit(""); setPositionSize(""); setEmotion("");
     setNotes(""); setEntryReason(""); setStrategy("");
   };
+
+  // TP/SL Auto-Close Monitor
+  const handleAutoClose = useCallback(
+    async (tradeId: string, exitPrice: number, result: "tp_hit" | "sl_hit") => {
+      const trade = trades.find((t) => t.id === tradeId);
+      if (!trade) return;
+      const size = trade.position_size || 1;
+      const pnl =
+        trade.direction === "long"
+          ? (exitPrice - trade.entry_price) * size
+          : (trade.entry_price - exitPrice) * size;
+
+      const { error } = await supabase
+        .from("trades")
+        .update({
+          exit_price: exitPrice,
+          pnl,
+          status: "closed",
+          closed_at: new Date().toISOString(),
+        })
+        .eq("id", tradeId);
+
+      if (error) {
+        console.error("Auto-close failed:", error);
+        return;
+      }
+
+      if (goal) {
+        try {
+          await addEntry.mutateAsync({
+            amount: pnl,
+            note: `${result === "tp_hit" ? "TP" : "SL"} ${trade.pair} | ${pnl >= 0 ? "ربح" : "خسارة"}`,
+          });
+        } catch (e) {
+          console.error("Failed to update goal:", e);
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["trades"] });
+      queryClient.invalidateQueries({ queryKey: ["dash-equity"] });
+      queryClient.invalidateQueries({ queryKey: ["trade-performance"] });
+      queryClient.invalidateQueries({ queryKey: ["trades-pnl-total"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-goal"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-closed-pnl"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-open-trades"] });
+
+      toast.success(
+        result === "tp_hit"
+          ? `🎯 ${trade.pair} وصل الهدف — تم الإغلاق تلقائياً (+$${pnl.toFixed(2)})`
+          : `🛑 ${trade.pair} وصل وقف الخسارة — تم الإغلاق تلقائياً (${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)})`
+      );
+    },
+    [trades, goal, addEntry, queryClient]
+  );
+
+  useAutoCloseMonitor(
+    trades as any,
+    priceMap,
+    handleAutoClose
+  );
 
   const filtered = useMemo(() => {
     if (filter === "all") return trades;
