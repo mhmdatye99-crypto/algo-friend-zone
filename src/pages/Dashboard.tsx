@@ -40,12 +40,12 @@ const Dashboard = () => {
       {/* ═══ HERO — AI CHART ANALYSIS ═══ */}
       <motion.section variants={fade} className="nx-card-premium space-y-4">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
             <ScanLine className="w-6 h-6 text-primary" strokeWidth={1.8} />
           </div>
           <div className="min-w-0">
             <h1 className="nx-section">تحليل الشارت بالذكاء الاصطناعي</h1>
-            <p className="nx-body text-[15px] text-muted-foreground mt-1">
+            <p className="text-[15px] leading-7 text-muted-foreground mt-1">
               ارفع صورة الشارت واحصل على تحليل منظم للسوق.
             </p>
           </div>
@@ -63,16 +63,16 @@ const Dashboard = () => {
             الأسواق <ChevronLeft className="w-4 h-4" />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           {overview.map((a) => (
             <button
               key={a!.pair}
               onClick={() => navigate(`/asset/${encodeURIComponent(a!.pair)}`)}
-              className="nx-card !p-3 text-center space-y-2 active:scale-[0.98] transition-transform"
+              className="nx-card !p-3 min-w-0 h-[142px] text-center flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition-transform"
             >
               <AssetLogo pair={a!.pair} icon={a!.icon} category={a!.category} size={32} className="mx-auto" />
-              <p className="font-mono text-[14px] font-bold nx-ltr">{a!.pair.replace("/USDT", "")}</p>
-              <p className="font-mono text-[14px] font-semibold tabular-nums nx-ltr text-foreground">
+              <p className="font-mono text-[14px] font-bold nx-ltr truncate w-full">{a!.pair.replace("/USDT", "")}</p>
+              <p className="font-mono text-[14px] font-semibold tabular-nums nx-ltr text-foreground truncate w-full">
                 {formatPrice(a!.price)}
               </p>
               <p

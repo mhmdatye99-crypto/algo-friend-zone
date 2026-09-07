@@ -83,23 +83,23 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-lg glass-strong rounded-t-2xl p-5 pb-28 space-y-4 safe-area-bottom max-h-[85vh] overflow-y-auto"
+            className="w-full max-w-lg bg-card border-t border-border rounded-t-2xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] space-y-4 max-h-[88vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {step > 1 && (
-                  <button onClick={() => setStep(step - 1)} className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
+                  <button onClick={() => setStep(step - 1)} aria-label="السابق" className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
-                <span className="text-[13px] font-mono font-bold">
+                <span className="text-[16px] font-semibold">
                   {step === 1 ? "اختر الأصل" : step === 2 ? "التفاصيل" : "ملخص التحليل"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-muted-foreground">{step}/3</span>
-                <button onClick={resetAndClose} className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
+                <span className="text-[13px] font-mono text-muted-foreground nx-ltr">{step}/3</span>
+                <button onClick={resetAndClose} aria-label="إغلاق" className="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center">
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
@@ -115,7 +115,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                       value={pairSearch}
                       onChange={e => setPairSearch(e.target.value)}
                       placeholder="ابحث عن الأصل... BTC, SOL, GOLD"
-                      className="w-full bg-secondary/60 border border-border/30 rounded-xl pr-10 pl-3 py-3 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/40"
+                       className="nx-input pr-10 font-mono"
                       dir="rtl"
                       autoFocus
                     />
@@ -126,7 +126,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                         key={p}
                         onClick={() => { setPair(p); setStep(2); }}
                         className={cn(
-                          "px-2 py-2.5 rounded-lg text-[11px] font-mono font-medium transition-all border text-center",
+                           "min-h-11 px-2 py-2.5 rounded-lg text-[13px] font-mono font-medium transition-all border text-center nx-ltr",
                           pair === p
                             ? "bg-primary text-primary-foreground border-primary"
                             : "bg-secondary/40 text-muted-foreground border-border/10 hover:border-primary/20 hover:text-foreground"
@@ -136,7 +136,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                       </button>
                     ))}
                     {filteredPairs.length === 0 && (
-                      <div className="col-span-3 text-center py-6 text-[11px] font-mono text-muted-foreground">
+                       <div className="col-span-3 text-center py-6 text-[14px] text-muted-foreground">
                         لا توجد نتائج
                       </div>
                     )}
@@ -153,12 +153,12 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
 
                   {/* Prediction */}
                   <div>
-                    <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5 block">التوقع</label>
+                     <label className="nx-label mb-1.5 block">التوقع</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setPrediction("bullish")}
                         className={cn(
-                          "flex items-center justify-center gap-2 py-3 rounded-xl text-[12px] font-mono font-bold transition-all border",
+                           "min-h-12 flex items-center justify-center gap-2 py-3 rounded-xl text-[15px] font-semibold transition-colors border",
                           prediction === "bullish" ? "bg-success/15 text-success border-success/25" : "bg-secondary/40 text-muted-foreground border-border/10"
                         )}
                       >
@@ -167,7 +167,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                       <button
                         onClick={() => setPrediction("bearish")}
                         className={cn(
-                          "flex items-center justify-center gap-2 py-3 rounded-xl text-[12px] font-mono font-bold transition-all border",
+                           "min-h-12 flex items-center justify-center gap-2 py-3 rounded-xl text-[15px] font-semibold transition-colors border",
                           prediction === "bearish" ? "bg-destructive/15 text-destructive border-destructive/25" : "bg-secondary/40 text-muted-foreground border-border/10"
                         )}
                       >
@@ -178,14 +178,14 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
 
                   {/* Timeframe */}
                   <div>
-                    <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5 block">الإطار الزمني</label>
+                     <label className="nx-label mb-1.5 block">الإطار الزمني</label>
                     <div className="flex gap-1.5">
                       {timeframes.map(tf => (
                         <button
                           key={tf}
                           onClick={() => setTimeframe(tf)}
                           className={cn(
-                            "flex-1 py-2 rounded-lg text-[11px] font-mono font-medium transition-all border",
+                             "flex-1 min-h-11 py-2 rounded-lg text-[14px] font-mono font-medium transition-colors border nx-ltr",
                             timeframe === tf ? "bg-accent/15 text-accent border-accent/20" : "bg-secondary/40 text-muted-foreground border-border/10"
                           )}
                         >{tf}</button>
@@ -196,7 +196,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                   {/* Confidence */}
                   <div>
                     <div className="flex justify-between items-center mb-1.5">
-                      <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">درجة الثقة</label>
+                       <label className="nx-label">درجة الثقة</label>
                       <span className="text-[13px] font-mono font-bold text-primary">{confidence}%</span>
                     </div>
                     <input
@@ -208,7 +208,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
 
                   <button
                     onClick={() => setStep(3)}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 text-primary font-mono font-bold text-[12px] border border-primary/20 hover:bg-primary/15 transition-all"
+                     className="nx-btn-primary w-full"
                   >
                     التالي <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -221,7 +221,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                   {/* Selected asset chip */}
                   <div className="flex items-center gap-2">
                     <span className={cn(
-                      "px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border",
+                       "px-2.5 py-1 rounded-lg text-[13px] font-mono font-bold border nx-ltr",
                       prediction === "bullish" ? "text-success border-success/20 bg-success/5" : "text-destructive border-destructive/20 bg-destructive/5"
                     )}>
                       {prediction === "bullish" ? "📈" : "📉"} {pair} · {timeframe} · {confidence}%
@@ -230,12 +230,12 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
 
                   {/* Summary */}
                   <div>
-                    <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5 block">ملخص التحليل</label>
+                     <label className="nx-label mb-1.5 block">ملخص التحليل</label>
                     <textarea
                       value={summary}
                       onChange={e => setSummary(e.target.value)}
                       placeholder="اشرح تحليلك... مستويات الدعم والمقاومة، السيناريوهات المتوقعة..."
-                      className="w-full bg-secondary/50 border border-border/20 rounded-xl px-3 py-3 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 resize-none h-24"
+                       className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-3 text-[16px] leading-7 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 resize-none h-28"
                       dir="rtl"
                       autoFocus
                     />
@@ -256,7 +256,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                       className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/30 bg-secondary/20 text-muted-foreground hover:border-primary/20 hover:text-primary transition-colors"
                     >
                       <ImagePlus className="w-4 h-4" />
-                      <span className="text-[11px] font-mono">إضافة شارت (اختياري)</span>
+                       <span className="text-[15px] font-semibold">إضافة شارت (اختياري)</span>
                     </button>
                   )}
 
@@ -264,7 +264,7 @@ const CreatePostDialog = ({ open, onClose, onCreate }: Props) => {
                   <button
                     onClick={handleSubmit}
                     disabled={!summary.trim()}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-[13px] hover:bg-primary/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed glow-gold"
+                     className="nx-btn-primary w-full disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Send className="w-4 h-4" /> نشر في غرفة العمليات
                   </button>

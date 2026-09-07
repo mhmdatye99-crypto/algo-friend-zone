@@ -11,14 +11,13 @@ const fade = {
   show: { opacity: 1, transition: { duration: 0.1 } },
 };
 
-type FilterKey = "all" | "long" | "short" | "confidence" | "recent";
+type FilterKey = "all" | "long" | "short" | "confidence";
 
 const filters: { key: FilterKey; label: string }[] = [
   { key: "all", label: "الكل" },
   { key: "long", label: "LONG" },
   { key: "short", label: "SHORT" },
   { key: "confidence", label: "الأعلى ثقة" },
-  { key: "recent", label: "حديثة" },
 ];
 
 const SignalsPage = () => {
@@ -36,7 +35,6 @@ const SignalsPage = () => {
     if (filter === "long") list = list.filter((s) => s.direction === "صعودي");
     if (filter === "short") list = list.filter((s) => s.direction === "هبوطي");
     if (filter === "confidence") list = [...list].sort((a, b) => b.confidence - a.confidence);
-    if (filter === "recent") list = [...list].sort((a, b) => b.winProbability - a.winProbability);
     return list;
   }, [signals, search, filter]);
 
@@ -81,7 +79,7 @@ const SignalsPage = () => {
       </motion.div>
 
       {/* Filters */}
-      <motion.div variants={fade} className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+      <motion.div variants={fade} className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-0.5">
         {filters.map((f) => (
           <button
             key={f.key}
