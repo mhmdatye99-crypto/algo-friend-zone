@@ -3,5 +3,3 @@ project_id = "ohrmbprirgitgwuzuerj"
 [functions.analyze-market]
 verify_jwt = false
 
-[functions.nexus-ai]
-verify_jwt = false
