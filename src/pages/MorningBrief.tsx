@@ -1,303 +1,242 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
-  Eye, RefreshCw, AlertTriangle, TrendingUp, TrendingDown,
-  Clock, Lightbulb, Loader2, BarChart3,
-  Shield, ArrowUpRight, ArrowDownRight, Crosshair, Activity
+  RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Minus,
+  Lightbulb, Loader2, BarChart3, Activity, ChevronLeft,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import AssetLogo from "@/components/shared/AssetLogo";
+
+interface MarketRow {
+  pair: string;
+  category: "كريبتو" | "فوركس";
+  price: number;
+  change: number;
+  trend: "صعودي" | "هبوطي" | "عرضي";
+  strength: number;
+  rsi: number;
+  support: number;
+  resistance: number;
+  distanceToSupport: number;
+  distanceToResistance: number;
+  source: string;
+  note?: string | null;
+}
 
 interface BriefData {
+  generatedAt?: string;
   date?: string;
-  greeting?: string;
-  marketOverview?: string;
-  keyEvents?: { time: string; event: string; impact: string; assets: string[] }[];
-  topOpportunities?: { pair: string; direction: string; reason: string; confidence: number }[];
-  riskAlerts?: { alert: string; severity: string }[];
+  markets?: MarketRow[];
   sentiment?: {
-    crypto?: { score: number; label: string };
-    forex?: { score: number; label: string };
-    commodities?: { score: number; label: string };
+    crypto?: { score: number; label: string } | null;
+    forex?: { score: number; label: string } | null;
   };
-  dailyTip?: string;
+  marketOverview?: string | null;
+  riskAlerts?: { alert: string; severity: string }[];
+  dailyTip?: string | null;
   focusAssets?: string[];
   error?: string;
 }
 
-const MorningBrief = () => {
-  const [brief, setBrief] = useState<BriefData | null>(null);
-  const [loading, setLoading] = useState(false);
+const trendMeta = (t: MarketRow["trend"]) =>
+  t === "صعودي"
+    ? { icon: TrendingUp, cls: "text-success" }
+    : t === "هبوطي"
+    ? { icon: TrendingDown, cls: "text-destructive" }
+    : { icon: Minus, cls: "text-muted-foreground" };
 
-  const fetchBrief = async () => {
+const MorningBrief = () => {
+  const navigate = useNavigate();
+  const [brief, setBrief] = useState<BriefData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchBrief = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("morning-brief");
       if (error) throw error;
-      if (data?.error) { toast.error(data.error); setLoading(false); return; }
+      if (data?.error) { toast.error(data.error); return; }
       setBrief(data);
     } catch {
-      toast.error("فشل تحميل الإحاطة. حاول مرة أخرى.");
+      toast.error("تعذر تحميل بيانات السوق. حاول مرة أخرى.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const impactColor = (impact: string) =>
-    impact === "high" ? "text-destructive bg-destructive/10 border-destructive/20" :
-    impact === "medium" ? "text-warning bg-warning/10 border-warning/20" :
-    "text-muted-foreground bg-secondary border-border/20";
+  useEffect(() => { fetchBrief(); }, [fetchBrief]);
 
   const sentimentColor = (score: number) =>
     score >= 65 ? "text-success" : score >= 40 ? "text-warning" : "text-destructive";
 
-  return (
-    <motion.div
-      className="px-4 pt-6 pb-28 max-w-lg mx-auto"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
-    >
-      {/* Header — Private Desk Briefing */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center">
-            <span className="text-[13px] font-black text-accent">X</span>
-          </div>
-          <div>
-            <p className="text-[13px] uppercase tracking-[0.2em] text-accent font-mono font-bold">Private Desk Briefing</p>
-            <h1 className="text-base font-bold">الإحاطة اليومية الخاصة</h1>
-          </div>
-        </div>
-        <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">
-          تقرير مكتب التداول — تحليل مؤسسي للأسواق العالمية وفرص التمركز الاستراتيجي
-        </p>
-      </div>
+  const crypto = brief?.markets?.filter((m) => m.category === "كريبتو") ?? [];
+  const forex = brief?.markets?.filter((m) => m.category === "فوركس") ?? [];
 
-      <AnimatePresence mode="wait">
-        {!brief && !loading && (
-          <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="rounded-xl p-8 text-center border border-accent/10 bg-accent/3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mx-auto mb-3">
-                <span className="text-lg font-black text-accent">X</span>
-              </div>
-              <h3 className="text-sm font-bold font-mono mb-1">إحاطة مكتب التداول</h3>
-              <p className="text-[13px] text-muted-foreground font-mono mb-4">
-                تحليل شامل للبيئة السوقية · فرص التمركز · مخاطر الجلسة
-              </p>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={fetchBrief}
-                className="bg-accent text-accent-foreground px-6 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 mx-auto hover:bg-accent/90 transition-colors"
+  const renderGroup = (title: string, rows: MarketRow[]) =>
+    rows.length > 0 && (
+      <section className="space-y-3">
+        <h2 className="nx-section">{title}</h2>
+        <div className="space-y-2.5">
+          {rows.map((m) => {
+            const T = trendMeta(m.trend);
+            return (
+              <button
+                key={m.pair}
+                onClick={() => navigate(`/asset/${encodeURIComponent(m.pair)}`)}
+                className="nx-card w-full text-right space-y-3 active:scale-[0.995] transition-transform"
               >
-                <Eye className="w-4 h-4" />
-                توليد الإحاطة
-              </motion.button>
-            </div>
-
-            <h3 className="text-[13px] font-bold uppercase tracking-wider mb-2 font-mono text-muted-foreground">محتويات الإحاطة</h3>
-            <div className="grid grid-cols-2 gap-1.5">
-              {[
-                { icon: BarChart3, label: "البيئة السوقية" },
-                { icon: Clock, label: "أحداث اقتصادية مؤثرة" },
-                { icon: Crosshair, label: "فرص التمركز" },
-                { icon: AlertTriangle, label: "تحذيرات المخاطر" },
-                { icon: Activity, label: "معنويات مؤسسية" },
-                { icon: Lightbulb, label: "توصية الجلسة" },
-              ].map((item, i) => (
-                <div key={i} className="rounded-lg p-3 flex items-center gap-2 border border-border/10 bg-card/50">
-                  <item.icon className="w-3.5 h-3.5 text-accent shrink-0" />
-                  <span className="text-[13px] font-mono text-muted-foreground">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <AssetLogo pair={m.pair} icon="" category={m.category} size={34} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-mono font-bold text-[15px] nx-ltr">{m.pair.replace("/USDT", "")}</p>
+                    <p className="nx-meta">{m.source}</p>
+                  </div>
+                  <div className="text-left" dir="ltr">
+                    <p className="font-mono font-semibold text-[15px] tabular-nums">{m.price}</p>
+                    <p className={cn(
+                      "font-mono text-[13px] font-semibold tabular-nums",
+                      m.change >= 0 ? "text-success" : "text-destructive",
+                    )}>
+                      {m.change >= 0 ? "+" : ""}{m.change}%
+                    </p>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div>
+                    <p className="nx-meta mb-0.5">الاتجاه</p>
+                    <p className={cn("text-[13px] font-semibold flex items-center justify-center gap-1", T.cls)}>
+                      <T.icon className="w-3.5 h-3.5" />{m.trend}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="nx-meta mb-0.5">RSI</p>
+                    <p className={cn(
+                      "font-mono text-[13px] font-semibold tabular-nums",
+                      m.rsi >= 70 ? "text-destructive" : m.rsi <= 30 ? "text-success" : "text-foreground",
+                    )}>{m.rsi}</p>
+                  </div>
+                  <div>
+                    <p className="nx-meta mb-0.5">دعم</p>
+                    <p className="font-mono text-[13px] font-semibold tabular-nums nx-ltr text-success">{m.support}</p>
+                  </div>
+                  <div>
+                    <p className="nx-meta mb-0.5">مقاومة</p>
+                    <p className="font-mono text-[13px] font-semibold tabular-nums nx-ltr text-destructive">{m.resistance}</p>
+                  </div>
+                </div>
+
+                <p className="nx-meta">
+                  يبعد عن الدعم {m.distanceToSupport}% · عن المقاومة {m.distanceToResistance}%
+                </p>
+
+                {m.note && <p className="nx-body text-muted-foreground leading-relaxed">{m.note}</p>}
+
+                <span className="nx-btn-text">فتح التحليل الكامل <ChevronLeft className="w-4 h-4" /></span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="nx-page">
+      <header className="space-y-1">
+        <h1 className="nx-section">الإحاطة اليومية الحية</h1>
+        <p className="nx-meta">
+          {brief?.generatedAt
+            ? `آخر تحديث ${new Date(brief.generatedAt).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })} — بيانات حقيقية من الكريبتو والفوركس`
+            : "اتجاهات السوق ومستويات الدعم والمقاومة من بيانات حية"}
+        </p>
+      </header>
+
+      {loading && (
+        <div className="nx-card py-10 text-center space-y-2">
+          <Loader2 className="w-7 h-7 mx-auto text-primary animate-spin" />
+          <p className="nx-body text-muted-foreground">جارٍ قراءة السوق وحساب المستويات...</p>
+        </div>
+      )}
+
+      {!loading && brief && (
+        <>
+          {brief.marketOverview && (
+            <section className="nx-card space-y-2">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-primary" />
+                <h2 className="nx-card-title">حالة السوق الآن</h2>
+              </div>
+              <p className="nx-body text-muted-foreground leading-relaxed">{brief.marketOverview}</p>
+            </section>
+          )}
+
+          {(brief.sentiment?.crypto || brief.sentiment?.forex) && (
+            <section className="nx-card space-y-3">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <h2 className="nx-card-title">ميل السوق</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { label: "كريبتو", data: brief.sentiment?.crypto },
+                  { label: "فوركس", data: brief.sentiment?.forex },
+                ].map((s) => s.data && (
+                  <div key={s.label} className="rounded-xl border border-border/70 bg-secondary/30 p-3 text-center">
+                    <p className="nx-meta">{s.label}</p>
+                    <p className={cn("font-mono text-xl font-bold tabular-nums", sentimentColor(s.data.score))}>
+                      {s.data.score}%
+                    </p>
+                    <p className="nx-meta">{s.data.label}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="nx-meta">نسبة الأصول ذات الاتجاه الصاعد ضمن العينة المحسوبة.</p>
+            </section>
+          )}
+
+          {renderGroup("الكريبتو", crypto)}
+          {renderGroup("الفوركس", forex)}
+
+          {brief.riskAlerts && brief.riskAlerts.length > 0 && (
+            <section className="nx-card space-y-2.5">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-warning" />
+                <h2 className="nx-card-title">تنبيهات المخاطر</h2>
+              </div>
+              {brief.riskAlerts.map((r, i) => (
+                <p key={i} className={cn(
+                  "nx-body leading-relaxed",
+                  r.severity === "high" ? "text-destructive" : "text-muted-foreground",
+                )}>• {r.alert}</p>
               ))}
-            </div>
-          </motion.div>
-        )}
+            </section>
+          )}
 
-        {loading && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="rounded-xl p-10 text-center border border-accent/10 bg-accent/3">
-              <Loader2 className="w-8 h-8 mx-auto mb-3 text-accent animate-spin" />
-              <h3 className="text-sm font-bold font-mono mb-1">جارٍ إعداد الإحاطة...</h3>
-              <p className="text-[13px] text-muted-foreground font-mono">
-                تحليل مؤسسي للأسواق العالمية والتدفقات المالية
-              </p>
-            </div>
-          </motion.div>
-        )}
-
-        {brief && !loading && (
-          <motion.div
-            key="brief"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            {/* Date + Greeting */}
-            <div className="rounded-xl p-3 border border-accent/10 bg-accent/3">
-              <p className="text-[13px] font-mono text-muted-foreground mb-0.5">{brief.date}</p>
-              <p className="text-[13px] font-mono font-bold">{brief.greeting}</p>
-            </div>
-
-            {/* Market Overview */}
-            <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-              <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
-                <BarChart3 className="w-3 h-3" />
-                البيئة السوقية
-              </h3>
-              <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{brief.marketOverview}</p>
-            </div>
-
-            {/* Institutional Sentiment */}
-            {brief.sentiment && (
-              <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
-                  <Activity className="w-3 h-3" />
-                  المعنويات المؤسسية
-                </h3>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {[
-                    { key: "crypto", label: "أصول رقمية", data: brief.sentiment.crypto },
-                    { key: "forex", label: "عملات", data: brief.sentiment.forex },
-                    { key: "commodities", label: "سلع", data: brief.sentiment.commodities },
-                  ].map((s) => s.data && (
-                    <div key={s.key} className="bg-secondary/40 rounded-lg p-2 text-center border border-border/10">
-                      <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider">{s.label}</p>
-                      <p className={cn("text-base font-bold font-mono", sentimentColor(s.data.score))}>{s.data.score}</p>
-                      <p className="text-[13px] font-mono text-muted-foreground">{s.data.label}</p>
-                    </div>
-                  ))}
-                </div>
+          {brief.dailyTip && (
+            <section className="nx-card space-y-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-primary" />
+                <h2 className="nx-card-title">انضباط اليوم</h2>
               </div>
-            )}
+              <p className="nx-body text-muted-foreground leading-relaxed">{brief.dailyTip}</p>
+            </section>
+          )}
 
-            {/* Key Events */}
-            {brief.keyEvents && brief.keyEvents.length > 0 && (
-              <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
-                  <Clock className="w-3 h-3" />
-                  أحداث اقتصادية مؤثرة
-                </h3>
-                <div className="space-y-1.5">
-                  {brief.keyEvents.map((ev, i) => (
-                    <div key={i} className="flex items-start gap-2 bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/5">
-                      <span className={cn("text-[13px] font-mono font-bold px-1.5 py-0.5 rounded-lg border shrink-0 mt-0.5", impactColor(ev.impact))}>
-                        {ev.impact === "high" ? "عالي" : ev.impact === "medium" ? "متوسط" : "منخفض"}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-mono font-medium">{ev.event}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[13px] font-mono text-muted-foreground">{ev.time}</span>
-                          <div className="flex gap-1">
-                            {ev.assets?.map((a, ai) => (
-                              <span key={ai} className="text-[13px] font-mono bg-secondary px-1 py-0.5 rounded-lg border border-border/10">{a}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <button onClick={fetchBrief} className="nx-btn-secondary w-full flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4" /> تحديث البيانات
+          </button>
 
-            {/* Positioning Opportunities */}
-            {brief.topOpportunities && brief.topOpportunities.length > 0 && (
-              <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
-                  <Crosshair className="w-3 h-3" />
-                  فرص التمركز
-                </h3>
-                <div className="space-y-1.5">
-                  {brief.topOpportunities.map((opp, i) => (
-                    <div key={i} className="flex items-center justify-between bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/5">
-                      <div className="flex items-center gap-2">
-                        {opp.direction === "شراء" ? (
-                          <ArrowUpRight className="w-3.5 h-3.5 text-success shrink-0" />
-                        ) : (
-                          <ArrowDownRight className="w-3.5 h-3.5 text-destructive shrink-0" />
-                        )}
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[13px] font-mono font-bold">{opp.pair}</span>
-                            <span className={cn(
-                              "text-[13px] font-mono font-bold px-1.5 py-0.5 rounded-lg border",
-                              opp.direction === "شراء" ? "bg-success/10 text-success border-success/20" : "bg-destructive/10 text-destructive border-destructive/20"
-                            )}>
-                              {opp.direction}
-                            </span>
-                          </div>
-                          <p className="text-[13px] font-mono text-muted-foreground">{opp.reason}</p>
-                        </div>
-                      </div>
-                      <span className="text-[13px] font-mono font-bold text-accent">{opp.confidence}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Risk Alerts */}
-            {brief.riskAlerts && brief.riskAlerts.length > 0 && (
-              <div className="rounded-xl p-3 border border-destructive/10 bg-destructive/3">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-destructive">
-                  <Shield className="w-3 h-3" />
-                  تحذيرات المخاطر
-                </h3>
-                <div className="space-y-1.5">
-                  {brief.riskAlerts.map((alert, i) => (
-                    <div key={i} className="flex items-start gap-2 bg-destructive/5 rounded-lg px-2.5 py-2 border border-destructive/10">
-                      <AlertTriangle className={cn("w-3 h-3 shrink-0 mt-0.5", alert.severity === "high" ? "text-destructive" : "text-warning")} />
-                      <p className="text-[13px] font-mono">{alert.alert}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Focus Assets */}
-            {brief.focusAssets && brief.focusAssets.length > 0 && (
-              <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
-                  <Eye className="w-3 h-3" />
-                  أصول تحت المراقبة
-                </h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {brief.focusAssets.map((asset, i) => (
-                    <span key={i} className="text-[13px] font-mono bg-accent/10 text-accent px-2 py-1 rounded-lg border border-accent/10">
-                      {asset}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Daily Tip */}
-            {brief.dailyTip && (
-              <div className="rounded-xl p-3 border border-accent/10 bg-accent/3">
-                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
-                  <Lightbulb className="w-3 h-3" />
-                  توصية الجلسة
-                </h3>
-                <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{brief.dailyTip}</p>
-              </div>
-            )}
-
-            {/* Regenerate */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={fetchBrief}
-              className="w-full rounded-xl p-3 flex items-center justify-center gap-2 border border-accent/10 hover:border-accent/20 transition-all bg-card/50"
-            >
-              <RefreshCw className="w-4 h-4 text-accent" />
-              <span className="font-mono text-xs font-medium">إعادة توليد الإحاطة</span>
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="flex items-start gap-2 px-1">
+            <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="nx-meta leading-relaxed">
+              المستويات محسوبة من بيانات الأسعار الحقيقية لأغراض تعليمية فقط، وليست توصية استثمارية.
+            </p>
+          </div>
+        </>
+      )}
     </motion.div>
   );
 };
