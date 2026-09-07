@@ -78,7 +78,7 @@ const OnboardingSlides = ({ onComplete }: Props) => {
             <Icon className="w-9 h-9" style={{ color: `hsl(${slide.color})` }} />
           </motion.div>
 
-          <p className="text-[10px] font-mono text-muted-foreground mb-1 tracking-widest">
+          <p className="text-[13px] font-mono text-muted-foreground mb-1 tracking-widest">
             {current + 1} / {slides.length}
           </p>
           <h2 className="text-lg font-display font-bold mb-2">{slide.title}</h2>
@@ -116,7 +116,7 @@ const OnboardingSlides = ({ onComplete }: Props) => {
         </motion.button>
       </div>
 
-      <button onClick={onComplete} className="mt-3 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+      <button onClick={onComplete} className="mt-3 text-[13px] font-mono text-muted-foreground hover:text-foreground transition-colors">
         تخطي
       </button>
     </div>

@@ -67,29 +67,25 @@ const AICoachTip = () => {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -6, scale: 0.98 }}
         transition={{ duration: 0.3 }}
-        className="rounded-xl px-3 py-2.5 flex items-center gap-2.5 relative overflow-hidden backdrop-blur-sm"
-        style={{
-          background: "linear-gradient(135deg, hsla(190, 100%, 50%, 0.04), hsla(43, 100%, 50%, 0.03))",
-          border: "1px solid hsla(190, 100%, 50%, 0.08)",
-        }}
+        className="nx-card-flat flex items-center gap-3"
       >
-        <div className="w-6 h-6 rounded-lg bg-accent/8 border border-accent/15 flex items-center justify-center shrink-0">
-          <Brain className="w-3 h-3 text-accent" />
+        <div className="w-9 h-9 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+          <Brain className="w-4 h-4 text-accent" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 mb-0.5">
-            <Sparkles className="w-2.5 h-2.5 text-primary" />
-            <span className="text-[8px] font-mono uppercase tracking-wider text-accent font-bold">AI Coach</span>
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[13px] font-semibold text-accent">مدرّب الذكاء الاصطناعي</span>
           </div>
-          <p className="text-[10px] font-mono text-foreground/85 leading-relaxed">{tip}</p>
+          <p className="nx-body text-[14px] leading-relaxed">{tip}</p>
         </div>
 
         <button
           onClick={() => setDismissed(true)}
-          className="p-0.5 rounded-md hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          className="nx-tap flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
-          <X className="w-3 h-3" />
+          <X className="w-4 h-4" />
         </button>
       </motion.div>
     </AnimatePresence>

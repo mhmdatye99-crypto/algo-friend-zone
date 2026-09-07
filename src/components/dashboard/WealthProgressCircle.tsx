@@ -8,23 +8,18 @@ const WealthProgressCircle = () => {
 
   if (!goal || !stats) {
     return (
-      <div className="rounded-lg p-4 border border-border/15 bg-card/50 flex flex-col items-center justify-center gap-2 min-h-[180px]">
-        <Target className="w-5 h-5 text-muted-foreground/30" />
-        <p className="text-[9px] font-mono text-muted-foreground/50">لا يوجد هدف مالي نشط</p>
+      <div className="nx-card flex flex-col items-center justify-center gap-2 min-h-[180px]">
+        <Target className="w-6 h-6 text-muted-foreground" />
+        <p className="nx-meta">لا يوجد هدف مالي نشط</p>
       </div>
     );
   }
 
   const progress = Math.min(100, Math.max(0, stats.progress));
   const radius = 62;
-  const strokeWidth = 4;
+  const strokeWidth = 6;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
-
-  // Watch tick marks (60 like a real watch)
-  const ticks = Array.from({ length: 60 }, (_, i) => i);
-  const majorTicks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-  const tickRadius = 72;
   const center = 80;
 
   const progressColor = progress >= 75 ? "hsl(var(--success))" : progress >= 40 ? "hsl(var(--primary))" : "hsl(var(--warning))";
@@ -35,51 +30,22 @@ const WealthProgressCircle = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="rounded-lg p-4 border border-border/15 bg-card/50"
+      className="nx-card"
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[8px] font-mono text-muted-foreground/60 uppercase tracking-wider">تقدم الثروة</span>
-        <span className="text-[8px] font-mono text-muted-foreground/40">{stats.title}</span>
+        <span className="nx-label">تقدم الثروة</span>
+        <span className="nx-meta">{stats.title}</span>
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Watch Face */}
-        <div className="relative shrink-0" style={{ width: 160, height: 160 }}>
+        <div className="relative shrink-0" style={{ width: 148, height: 148 }}>
           <svg viewBox="0 0 160 160" className="w-full h-full">
-            {/* Outer bezel ring */}
-            <circle cx={center} cy={center} r="76" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.3" />
-
-            {/* Tick marks */}
-            {ticks.map((i) => {
-              const angle = (i / 60) * 360 - 90;
-              const rad = (angle * Math.PI) / 180;
-              const isMajor = majorTicks.includes(i);
-              const outerR = tickRadius;
-              const innerR = isMajor ? tickRadius - 6 : tickRadius - 3;
-              return (
-                <line
-                  key={i}
-                  x1={center + Math.cos(rad) * innerR}
-                  y1={center + Math.sin(rad) * innerR}
-                  x2={center + Math.cos(rad) * outerR}
-                  y2={center + Math.sin(rad) * outerR}
-                  stroke={isMajor ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
-                  strokeWidth={isMajor ? "1" : "0.5"}
-                  opacity={isMajor ? 0.25 : 0.12}
-                />
-              );
-            })}
-
-            {/* Background track */}
             <circle
               cx={center} cy={center} r={radius}
               fill="none"
-              stroke="hsl(var(--muted))"
+              stroke="hsl(var(--secondary))"
               strokeWidth={strokeWidth}
-              opacity="0.1"
             />
-
-            {/* Progress arc */}
             <motion.circle
               cx={center} cy={center} r={radius}
               fill="none"
@@ -89,75 +55,51 @@ const WealthProgressCircle = () => {
               strokeDasharray={circumference}
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset }}
-              transition={{ duration: 1.4, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
               transform={`rotate(-90 ${center} ${center})`}
             />
-
-            {/* Glow effect on progress end */}
-            <motion.circle
-              cx={center} cy={center} r={radius}
-              fill="none"
-              stroke={progressColor}
-              strokeWidth={strokeWidth + 4}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset }}
-              transition={{ duration: 1.4, ease: [0.23, 1, 0.32, 1] }}
-              transform={`rotate(-90 ${center} ${center})`}
-              opacity="0.1"
-              filter="blur(4px)"
-            />
-
-            {/* Inner circle border */}
-            <circle cx={center} cy={center} r="44" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.15" />
-
-            {/* Center dot */}
-            <circle cx={center} cy={center} r="2" fill={progressColor} opacity="0.6" />
           </svg>
 
-          {/* Center content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <motion.span
-              className={cn("text-2xl font-mono font-bold tabular-nums", progressColorClass)}
-              initial={{ opacity: 0, scale: 0.8 }}
+              className={cn("nx-num-lg text-[26px]", progressColorClass)}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
             >
               {Math.round(progress)}%
             </motion.span>
-            <span className="text-[7px] font-mono text-muted-foreground/40 mt-0.5">PROGRESS</span>
+            <span className="nx-meta text-[12px] mt-0.5">التقدم</span>
           </div>
         </div>
 
-        {/* Stats panel */}
-        <div className="flex-1 space-y-2.5 min-w-0">
+        <div className="flex-1 space-y-3 min-w-0">
           <div>
-            <p className="text-[7px] font-mono text-muted-foreground/40 uppercase tracking-wider">الرصيد الحالي</p>
-            <p className={cn("text-[15px] font-mono font-bold tabular-nums", progressColorClass)}>
+            <p className="nx-meta">الرصيد الحالي</p>
+            <p className={cn("nx-num nx-ltr text-[17px]", progressColorClass)}>
               ${stats.effectiveBalance.toLocaleString()}
             </p>
           </div>
-          <div className="h-px bg-border/10" />
+          <div className="h-px bg-border" />
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <p className="text-[7px] font-mono text-muted-foreground/40">الهدف</p>
-              <p className="text-[10px] font-mono font-semibold tabular-nums">${goal.target_goal.toLocaleString()}</p>
+              <p className="nx-meta">الهدف</p>
+              <p className="nx-num nx-ltr text-[14px]">${goal.target_goal.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-[7px] font-mono text-muted-foreground/40">المتبقي</p>
-              <p className="text-[10px] font-mono font-semibold tabular-nums text-warning">${stats.remaining.toLocaleString()}</p>
+              <p className="nx-meta">المتبقي</p>
+              <p className="nx-num nx-ltr text-[14px] text-warning">${stats.remaining.toLocaleString()}</p>
             </div>
           </div>
-          <div className="h-px bg-border/10" />
+          <div className="h-px bg-border" />
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <p className="text-[7px] font-mono text-muted-foreground/40">المستوى</p>
-              <p className="text-[9px] font-mono font-semibold">{stats.title}</p>
+              <p className="nx-meta">المستوى</p>
+              <p className="text-[13px] font-semibold">{stats.title}</p>
             </div>
             <div>
-              <p className="text-[7px] font-mono text-muted-foreground/40">أيام متبقية</p>
-              <p className="text-[10px] font-mono font-semibold tabular-nums">{stats.daysRemaining || "∞"}</p>
+              <p className="nx-meta">أيام متبقية</p>
+              <p className="nx-num nx-ltr text-[14px]">{stats.daysRemaining || "∞"}</p>
             </div>
           </div>
         </div>

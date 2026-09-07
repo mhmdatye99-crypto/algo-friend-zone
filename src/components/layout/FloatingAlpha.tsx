@@ -133,7 +133,7 @@ const FloatingAlpha = () => {
               boxShadow: "0 4px 20px hsla(190, 100%, 50%, 0.35), 0 0 40px hsla(190, 100%, 50%, 0.15)",
             }}
           >
-            <Brain className="w-5 h-5 text-white" />
+            <Brain className="w-5 h-5 text-accent-foreground" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -164,7 +164,7 @@ const FloatingAlpha = () => {
                   </div>
                   <div>
                      <p className="text-sm font-display font-bold text-foreground tracking-wide">NEXUS ORACLE</p>
-                     <p className="text-[10px] font-mono text-muted-foreground">المستشار العصبي — اسأل عن أي أصل أو استراتيجية</p>
+                     <p className="text-[13px] font-mono text-muted-foreground">المستشار العصبي — اسأل عن أي أصل أو استراتيجية</p>
                   </div>
                 </div>
                 <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors">
@@ -180,10 +180,10 @@ const FloatingAlpha = () => {
                       <Brain className="w-7 h-7 text-accent" />
                     </div>
                      <p className="text-sm font-display font-bold text-foreground tracking-wide">NEXUS ORACLE</p>
-                     <p className="text-[11px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
+                     <p className="text-[13px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
                     <div className="flex flex-col gap-2 mt-4">
                       {["ما أفضل فرصة تداول اليوم؟", "حلل لي البيتكوين الآن", "اقترح استراتيجية منخفضة المخاطر"].map(q => (
-                        <button key={q} onClick={() => send(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-[11px] font-mono text-foreground hover:bg-secondary/80 transition-all text-right">
+                        <button key={q} onClick={() => send(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-[13px] font-mono text-foreground hover:bg-secondary/80 transition-all text-right">
                           <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
                           {q}
                         </button>
@@ -195,7 +195,7 @@ const FloatingAlpha = () => {
                   <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed font-mono",
+                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed font-mono",
                         msg.role === "user"
                           ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                           : "rounded-bl-md text-foreground"
@@ -231,7 +231,7 @@ const FloatingAlpha = () => {
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && send(input)}
                     placeholder="اسأل Nexus Oracle..."
-                    className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
+                    className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
                     dir="rtl"
                   />
                   <button

@@ -14,12 +14,12 @@ const LiveTickerBar = () => {
     .slice(0, 12);
 
   return (
-    <div className="overflow-hidden relative border-b border-border/10">
-      <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+    <div className="overflow-hidden relative border-b border-border bg-card/50">
+      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
       <div
         ref={scrollRef}
-        className="flex gap-5 overflow-x-auto scrollbar-hide py-1 px-2 animate-scroll"
+        className="flex gap-5 overflow-x-auto scrollbar-hide py-2 px-3 animate-scroll"
         style={{ animationDuration: "45s" }}
       >
         {[...topMovers, ...topMovers].map((asset, i) => (
@@ -28,14 +28,14 @@ const LiveTickerBar = () => {
             onClick={() => navigate(`/asset/${encodeURIComponent(asset.pair)}`)}
             className="flex items-center gap-1.5 shrink-0"
           >
-            <span className="text-[10px] font-mono font-medium text-foreground/50">
+            <span className="text-[13px] font-medium text-foreground/80">
               {asset.pair.replace("/USDT", "")}
             </span>
-            <span className="text-[10px] font-mono font-semibold tabular-nums text-foreground/70">
+            <span className="font-mono text-[13px] font-semibold tabular-nums text-foreground">
               {formatPrice(asset.price)}
             </span>
             <span className={cn(
-              "text-[9px] font-mono font-semibold tabular-nums",
+              "font-mono text-[13px] font-semibold tabular-nums",
               asset.up ? "text-success" : "text-destructive"
             )}>
               {asset.up ? "+" : ""}{asset.change}%

@@ -16,7 +16,7 @@ const LearningPage = () => {
   return (
     <div className="max-w-lg mx-auto">
       <div className="px-4 pt-3 pb-2">
-        <div className="flex gap-1 bg-secondary/30 rounded p-0.5 border border-border/10">
+        <div className="flex gap-1 bg-secondary/30 rounded-lg p-0.5 border border-border/10">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -24,7 +24,7 @@ const LearningPage = () => {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded text-[10px] font-mono font-bold transition-all",
+                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[13px] font-mono font-bold transition-all",
                   activeTab === tab.key
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"

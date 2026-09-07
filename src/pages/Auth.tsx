@@ -110,7 +110,7 @@ const Auth = () => {
 
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border/20" />
-              <span className="text-[10px] font-mono text-muted-foreground">أو بالبريد الإلكتروني</span>
+              <span className="text-[13px] font-mono text-muted-foreground">أو بالبريد الإلكتروني</span>
               <div className="flex-1 h-px bg-border/20" />
             </div>
 

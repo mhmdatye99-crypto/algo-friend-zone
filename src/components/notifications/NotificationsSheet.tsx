@@ -48,7 +48,7 @@ const NotificationsSheet = ({ open, onClose }: Props) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
@@ -63,9 +63,9 @@ const NotificationsSheet = ({ open, onClose }: Props) => {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-primary" />
-              <span className="text-[12px] font-mono font-bold">الإشعارات</span>
+              <span className="text-[13px] font-mono font-bold">الإشعارات</span>
               {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-destructive text-[9px] font-mono font-bold text-white">
+                <span className="px-1.5 py-0.5 rounded-full bg-destructive text-[13px] font-mono font-bold text-destructive-foreground">
                   {unreadCount}
                 </span>
               )}
@@ -100,7 +100,7 @@ const NotificationsSheet = ({ open, onClose }: Props) => {
             {notifications.length === 0 ? (
               <div className="text-center py-16 space-y-2">
                 <Bell className="w-8 h-8 text-muted-foreground/40 mx-auto" />
-                <p className="text-[11px] font-mono text-muted-foreground">
+                <p className="text-[13px] font-mono text-muted-foreground">
                   لا توجد إشعارات بعد
                 </p>
               </div>
@@ -119,12 +119,12 @@ const NotificationsSheet = ({ open, onClose }: Props) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn(
-                      "text-[11px] font-mono leading-relaxed",
+                      "text-[13px] font-mono leading-relaxed",
                       n.is_read ? "text-muted-foreground" : "text-foreground font-medium"
                     )}>
                       {n.message}
                     </p>
-                    <span className="text-[9px] font-mono text-muted-foreground/60">
+                    <span className="text-[13px] font-mono text-muted-foreground/60">
                       {timeAgo(n.created_at)}
                     </span>
                   </div>

@@ -228,7 +228,7 @@ const Academy = () => {
       <motion.div className="px-4 pt-6 pb-28 max-w-lg mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <button
           onClick={() => { setSelectedLesson(null); setLessonData(null); }}
-          className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono mb-3 hover:text-primary transition-colors"
+          className="flex items-center gap-1.5 text-[13px] text-muted-foreground font-mono mb-3 hover:text-primary transition-colors"
         >
           <ChevronRight className="w-3 h-3" />
           العودة
@@ -245,7 +245,7 @@ const Academy = () => {
           <div className="rounded-lg border border-border/20 bg-secondary/30 p-6 text-center">
             <XCircle className="w-8 h-8 mx-auto mb-3 text-destructive" />
             <p className="text-xs text-destructive font-mono mb-3">{lessonData.error}</p>
-            <button onClick={() => loadLesson(selectedCourse, selectedLesson)} className="text-[10px] font-mono text-primary flex items-center gap-1 mx-auto hover:underline">
+            <button onClick={() => loadLesson(selectedCourse, selectedLesson)} className="text-[13px] font-mono text-primary flex items-center gap-1 mx-auto hover:underline">
               <RotateCcw className="w-3 h-3" /> إعادة المحاولة
             </button>
           </div>
@@ -253,11 +253,11 @@ const Academy = () => {
           <div className="space-y-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[8px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">الدرس {selectedLesson + 1}</span>
-                <span className="text-[8px] font-mono text-muted-foreground">{course.title}</span>
+                <span className="text-[13px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded-lg">الدرس {selectedLesson + 1}</span>
+                <span className="text-[13px] font-mono text-muted-foreground">{course.title}</span>
               </div>
               <h1 className="text-sm font-bold">{lessonData.title}</h1>
-              <p className="text-[10px] text-muted-foreground font-mono mt-1">{lessonData.introduction}</p>
+              <p className="text-[13px] text-muted-foreground font-mono mt-1">{lessonData.introduction}</p>
             </div>
 
             {/* Tabs */}
@@ -268,7 +268,7 @@ const Academy = () => {
                 { key: "quiz" as const, label: "اختبار", icon: GraduationCap },
               ].map((tab) => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  className={cn("flex-1 flex items-center justify-center gap-1 py-2 rounded text-[10px] font-mono transition-all",
+                  className={cn("flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[13px] font-mono transition-all",
                     activeTab === tab.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -283,19 +283,19 @@ const Academy = () => {
                   {lessonData.sections.map((section, i) => (
                     <div key={i} className="rounded-lg border border-border/15 bg-secondary/20 p-4">
                       <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-[9px] font-mono shrink-0">{i + 1}</span>
+                        <span className="w-5 h-5 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-[13px] font-mono shrink-0">{i + 1}</span>
                         {section.heading}
                       </h3>
-                      <p className="text-[11px] leading-relaxed text-muted-foreground whitespace-pre-line">{section.content}</p>
+                      <p className="text-[13px] leading-relaxed text-muted-foreground whitespace-pre-line">{section.content}</p>
                       <div className="mt-3 flex items-start gap-1.5 bg-primary/5 rounded-lg p-2 border border-primary/10">
                         <Lightbulb className="w-3 h-3 text-primary mt-0.5 shrink-0" />
-                        <p className="text-[9px] font-mono text-primary">{section.keyPoint}</p>
+                        <p className="text-[13px] font-mono text-primary">{section.keyPoint}</p>
                       </div>
                     </div>
                   ))}
                   <div className="rounded-lg border border-primary/15 bg-primary/5 p-4">
-                    <h3 className="text-[11px] font-bold mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" />ملخص</h3>
-                    <p className="text-[10px] text-muted-foreground font-mono leading-relaxed whitespace-pre-line">{lessonData.summary}</p>
+                    <h3 className="text-[13px] font-bold mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" />ملخص</h3>
+                    <p className="text-[13px] text-muted-foreground font-mono leading-relaxed whitespace-pre-line">{lessonData.summary}</p>
                   </div>
                 </motion.div>
               )}
@@ -303,19 +303,19 @@ const Academy = () => {
                 <motion.div key="example" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="space-y-3">
                   <div className="rounded-lg border border-border/15 bg-secondary/20 p-4">
                     <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5"><Target className="w-3.5 h-3.5 text-accent" />السيناريو</h3>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.scenario}</p>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.scenario}</p>
                   </div>
                   <div className="rounded-lg border border-border/15 bg-secondary/20 p-4">
                     <h3 className="text-xs font-bold mb-2">التحليل خطوة بخطوة</h3>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.analysis}</p>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.analysis}</p>
                   </div>
                   <div className="rounded-lg border border-primary/15 bg-primary/5 p-4">
                     <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-primary" />النتيجة</h3>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.outcome}</p>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-line">{lessonData.practicalExample.outcome}</p>
                   </div>
                   <div className="rounded-lg border border-border/15 bg-secondary/20 p-4">
                     <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5"><ArrowRight className="w-3.5 h-3.5 text-primary" />الخطوات التالية</h3>
-                    <p className="text-[10px] text-muted-foreground font-mono leading-relaxed">{lessonData.nextSteps}</p>
+                    <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{lessonData.nextSteps}</p>
                   </div>
                 </motion.div>
               )}
@@ -323,7 +323,7 @@ const Academy = () => {
                 <motion.div key="quiz" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="space-y-3">
                   {lessonData.quiz.map((q, qi) => (
                     <div key={qi} className="rounded-lg border border-border/15 bg-secondary/20 p-4">
-                      <p className="text-[11px] font-semibold mb-2"><span className="text-primary font-mono ml-1">س{qi + 1}.</span>{q.question}</p>
+                      <p className="text-[13px] font-semibold mb-2"><span className="text-primary font-mono ml-1">س{qi + 1}.</span>{q.question}</p>
                       <div className="space-y-1.5">
                         {q.options.map((opt, oi) => {
                           const isSelected = quizAnswers[qi] === oi;
@@ -337,24 +337,24 @@ const Academy = () => {
                           }
                           return (
                             <button key={oi} onClick={() => handleQuizAnswer(qi, oi)}
-                              className={cn("w-full text-right text-[10px] font-mono p-2.5 rounded border transition-all", optClass)}
+                              className={cn("w-full text-right text-[13px] font-mono p-2.5 rounded-lg border transition-all", optClass)}
                             >{opt}</button>
                           );
                         })}
                       </div>
                       {quizSubmitted && (
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[9px] text-muted-foreground font-mono mt-2 bg-secondary/20 rounded p-2">{q.explanation}</motion.p>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[13px] text-muted-foreground font-mono mt-2 bg-secondary/20 rounded-lg p-2">{q.explanation}</motion.p>
                       )}
                     </div>
                   ))}
                   {!quizSubmitted ? (
                     <button onClick={() => setQuizSubmitted(true)} disabled={Object.keys(quizAnswers).length < (lessonData.quiz?.length || 0)}
-                      className="w-full py-3 rounded bg-primary text-primary-foreground text-xs font-mono font-bold disabled:opacity-40 transition-opacity"
+                      className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-xs font-mono font-bold disabled:opacity-40 transition-opacity"
                     >تحقق من إجاباتك</button>
                   ) : (
                     <div className="rounded-lg border border-border/15 bg-secondary/20 p-4 text-center">
                       <p className="text-lg font-bold font-mono text-primary">{quizScore}/{lessonData.quiz.length}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">
+                      <p className="text-[13px] text-muted-foreground font-mono">
                         {quizScore === lessonData.quiz.length ? "ممتاز! أتقنت هذا الدرس 🏆" : quizScore >= Math.ceil(lessonData.quiz.length / 2) ? "أداء جيد — راجع النقاط المذكورة" : "أعد قراءة المحتوى وحاول مرة أخرى"}
                       </p>
                     </div>
@@ -373,7 +373,7 @@ const Academy = () => {
     const course = courses[selectedCourse];
     return (
       <motion.div className="px-4 pt-6 pb-28 max-w-lg mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <button onClick={() => setSelectedCourse(null)} className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono mb-3 hover:text-primary transition-colors">
+        <button onClick={() => setSelectedCourse(null)} className="flex items-center gap-1.5 text-[13px] text-muted-foreground font-mono mb-3 hover:text-primary transition-colors">
           <ChevronRight className="w-3 h-3" />العودة
         </button>
         <div className="flex items-center gap-3 mb-4">
@@ -382,17 +382,17 @@ const Academy = () => {
           </div>
           <div>
             <h1 className="text-sm font-bold">{course.title}</h1>
-            <p className="text-[9px] text-muted-foreground font-mono">{course.lessons} وحدة · {course.level}</p>
+            <p className="text-[13px] text-muted-foreground font-mono">{course.lessons} وحدة · {course.level}</p>
           </div>
         </div>
         <div className="space-y-1">
           {course.lessonTitles.map((title, i) => (
             <motion.button key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.025 }}
               onClick={() => loadLesson(selectedCourse, i)}
-              className="w-full rounded border border-border/10 bg-secondary/15 p-3 flex items-center gap-3 hover:bg-secondary/30 hover:border-primary/15 transition-all text-right"
+              className="w-full rounded-lg border border-border/10 bg-secondary/15 p-3 flex items-center gap-3 hover:bg-secondary/30 hover:border-primary/15 transition-all text-right"
             >
-              <span className="w-6 h-6 rounded bg-secondary/50 text-[10px] font-mono text-muted-foreground flex items-center justify-center shrink-0">{i + 1}</span>
-              <span className="text-[11px] font-mono flex-1">{title}</span>
+              <span className="w-6 h-6 rounded-lg bg-secondary/50 text-[13px] font-mono text-muted-foreground flex items-center justify-center shrink-0">{i + 1}</span>
+              <span className="text-[13px] font-mono flex-1">{title}</span>
               <ChevronLeft className="w-3 h-3 text-muted-foreground shrink-0" />
             </motion.button>
           ))}
@@ -407,17 +407,17 @@ const Academy = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-[9px] uppercase tracking-[0.25em] text-accent font-mono font-bold">GROWTH JOURNEY</p>
+          <p className="text-[13px] uppercase tracking-[0.25em] text-accent font-mono font-bold">GROWTH JOURNEY</p>
           <h1 className="text-base font-bold mt-0.5">مسار النمو</h1>
         </div>
-        <div className="flex gap-1 bg-secondary/30 rounded p-0.5 border border-border/10">
+        <div className="flex gap-1 bg-secondary/30 rounded-lg p-0.5 border border-border/10">
           <button onClick={() => setViewMode("journey")}
-            className={cn("px-2.5 py-1.5 rounded text-[9px] font-mono transition-all",
+            className={cn("px-2.5 py-1.5 rounded-lg text-[13px] font-mono transition-all",
               viewMode === "journey" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           ><Route className="w-3 h-3 inline mr-1" />تشخيص</button>
           <button onClick={() => setViewMode("catalog")}
-            className={cn("px-2.5 py-1.5 rounded text-[9px] font-mono transition-all",
+            className={cn("px-2.5 py-1.5 rounded-lg text-[13px] font-mono transition-all",
               viewMode === "catalog" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           ><BookOpen className="w-3 h-3 inline mr-1" />المنهج</button>
@@ -434,14 +434,14 @@ const Academy = () => {
                   <Flame className="w-4 h-4 text-accent" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">مؤشر النمو</p>
-                  <p className="text-lg font-bold font-mono text-accent">{growthScore}<span className="text-[10px] text-muted-foreground">/100</span></p>
+                  <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider">مؤشر النمو</p>
+                  <p className="text-lg font-bold font-mono text-accent">{growthScore}<span className="text-[13px] text-muted-foreground">/100</span></p>
                 </div>
               </div>
               {perf && perf.closedTrades > 0 && (
                 <div className="text-left">
-                  <p className="text-[9px] font-mono text-muted-foreground">{perf.closedTrades} صفقة</p>
-                  <p className={cn("text-[11px] font-mono font-bold", perf.totalPnl >= 0 ? "text-success" : "text-destructive")}>
+                  <p className="text-[13px] font-mono text-muted-foreground">{perf.closedTrades} صفقة</p>
+                  <p className={cn("text-[13px] font-mono font-bold", perf.totalPnl >= 0 ? "text-success" : "text-destructive")}>
                     {perf.totalPnl >= 0 ? "+" : ""}{perf.totalPnl.toFixed(0)}$
                   </p>
                 </div>
@@ -449,8 +449,8 @@ const Academy = () => {
             </div>
             <Progress value={growthScore} className="h-1.5 bg-secondary/40" />
             <div className="flex justify-between mt-1.5">
-              <span className="text-[8px] font-mono text-muted-foreground">مبتدئ</span>
-              <span className="text-[8px] font-mono text-muted-foreground">محترف</span>
+              <span className="text-[13px] font-mono text-muted-foreground">مبتدئ</span>
+              <span className="text-[13px] font-mono text-muted-foreground">محترف</span>
             </div>
           </div>
 
@@ -458,7 +458,7 @@ const Academy = () => {
           {perfLoading ? (
             <div className="flex items-center justify-center py-10 gap-2">
               <Loader2 className="w-4 h-4 text-primary animate-spin" />
-              <span className="text-[10px] font-mono text-muted-foreground">جاري تحليل أدائك...</span>
+              <span className="text-[13px] font-mono text-muted-foreground">جاري تحليل أدائك...</span>
             </div>
           ) : diagnoses.length === 0 ? (
             <div className="rounded-lg border border-border/15 bg-secondary/15 p-6 text-center">
@@ -466,16 +466,16 @@ const Academy = () => {
                 <GraduationCap className="w-5 h-5 text-muted-foreground" />
               </div>
               <p className="text-xs font-bold mb-1">ابدأ التداول أولاً</p>
-              <p className="text-[10px] font-mono text-muted-foreground leading-relaxed">
+              <p className="text-[13px] font-mono text-muted-foreground leading-relaxed">
                 سجّل صفقاتك في دفتر التداول وسيُحلّل النظام أداءك ويقترح دروساً مخصصة لنقاط ضعفك
               </p>
-              <button onClick={() => setViewMode("catalog")} className="mt-3 text-[10px] font-mono text-primary hover:underline flex items-center gap-1 mx-auto">
+              <button onClick={() => setViewMode("catalog")} className="mt-3 text-[13px] font-mono text-primary hover:underline flex items-center gap-1 mx-auto">
                 <BookOpen className="w-3 h-3" /> أو تصفّح المنهج الكامل
               </button>
             </div>
           ) : (
             <>
-              <p className="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5">
+              <p className="text-[13px] font-mono text-muted-foreground flex items-center gap-1.5">
                 <Brain className="w-3 h-3 text-primary" />
                 تم تحليل <span className="text-foreground font-bold">{perf?.closedTrades}</span> صفقة — إليك خطة تطويرك المخصصة
               </p>
@@ -495,21 +495,21 @@ const Academy = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-[11px] font-bold">{d.title}</h3>
-                            <span className={cn("text-[7px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider", sev.color, sev.bg, "border", sev.border)}>{sev.badge}</span>
-                            {d.metric && <span className={cn("text-[10px] font-mono font-bold mr-auto", sev.color)}>{d.metric}</span>}
+                            <h3 className="text-[13px] font-bold">{d.title}</h3>
+                            <span className={cn("text-[13px] font-mono px-1.5 py-0.5 rounded-lg uppercase tracking-wider", sev.color, sev.bg, "border", sev.border)}>{sev.badge}</span>
+                            {d.metric && <span className={cn("text-[13px] font-mono font-bold mr-auto", sev.color)}>{d.metric}</span>}
                           </div>
-                          <p className="text-[10px] text-muted-foreground font-mono leading-relaxed">{d.description}</p>
+                          <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{d.description}</p>
 
                           {/* Recommended lessons */}
                           <div className="mt-3 space-y-1">
-                            <p className="text-[8px] font-mono text-muted-foreground uppercase tracking-wider mb-1">الدروس الموصى بها</p>
+                            <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider mb-1">الدروس الموصى بها</p>
                             {d.lessonIndices.map(li => (
                               <button key={li} onClick={() => { setSelectedCourse(d.courseId); loadLesson(d.courseId, li); }}
-                                className="w-full flex items-center gap-2 px-2.5 py-2 rounded border border-border/10 bg-background/40 hover:bg-secondary/30 hover:border-primary/15 transition-all text-right"
+                                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg border border-border/10 bg-background/40 hover:bg-secondary/30 hover:border-primary/15 transition-all text-right"
                               >
-                                <span className="w-5 h-5 rounded bg-secondary/50 text-[8px] font-mono text-muted-foreground flex items-center justify-center shrink-0">{li + 1}</span>
-                                <span className="text-[10px] font-mono flex-1">{course.lessonTitles[li]}</span>
+                                <span className="w-5 h-5 rounded-lg bg-secondary/50 text-[13px] font-mono text-muted-foreground flex items-center justify-center shrink-0">{li + 1}</span>
+                                <span className="text-[13px] font-mono flex-1">{course.lessonTitles[li]}</span>
                                 <ChevronLeft className="w-3 h-3 text-muted-foreground shrink-0" />
                               </button>
                             ))}
@@ -535,7 +535,7 @@ const Academy = () => {
               <div key={i} className="rounded-lg border border-border/15 bg-secondary/15 p-3 text-center">
                 <s.icon className="w-4 h-4 mx-auto mb-1 text-primary" />
                 <p className="text-sm font-bold font-mono">{s.value}</p>
-                <p className="text-[8px] text-muted-foreground font-mono uppercase tracking-wider">{s.label}</p>
+                <p className="text-[13px] text-muted-foreground font-mono uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </div>
@@ -550,11 +550,11 @@ const Academy = () => {
                   <course.icon className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-[11px] font-bold truncate">{course.title}</h4>
-                  <p className="text-[9px] text-muted-foreground font-mono mt-0.5">{course.description}</p>
+                  <h4 className="text-[13px] font-bold truncate">{course.title}</h4>
+                  <p className="text-[13px] text-muted-foreground font-mono mt-0.5">{course.description}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[8px] font-mono bg-secondary/50 px-1.5 py-0.5 rounded text-muted-foreground">{course.level}</span>
-                    <span className="text-[8px] font-mono text-muted-foreground">{course.lessons} درس</span>
+                    <span className="text-[13px] font-mono bg-secondary/50 px-1.5 py-0.5 rounded-lg text-muted-foreground">{course.level}</span>
+                    <span className="text-[13px] font-mono text-muted-foreground">{course.lessons} درس</span>
                   </div>
                 </div>
                 <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground shrink-0" />

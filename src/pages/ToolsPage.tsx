@@ -29,7 +29,7 @@ const ToolsPage = () => {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[11px] font-mono font-bold transition-all",
+                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[13px] font-mono font-bold transition-all",
                   activeTab === tab.key
                     ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
                     : "text-muted-foreground hover:text-foreground"

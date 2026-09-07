@@ -52,8 +52,8 @@ const fade = {
 };
 
 // Post-Trade Grade calculation
-const getTradeGrade = (trade: Trade): { grade: string; color: string } => {
-  if (trade.status !== "closed" || trade.pnl === null) return { grade: "—", color: "text-muted-foreground" };
+const getTradeGrade = (trade: Trade): { grade: string; badge: string } => {
+  if (trade.status !== "closed" || trade.pnl === null) return { grade: "—", badge: "nx-badge-neutral" };
   const hadSL = !!trade.stop_loss;
   const hadTP = !!trade.take_profit;
   const hadReason = !!trade.entry_reason;
@@ -67,10 +67,10 @@ const getTradeGrade = (trade: Trade): { grade: string; color: string } => {
   if (hadStrategy) score += 15;
   if (isWin) score += 20;
 
-  if (score >= 90) return { grade: "A", color: "text-success" };
-  if (score >= 70) return { grade: "B", color: "text-primary" };
-  if (score >= 45) return { grade: "C", color: "text-warning" };
-  return { grade: "D", color: "text-destructive" };
+  if (score >= 90) return { grade: "A", badge: "nx-badge-gold" };
+  if (score >= 70) return { grade: "B", badge: "nx-badge-long" };
+  if (score >= 45) return { grade: "C", badge: "nx-badge-warn" };
+  return { grade: "D", badge: "nx-badge-short" };
 };
 
 const TradeJournal = () => {
@@ -307,41 +307,41 @@ const TradeJournal = () => {
     <motion.div
       initial="hidden" animate="show"
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
-      className="px-4 pt-3 pb-28 space-y-3 max-w-lg mx-auto"
+      className="nx-page"
     >
       {/* Header */}
       <motion.div variants={fade} className="flex items-center justify-between">
         <div>
-          <h1 className="text-[15px] font-bold">سجل الصفقات</h1>
-          <p className="text-[8px] font-mono text-muted-foreground/50">TRADE JOURNAL</p>
+          <h1 className="nx-section">سجل الصفقات</h1>
+          <p className="nx-meta">TRADE JOURNAL</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-[10px] font-mono font-semibold hover-lift">
-          <Plus className="w-3 h-3" /> تسجيل صفقة
+          className="nx-btn-primary nx-btn-sm">
+          <Plus className="w-4 h-4" /> تسجيل صفقة
         </button>
       </motion.div>
 
       {/* Quick Stats — Bank Statement Header */}
-      <motion.div variants={fade} className="grid grid-cols-4 gap-1.5">
+      <motion.div variants={fade} className="grid grid-cols-4 gap-2">
         {[
           { label: "الإجمالي", value: trades.length, color: "text-foreground" },
           { label: "مفتوحة", value: trades.filter(t => t.status === "open").length, color: "text-warning" },
           { label: "ربح", value: analytics.wins, color: "text-success" },
           { label: "خسارة", value: analytics.losses, color: "text-destructive" },
         ].map((s, i) => (
-          <div key={i} className="rounded-md p-2 border border-border/10 bg-card/40 text-center">
-            <p className={cn("text-sm font-mono font-bold tabular-nums", s.color)}>{s.value}</p>
-            <p className="text-[7px] font-mono text-muted-foreground/40">{s.label}</p>
+          <div key={i} className="nx-card-flat text-center">
+            <p className={cn("nx-num", s.color)}>{s.value}</p>
+            <p className="nx-meta">{s.label}</p>
           </div>
         ))}
       </motion.div>
 
       {/* Tabs */}
-      <motion.div variants={fade} className="flex gap-1.5">
+      <motion.div variants={fade} className="flex gap-2">
         {(["trades", "analytics"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={cn("flex-1 py-1.5 rounded-md text-[10px] font-mono font-semibold transition-colors",
-              tab === t ? "bg-primary/10 text-primary border border-primary/20" : "bg-muted/30 text-muted-foreground border border-border/10"
+            className={cn("flex-1 nx-tap py-2.5 rounded-xl text-[14px] font-semibold transition-colors",
+              tab === t ? "bg-primary/10 text-primary border border-primary/30" : "bg-secondary text-muted-foreground border border-border"
             )}>
             {t === "trades" ? "الصفقات" : "التحليلات"}
           </button>
@@ -351,11 +351,11 @@ const TradeJournal = () => {
       {tab === "trades" && (
         <>
           {/* One-Click Filters: All / Open / Closed / Wins / Losses */}
-          <motion.div variants={fade} className="flex gap-1">
+          <motion.div variants={fade} className="flex gap-1.5 flex-wrap">
             {(["all", "open", "closed", "wins", "losses"] as const).map(f => (
               <button key={f} onClick={() => setFilter(f)}
-                className={cn("px-2 py-1 rounded-md text-[9px] font-mono transition-colors",
-                  filter === f ? "bg-primary/10 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"
+                className={cn("px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors",
+                  filter === f ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                 )}>
                 {f === "all" ? "الكل" : f === "open" ? "مفتوحة" : f === "closed" ? "مغلقة" : f === "wins" ? "✓ ربح" : "✗ خسارة"}
               </button>
@@ -365,20 +365,20 @@ const TradeJournal = () => {
           {/* Trades — Bank Statement Rows */}
           {isLoading ? (
             <div className="space-y-2">
-              {[1,2,3].map(i => <div key={i} className="skeleton h-14 rounded-md" />)}
+              {[1,2,3].map(i => <div key={i} className="skeleton h-16 rounded-xl" />)}
             </div>
           ) : filtered.length === 0 ? (
-            <motion.div variants={fade} className="rounded-lg p-8 border border-border/10 bg-card/30 text-center">
-              <BarChart3 className="w-6 h-6 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-[11px] text-muted-foreground/50 font-mono">لا توجد صفقات</p>
+            <motion.div variants={fade} className="nx-card text-center py-10">
+              <BarChart3 className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="nx-body text-muted-foreground">لا توجد صفقات</p>
             </motion.div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {/* Statement Header */}
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[7px] font-mono text-muted-foreground/40 uppercase border-b border-border/10">
+              <div className="flex items-center gap-2 px-3 py-1.5 nx-meta uppercase border-b border-border">
                 <span className="w-14">التاريخ</span>
                 <span className="flex-1">الأصل</span>
-                <span className="w-10 text-center">النتيجة</span>
+                <span className="w-14 text-center">النتيجة</span>
                 <span className="w-10 text-center">R:R</span>
                 <span className="w-10 text-center">الرتبة</span>
                 <span className="w-16 text-left">P&L</span>
