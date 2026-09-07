@@ -67,21 +67,22 @@ const SignalsPage = () => {
       initial="hidden"
       animate="show"
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
-      className="px-4 pt-3 pb-28 max-w-lg mx-auto space-y-2.5"
+      className="nx-page"
     >
       {/* Summary Strip */}
-      <motion.div variants={fade} className="flex items-center gap-2 text-[9px] font-mono">
-        <div className="flex items-center gap-1 text-success px-2 py-1 border border-success/10" style={{ borderRadius: '3px' }}>
-          <span className="font-bold tabular-nums">{bullish}</span>
-          <span className="text-success/60">LONG</span>
+      <motion.div variants={fade} className="flex items-center gap-2">
+        <div className="nx-badge-long">
+          <span className="font-bold tabular-nums nx-ltr">{bullish}</span>
+          <span>LONG</span>
         </div>
-        <div className="flex items-center gap-1 text-destructive px-2 py-1 border border-destructive/10" style={{ borderRadius: '3px' }}>
-          <span className="font-bold tabular-nums">{bearish}</span>
-          <span className="text-destructive/60">SHORT</span>
+        <div className="nx-badge-short">
+          <span className="font-bold tabular-nums nx-ltr">{bearish}</span>
+          <span>SHORT</span>
         </div>
-        <div className="mr-auto flex items-center gap-1 text-muted-foreground/40">
-          <div className="w-1 h-1 rounded-full bg-primary gold-glow" />
-          <span className="tabular-nums">{signals.length} إشارة نشطة</span>
+        <div className="mr-auto flex items-center gap-1.5 nx-meta">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary gold-glow" />
+          <span className="nx-ltr tabular-nums">{signals.length}</span>
+          <span>إشارة نشطة</span>
         </div>
       </motion.div>
 
@@ -91,14 +92,10 @@ const SignalsPage = () => {
           onClick={handleScanMarket}
           disabled={scanning}
           className={cn(
-            "w-full flex items-center justify-center gap-2 py-2.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all border",
-            scanning
-              ? "bg-muted text-muted-foreground border-border/20 cursor-wait"
-              : "bg-primary text-primary-foreground border-primary hover:opacity-90"
+            scanning ? "nx-btn nx-btn-secondary w-full cursor-wait" : "nx-btn-primary w-full"
           )}
-          style={{ borderRadius: '4px' }}
         >
-          {scanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5" />}
+          {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
           {scanning ? "جاري المسح..." : "Scan Market — SNIPER Mode"}
         </button>
       </motion.div>
@@ -111,91 +108,86 @@ const SignalsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="border border-border/20 bg-card/90 overflow-hidden"
-            style={{ borderRadius: '4px' }}
+            className="nx-card-premium overflow-hidden"
           >
             {sniperSignal.TYPE === "NO_TRADE" ? (
-              <div className="p-4 text-center">
-                <Shield className="w-5 h-5 text-muted-foreground/40 mx-auto mb-2" />
-                <p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-wider">NO TRADE — STANDBY</p>
-                <p className="text-[9px] font-mono text-muted-foreground/40 mt-1">{sniperSignal.REASON}</p>
+              <div className="text-center py-2">
+                <Shield className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                <p className="nx-label uppercase tracking-wider">NO TRADE — STANDBY</p>
+                <p className="nx-meta mt-1">{sniperSignal.REASON}</p>
               </div>
             ) : (
-              <div className="p-3 space-y-2.5">
+              <div className="space-y-3">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "px-2 py-0.5 text-[8px] font-mono font-bold uppercase tracking-wider",
-                      sniperSignal.DIRECTION === "BUY" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-                    )} style={{ borderRadius: '2px' }}>
+                    <span className={sniperSignal.DIRECTION === "BUY" ? "nx-badge-long" : "nx-badge-short"}>
                       {sniperSignal.DIRECTION}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-foreground">{sniperSignal.PAIR}</span>
+                    <span className="nx-ltr font-mono font-bold text-foreground">{sniperSignal.PAIR}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Crosshair className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[8px] font-mono text-primary font-bold uppercase">SNIPER</span>
+                    <Crosshair className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[13px] font-mono text-primary font-bold uppercase">SNIPER</span>
                   </div>
                 </div>
 
                 {/* Levels Grid */}
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-2">
                   {[
                     { label: "ENTRY", value: sniperSignal.ENTRY_ZONE, color: "text-foreground" },
                     { label: "SL", value: sniperSignal.STOP_LOSS, color: "text-destructive" },
                     { label: "TP1", value: sniperSignal.TAKE_PROFIT_1, color: "text-success" },
                     { label: "TP2", value: sniperSignal.TAKE_PROFIT_2, color: "text-success" },
                   ].map(({ label, value, color }) => (
-                    <div key={label} className="border border-border/10 p-1.5 text-center" style={{ borderRadius: '3px' }}>
-                      <p className="text-[7px] font-mono text-muted-foreground/40 uppercase">{label}</p>
-                      <p className={cn("text-[10px] font-mono font-bold tabular-nums", color)}>{value}</p>
+                    <div key={label} className="nx-card-flat p-2 text-center">
+                      <p className="nx-label text-[13px]">{label}</p>
+                      <p className={cn("nx-ltr font-mono font-bold tabular-nums text-[14px]", color)}>{value}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Confluence Score + Logic */}
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 px-2 py-1 border border-primary/15" style={{ borderRadius: '3px' }}>
-                    <Zap className="w-2.5 h-2.5 text-primary" />
-                    <span className="text-[9px] font-mono font-bold text-primary tabular-nums">{sniperSignal.CONFLUENCE_SCORE}%</span>
+                  <div className="nx-badge-gold shrink-0">
+                    <Zap className="w-3.5 h-3.5" />
+                    <span className="nx-ltr tabular-nums">{sniperSignal.CONFLUENCE_SCORE}%</span>
                   </div>
-                  <p className="text-[8px] font-mono text-muted-foreground/50 leading-relaxed flex-1">{sniperSignal.LOGIC}</p>
+                  <p className="nx-meta leading-relaxed flex-1">{sniperSignal.LOGIC}</p>
                 </div>
               </div>
             )}
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Search */}
       <motion.div variants={fade} className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ابحث... BTC, GOLD, EUR"
-            className="w-full bg-card border border-border/30 pr-9 pl-9 py-2 text-[11px] font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors"
-            style={{ borderRadius: '4px' }}
+            className="w-full h-11 bg-card border border-border rounded-xl pr-10 pl-10 text-[14px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground nx-tap flex items-center justify-center">
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            "relative w-9 h-9 flex items-center justify-center transition-colors shrink-0 border",
-            showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground/50 border-border/30"
+            "relative nx-tap flex items-center justify-center rounded-xl border shrink-0 transition-colors",
+            showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"
           )}
-          style={{ borderRadius: '4px' }}
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <SlidersHorizontal className="w-4 h-4" />
           {activeFilters > 0 && (
-            <span className="absolute -top-1 -left-1 w-3.5 h-3.5 bg-primary text-primary-foreground text-[7px] flex items-center justify-center font-bold" style={{ borderRadius: '2px' }}>
+            <span className="absolute -top-1 -left-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
               {activeFilters}
             </span>
           )}
@@ -203,18 +195,17 @@ const SignalsPage = () => {
       </motion.div>
 
       {/* Category tabs */}
-      <motion.div variants={fade} className="flex gap-1 overflow-x-auto scrollbar-hide">
+      <motion.div variants={fade} className="flex gap-1.5 overflow-x-auto scrollbar-hide">
         {categoryFilters.map((f) => (
           <button
             key={f}
             onClick={() => setCategory(f)}
             className={cn(
-              "px-3 py-1.5 text-[9px] font-mono font-semibold whitespace-nowrap transition-all border",
+              "px-3.5 h-11 rounded-xl text-[14px] font-semibold whitespace-nowrap transition-all border shrink-0",
               category === f
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-transparent text-muted-foreground/50 border-border/15 hover:border-border/30"
+                : "bg-transparent text-muted-foreground border-border hover:border-primary/30"
             )}
-            style={{ borderRadius: '3px' }}
           >
             {f}
           </button>
@@ -231,12 +222,12 @@ const SignalsPage = () => {
             transition={{ duration: 0.15 }}
             className="overflow-hidden"
           >
-            <div className="p-3 space-y-3 border border-border/15 bg-card/80" style={{ borderRadius: '4px' }}>
+            <div className="nx-card-flat space-y-4">
               <div>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                  <Shield className="w-2.5 h-2.5" /> نسبة الثقة
+                <p className="nx-label uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> نسبة الثقة
                 </p>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap">
                   {([
                     { key: "all" as const, label: "الكل" },
                     { key: "80+" as const, label: "80%+" },
@@ -245,20 +236,19 @@ const SignalsPage = () => {
                   ]).map(({ key, label }) => (
                     <button key={key} onClick={() => setConfidenceFilter(key)}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
-                        confidenceFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground/50 border-border/15"
-                      )}
-                      style={{ borderRadius: '3px' }}>
+                        "px-3 h-9 rounded-lg text-[13px] font-medium transition-all border",
+                        confidenceFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground border-border"
+                      )}>
                       {label}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                  <AlertTriangle className="w-2.5 h-2.5" /> المخاطرة
+                <p className="nx-label uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" /> المخاطرة
                 </p>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap">
                   {([
                     { key: "all" as const, label: "الكل" },
                     { key: "منخفض" as const, label: "منخفض" },
@@ -267,10 +257,9 @@ const SignalsPage = () => {
                   ]).map(({ key, label }) => (
                     <button key={key} onClick={() => setRiskFilter(key)}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
-                        riskFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground/50 border-border/15"
-                      )}
-                      style={{ borderRadius: '3px' }}>
+                        "px-3 h-9 rounded-lg text-[13px] font-medium transition-all border",
+                        riskFilter === key ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground border-border"
+                      )}>
                       {label}
                     </button>
                   ))}
@@ -278,7 +267,7 @@ const SignalsPage = () => {
               </div>
               {activeFilters > 0 && (
                 <button onClick={() => { setConfidenceFilter("all"); setRiskFilter("all"); }}
-                  className="text-[9px] font-mono text-destructive/70 hover:text-destructive transition-colors">
+                  className="text-[13px] font-semibold text-destructive hover:opacity-80 transition-opacity">
                   إعادة تعيين
                 </button>
               )}
@@ -289,7 +278,7 @@ const SignalsPage = () => {
 
       {/* Count */}
       <motion.div variants={fade}>
-        <p className="text-[8px] font-mono text-muted-foreground/30 uppercase tracking-wider">
+        <p className="nx-meta uppercase tracking-wider">
           {filtered.length} إشارة
           {search && ` — "${search}"`}
           {confidenceFilter !== "all" && ` • ثقة ${confidenceFilter}`}
@@ -298,11 +287,11 @@ const SignalsPage = () => {
 
       {/* Signal Cards */}
       {signals.length === 0 ? (
-        <div className="space-y-2">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" style={{ borderRadius: '4px' }} />)}
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)}
         </div>
       ) : (
-        <motion.div className="space-y-2" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.02 } } }}>
+        <motion.div className="space-y-3" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.02 } } }}>
           {filtered.map((signal) => (
             <SignalCardCollapsible key={signal.pair} signal={signal} />
           ))}
@@ -311,15 +300,15 @@ const SignalsPage = () => {
 
       {filtered.length === 0 && signals.length > 0 && (
         <div className="text-center py-10">
-          <p className="text-muted-foreground/40 font-mono text-[11px]">لا توجد إشارات مطابقة</p>
+          <p className="nx-body text-muted-foreground">لا توجد إشارات مطابقة</p>
         </div>
       )}
 
       {/* Disclaimer */}
-      <div className="p-3 border border-border/10 bg-card/30" style={{ borderRadius: '4px' }}>
+      <div className="nx-card-flat">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="w-3 h-3 text-muted-foreground/20 shrink-0 mt-0.5" />
-          <p className="text-[7px] font-mono text-muted-foreground/25 leading-relaxed">
+          <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="nx-meta leading-relaxed">
             جميع الإشارات لأغراض تعليمية فقط ولا تشكل نصيحة مالية. التداول ينطوي على مخاطر عالية.
           </p>
         </div>
