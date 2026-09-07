@@ -176,8 +176,8 @@ const ChartVision = () => {
         {step === "idle" && (
           <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col min-h-[75vh]">
             {/* القدرات */}
-            <div className="mb-4">
-              <h3 className="text-[13px] font-semibold uppercase tracking-wider mb-3 font-mono">قدرات المحرك العصبي</h3>
+            <div className="mb-5">
+              <h3 className="nx-label mb-3">قدرات المحرك العصبي</h3>
               <div className="grid grid-cols-3 gap-2.5">
                 {[
                   { icon: Target, label: "+50 نمط فني" },
@@ -192,20 +192,20 @@ const ChartVision = () => {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="intel-card rounded-[10px] p-3 flex flex-col items-center gap-2 text-center"
+                    className="nx-card-flat p-3 flex flex-col items-center gap-2 text-center"
                   >
                     <cap.icon className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-tight">{cap.label}</span>
+                    <span className="text-[12px] text-muted-foreground leading-tight">{cap.label}</span>
                   </motion.div>
                 ))}
               </div>
             </div>
 
             {/* الحالة الفارغة */}
-            <div className="intel-card rounded-[10px] p-8 text-center mb-4 flex-1 flex flex-col items-center justify-center">
+            <div className="nx-card-flat p-8 text-center mb-4 flex-1 flex flex-col items-center justify-center">
               <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40 animate-pulse" />
-              <h4 className="text-xs font-semibold font-mono mb-1">المحرك العصبي في وضع الاستعداد</h4>
-              <p className="text-[10px] text-muted-foreground font-mono">
+              <h4 className="nx-card-title mb-1">المحرك العصبي في وضع الاستعداد</h4>
+              <p className="nx-body text-muted-foreground">
                 ارفع صورة شارت لبدء التحليل المؤسسي بالذكاء الاصطناعي
               </p>
             </div>
@@ -215,40 +215,32 @@ const ChartVision = () => {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => cameraInputRef.current?.click()}
-                className="rounded-[10px] p-4 flex items-center gap-3 transition-all"
-                style={{
-                  background: "linear-gradient(180deg, hsla(43,100%,50%,0.1) 0%, hsla(43,100%,50%,0.04) 100%)",
-                  border: "1px solid hsla(43,100%,50%,0.15)",
-                }}
+                className="rounded-2xl p-4 flex items-center gap-3 transition-all bg-primary/8 border border-primary/20"
               >
-                <div className="w-11 h-11 rounded-[10px] bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-primary/12 border border-primary/25 flex items-center justify-center">
                   <Camera className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-right">
-                  <span className="text-[12px] font-mono font-bold text-primary block">التقاط مباشر</span>
-                  <span className="text-[9px] font-mono text-muted-foreground flex items-center gap-1">
+                  <span className="text-[14px] font-bold text-primary block">التقاط مباشر</span>
+                  <span className="text-[12px] text-muted-foreground flex items-center gap-1">
                     كاميرا الجهاز
-                    {!isFounder && <span className="bg-primary/15 text-primary px-1 rounded text-[8px]">{CREDIT_COSTS.chart_analysis}pt</span>}
+                    {!isFounder && <span className="bg-primary/15 text-primary px-1.5 py-0.5 rounded nx-num text-[11px]">{CREDIT_COSTS.chart_analysis}pt</span>}
                   </span>
                 </div>
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-[10px] p-4 flex items-center gap-3 transition-all"
-                style={{
-                  background: "linear-gradient(180deg, hsla(190,100%,50%,0.08) 0%, hsla(190,100%,50%,0.02) 100%)",
-                  border: "1px solid hsla(190,100%,50%,0.12)",
-                }}
+                className="rounded-2xl p-4 flex items-center gap-3 transition-all bg-accent/8 border border-accent/20"
               >
-                <div className="w-11 h-11 rounded-[10px] bg-accent/10 border border-accent/20 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-accent/12 border border-accent/25 flex items-center justify-center">
                   <Upload className="w-5 h-5 text-accent" />
                 </div>
                 <div className="text-right">
-                  <span className="text-[12px] font-mono font-bold text-accent block">رفع صورة</span>
-                  <span className="text-[9px] font-mono text-muted-foreground flex items-center gap-1">
+                  <span className="text-[14px] font-bold text-accent block">رفع صورة</span>
+                  <span className="text-[12px] text-muted-foreground flex items-center gap-1">
                     من المعرض
-                    {!isFounder && <span className="bg-accent/15 text-accent px-1 rounded text-[8px]">{CREDIT_COSTS.chart_analysis}pt</span>}
+                    {!isFounder && <span className="bg-accent/15 text-accent px-1.5 py-0.5 rounded nx-num text-[11px]">{CREDIT_COSTS.chart_analysis}pt</span>}
                   </span>
                 </div>
               </motion.button>
