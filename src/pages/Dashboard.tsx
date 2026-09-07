@@ -37,23 +37,6 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.06 } } }}
       className="nx-page"
     >
-      {/* ═══ HERO — AI CHART ANALYSIS ═══ */}
-      <motion.section variants={fade} className="nx-card-premium space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
-            <ScanLine className="w-6 h-6 text-primary" strokeWidth={1.8} />
-          </div>
-          <div className="min-w-0">
-            <h1 className="nx-section">تحليل الشارت بالذكاء الاصطناعي</h1>
-            <p className="text-[15px] leading-7 text-muted-foreground mt-1">
-              ارفع صورة الشارت واحصل على تحليل منظم للسوق.
-            </p>
-          </div>
-        </div>
-        <button onClick={() => navigate("/chart-analysis")} className="nx-btn-primary w-full">
-          تحليل شارت جديد
-        </button>
-      </motion.section>
 
       {/* ═══ MARKET OVERVIEW ═══ */}
       <motion.section variants={fade} className="space-y-3">

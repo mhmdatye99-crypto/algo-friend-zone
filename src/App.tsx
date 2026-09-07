@@ -19,6 +19,7 @@ import ToolsPage from "./pages/ToolsPage";
 import JournalPage from "./pages/JournalPage";
 import LearningPage from "./pages/LearningPage";
 import ChartAnalysisPage from "./pages/ChartAnalysisPage";
+import ChartAnalysisResult from "./pages/ChartAnalysisResult";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/learning" element={<LearningPage />} />
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/chart-analysis" element={<ChartAnalysisPage />} />
+              <Route path="/chart-analysis/result" element={<ChartAnalysisResult />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/admin" element={<AdminPanel />} />
