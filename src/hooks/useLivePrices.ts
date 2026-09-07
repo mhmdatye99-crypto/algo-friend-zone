@@ -1,4 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  fetchCryptoSnapshots,
+  fetchCryptoSparklines,
+  fetchForexSnapshots,
+  type MarketSnapshot,
+} from "@/lib/marketData";
 
 export type AssetCategory = "الكل" | "كريبتو" | "فوركس";
 
