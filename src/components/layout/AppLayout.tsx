@@ -5,18 +5,13 @@ import BottomNav from "./BottomNav";
 import TopBar from "./TopBar";
 import NexusSplash from "./NexusSplash";
 import LiveTickerBar from "./LiveTickerBar";
-import { NexusAIProvider, useNexusAI } from "@/contexts/NexusAIContext";
-import NexusAIFloatingButton from "@/components/nexus-ai/NexusAIFloatingButton";
-import NexusAIFullscreen from "@/components/nexus-ai/NexusAIFullscreen";
-import ChartAnalysisEdgeTab from "@/components/nexus-ai/ChartAnalysisEdgeTab";
 
-const LayoutShell = () => {
+const AppLayout = () => {
   const [showSplash, setShowSplash] = useState(() => {
     const shown = sessionStorage.getItem("nexus-splash-shown");
     return !shown;
   });
   const location = useLocation();
-  const { open: aiOpen } = useNexusAI();
 
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem("nexus-splash-shown", "1");
@@ -42,19 +37,9 @@ const LayoutShell = () => {
         </AnimatePresence>
       </main>
 
-      <ChartAnalysisEdgeTab />
-      <NexusAIFloatingButton />
-      <NexusAIFullscreen />
-
-      {!aiOpen && <BottomNav />}
+      <BottomNav />
     </div>
   );
 };
-
-const AppLayout = () => (
-  <NexusAIProvider>
-    <LayoutShell />
-  </NexusAIProvider>
-);
 
 export default AppLayout;
