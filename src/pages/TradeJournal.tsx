@@ -419,7 +419,7 @@ const TradeJournal = () => {
             >
               <div className="p-4 pb-32 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-[13px] font-semibold">تسجيل صفقة جديدة</h2>
+                  <h2 className="text-[15px] font-semibold">تسجيل صفقة جديدة</h2>
                   <button onClick={() => setShowForm(false)} className="w-6 h-6 rounded-md bg-muted/50 flex items-center justify-center">
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -442,7 +442,7 @@ const TradeJournal = () => {
 
                 {/* Pair */}
                 <div>
-                  <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">الزوج</label>
+                  <label className="nx-meta mb-1 block">الزوج</label>
                   <div className="flex gap-1 flex-wrap">
                     {pairs.map(p => (
                       <button key={p} onClick={() => setPair(p)}
@@ -475,7 +475,7 @@ const TradeJournal = () => {
 
                 {/* Emotion */}
                 <div>
-                  <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">الحالة النفسية</label>
+                  <label className="nx-meta mb-1 block">الحالة النفسية</label>
                   <div className="flex gap-1.5">
                     {emotions.map(e => (
                       <button key={e.emoji} onClick={() => setEmotion(emotion === e.emoji ? "" : e.emoji)}
@@ -490,24 +490,24 @@ const TradeJournal = () => {
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">سبب الدخول</label>
+                  <label className="nx-meta mb-1 block">سبب الدخول</label>
                   <textarea value={entryReason} onChange={e => setEntryReason(e.target.value)}
                     placeholder="لماذا دخلت هذه الصفقة؟"
-                    className="w-full h-14 rounded-md bg-muted/30 border border-border/10 px-3 py-2 text-[11px] font-mono placeholder:text-muted-foreground/30 resize-none focus:outline-none focus:border-primary/20" />
+                    className="w-full h-16 rounded-xl bg-secondary border border-border px-3 py-2 text-[14px] placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40" />
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">الاستراتيجية</label>
+                  <label className="nx-meta mb-1 block">الاستراتيجية</label>
                   <input type="text" value={strategy} onChange={e => setStrategy(e.target.value)}
                     placeholder="كسر مقاومة، ارتداد دعم..."
-                    className="w-full h-9 rounded-md bg-muted/30 border border-border/10 px-3 text-[11px] font-mono placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/20" />
+                    className="w-full h-11 rounded-xl bg-secondary border border-border px-3 text-[14px] placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40" />
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">ملاحظات</label>
+                  <label className="nx-meta mb-1 block">ملاحظات</label>
                   <textarea value={notes} onChange={e => setNotes(e.target.value)}
                     placeholder="ملاحظات إضافية..."
-                    className="w-full h-14 rounded-md bg-muted/30 border border-border/10 px-3 py-2 text-[11px] font-mono placeholder:text-muted-foreground/30 resize-none focus:outline-none focus:border-primary/20" />
+                    className="w-full h-16 rounded-xl bg-secondary border border-border px-3 py-2 text-[14px] placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40" />
                 </div>
 
                 <button onClick={() => addTrade.mutate()} disabled={!entryPrice || addTrade.isPending}
@@ -585,9 +585,9 @@ const SmartPositionSizer = ({ entryPrice, stopLoss, takeProfit, onApply }: {
 /* ─── Form Input ─── */
 const FormInput = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) => (
   <div>
-    <label className="text-[9px] font-mono text-muted-foreground/50 mb-1 block">{label}</label>
+    <label className="nx-meta mb-1 block">{label}</label>
     <input type="number" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-      className="w-full h-9 rounded-md bg-muted/30 border border-border/10 px-3 text-[11px] font-mono placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/20" />
+      className="w-full h-11 rounded-xl bg-secondary border border-border px-3 text-[15px] placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40" />
   </div>
 );
 
@@ -595,7 +595,7 @@ const FormInput = ({ label, value, onChange, placeholder }: { label: string; val
 const TradeRow = ({ trade, livePnl, livePrice, onDelete, onClose }: { trade: Trade; livePnl?: number | null; livePrice?: number | null; onDelete: () => void; onClose: (exitP: number) => void }) => {
   const [expanded, setExpanded] = useState(false);
   const [closePrice, setClosePrice] = useState("");
-  const { grade, color: gradeColor } = getTradeGrade(trade);
+  const { grade, badge: gradeBadge } = getTradeGrade(trade);
 
   // Calculate achieved R:R
   const achievedRR = (() => {
@@ -628,36 +628,36 @@ const TradeRow = ({ trade, livePnl, livePrice, onDelete, onClose }: { trade: Tra
   })();
 
   return (
-    <div className="rounded-md border border-border/10 bg-card/30 overflow-hidden">
+    <div className="nx-card overflow-hidden !p-0">
       {/* Main Row — Table style */}
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center gap-2 px-3 py-2.5 text-right hover-lift">
-        <span className="text-[8px] font-mono text-muted-foreground/40 tabular-nums w-14 shrink-0">
+      <button onClick={() => setExpanded(!expanded)} className="nx-tap w-full flex items-center gap-2 px-3 py-3 text-right hover:bg-secondary/40 transition-colors">
+        <span className="nx-meta nx-ltr tabular-nums w-14 shrink-0">
           {new Date(trade.created_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
         </span>
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <div className={cn("w-1 h-4 rounded-full shrink-0",
-            trade.direction === "long" ? "bg-success/60" : "bg-destructive/60"
+          <div className={cn("w-1 h-5 rounded-full shrink-0",
+            trade.direction === "long" ? "bg-success" : "bg-destructive"
           )} />
-          <span className="text-[10px] font-mono font-semibold truncate">{trade.pair}</span>
-          {trade.emotion && <span className="text-xs">{trade.emotion}</span>}
+          <span className="text-[14px] font-semibold truncate">{trade.pair}</span>
+          {trade.emotion && <span className="text-sm">{trade.emotion}</span>}
         </div>
         {/* Result */}
-        <span className={cn("text-[8px] font-mono font-semibold w-10 text-center px-1 py-0.5 rounded-sm",
-          trade.status === "open" ? "bg-warning/8 text-warning" : isWin ? "bg-success/8 text-success" : isLoss ? "bg-destructive/8 text-destructive" : "text-muted-foreground/40"
+        <span className={cn("text-[12px] font-semibold w-14 text-center px-1.5 py-1 rounded-lg",
+          trade.status === "open" ? "bg-warning/12 text-warning" : isWin ? "bg-success/12 text-success" : isLoss ? "bg-destructive/12 text-destructive" : "text-muted-foreground"
         )}>
           {trade.status === "open" ? "مفتوح" : isWin ? "WIN" : isLoss ? "LOSS" : "—"}
         </span>
         {/* R:R achieved */}
-        <span className={cn("text-[9px] font-mono font-semibold w-10 text-center tabular-nums",
-          achievedRR === null ? "text-muted-foreground/30" : achievedRR >= 2 ? "text-success" : achievedRR >= 1 ? "text-primary" : "text-destructive"
+        <span className={cn("font-mono text-[13px] font-semibold w-10 text-center tabular-nums",
+          achievedRR === null ? "text-muted-foreground/50" : achievedRR >= 2 ? "text-success" : achievedRR >= 1 ? "text-primary" : "text-destructive"
         )}>
           {achievedRR !== null ? `${achievedRR > 0 ? "+" : ""}${achievedRR}` : "—"}
         </span>
         {/* Grade */}
-        <span className={cn("text-[10px] font-mono font-bold w-10 text-center", gradeColor)}>{grade}</span>
+        <span className={cn(gradeBadge, "w-9 justify-center")}>{grade}</span>
         {/* P&L */}
-        <span className={cn("text-[10px] font-mono font-semibold tabular-nums w-16 text-left transition-colors",
-          displayPnl === null ? "text-muted-foreground/30" : displayPnl >= 0 ? "text-success" : "text-destructive"
+        <span className={cn("font-mono text-[14px] font-bold tabular-nums w-16 text-left transition-colors nx-ltr",
+          displayPnl === null ? "text-muted-foreground/50" : displayPnl >= 0 ? "text-success" : "text-destructive"
         )}>
           {displayPnl !== null ? `${displayPnl >= 0 ? "+" : ""}$${displayPnl.toFixed(2)}` : "—"}
         </span>
@@ -668,43 +668,43 @@ const TradeRow = ({ trade, livePnl, livePrice, onDelete, onClose }: { trade: Tra
         {expanded && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.15 }} className="overflow-hidden">
-            <div className="px-3 pb-2.5 pt-0.5 space-y-1.5 border-t border-border/5">
-              <div className="flex items-center gap-2 text-[8px] font-mono text-muted-foreground/50 flex-wrap">
-                <span>دخول: <span className="text-foreground/70 font-semibold">{trade.entry_price.toFixed(2)}</span></span>
+            <div className="px-4 pb-3 pt-1 space-y-2 border-t border-border">
+              <div className="flex items-center gap-3 nx-meta nx-ltr flex-wrap">
+                <span>دخول: <span className="text-foreground font-semibold">{trade.entry_price.toFixed(2)}</span></span>
                 {trade.status === "open" && livePrice != null && (
-                  <span>الآن: <span className={cn("font-semibold animate-pulse", livePrice > trade.entry_price ? "text-success" : livePrice < trade.entry_price ? "text-destructive" : "text-foreground/70")}>{livePrice.toFixed(2)}</span></span>
+                  <span>الآن: <span className={cn("font-semibold animate-pulse", livePrice > trade.entry_price ? "text-success" : livePrice < trade.entry_price ? "text-destructive" : "text-foreground")}>{livePrice.toFixed(2)}</span></span>
                 )}
-                {trade.exit_price && <span>→ <span className="text-foreground/70 font-semibold">{trade.exit_price.toFixed(2)}</span></span>}
-                {trade.stop_loss && <span className="text-destructive/60">SL {trade.stop_loss.toFixed(2)}</span>}
-                {trade.take_profit && <span className="text-success/60">TP {trade.take_profit.toFixed(2)}</span>}
+                {trade.exit_price && <span>→ <span className="text-foreground font-semibold">{trade.exit_price.toFixed(2)}</span></span>}
+                {trade.stop_loss && <span className="text-destructive">SL {trade.stop_loss.toFixed(2)}</span>}
+                {trade.take_profit && <span className="text-success">TP {trade.take_profit.toFixed(2)}</span>}
               </div>
               {trade.entry_reason && (
-                <p className="text-[8px] font-mono text-foreground/60 bg-muted/20 rounded-sm px-2 py-1">{trade.entry_reason}</p>
+                <p className="nx-body text-foreground/80 bg-secondary/60 rounded-lg px-3 py-2">{trade.entry_reason}</p>
               )}
               {trade.strategy && (
-                <p className="text-[7px] font-mono text-primary/60 bg-primary/4 rounded-sm px-2 py-0.5">{trade.strategy}</p>
+                <p className="text-[13px] font-medium text-primary bg-primary/8 rounded-lg px-3 py-1.5">{trade.strategy}</p>
               )}
               {trade.notes && (
-                <p className="text-[8px] font-mono text-muted-foreground/50">{trade.notes}</p>
+                <p className="nx-meta">{trade.notes}</p>
               )}
               {disciplineNote && (
-                <div className="flex items-center gap-2 px-2 py-1 rounded-sm bg-primary/3 border border-primary/8">
-                  <span className="text-[7px] font-mono text-muted-foreground/50">انضباط الخروج:</span>
-                  <span className={cn("text-[9px] font-mono font-semibold", disciplineNote.color)}>{disciplineNote.text}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/15">
+                  <span className="nx-meta">انضباط الخروج:</span>
+                  <span className={cn("text-[13px] font-semibold", disciplineNote.color)}>{disciplineNote.text}</span>
                 </div>
               )}
-              <div className="flex gap-1">
+              <div className="flex gap-2 pt-1">
                 {trade.status === "open" && (
-                  <div className="flex gap-1 flex-1">
+                  <div className="flex gap-2 flex-1">
                     <input type="number" value={closePrice} onChange={e => setClosePrice(e.target.value)}
                       placeholder="سعر الإغلاق"
-                      className="flex-1 h-6 rounded-sm bg-muted/30 border border-border/10 px-2 text-[9px] font-mono focus:outline-none" />
+                      className="flex-1 h-10 rounded-xl bg-secondary border border-border px-3 text-[14px] focus:outline-none focus:border-primary/40" />
                     <button onClick={() => { if (closePrice) onClose(parseFloat(closePrice)); }}
-                      className="px-2 h-6 rounded-sm bg-primary/8 text-primary text-[8px] font-mono font-semibold">إغلاق</button>
+                      className="nx-btn-primary nx-btn-sm">إغلاق</button>
                   </div>
                 )}
-                <button onClick={onDelete} className="w-6 h-6 rounded-sm bg-destructive/5 flex items-center justify-center">
-                  <Trash2 className="w-2.5 h-2.5 text-destructive/50" />
+                <button onClick={onDelete} className="nx-tap w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                  <Trash2 className="w-4 h-4 text-destructive" />
                 </button>
               </div>
             </div>
@@ -717,12 +717,12 @@ const TradeRow = ({ trade, livePnl, livePrice, onDelete, onClose }: { trade: Tra
 
 /* ─── Analytics Panel ─── */
 const AnalyticsPanel = ({ analytics }: { analytics: any }) => (
-  <div className="space-y-2">
-    <motion.div variants={fade} className="rounded-lg p-3 border border-border/10 bg-card/40">
-      <p className="text-[9px] font-mono text-muted-foreground/50 mb-2 flex items-center gap-1">
-        <BarChart3 className="w-3 h-3 text-primary/50" /> ملخص الأداء
+  <div className="space-y-3">
+    <motion.div variants={fade} className="nx-card">
+      <p className="nx-label mb-3 flex items-center gap-1.5">
+        <BarChart3 className="w-4 h-4 text-primary" /> ملخص الأداء
       </p>
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-2">
         <StatCell label="P&L" value={`${analytics.totalPnl >= 0 ? "+" : ""}$${analytics.totalPnl.toFixed(0)}`} color={analytics.totalPnl >= 0 ? "text-success" : "text-destructive"} />
         <StatCell label="نسبة الفوز" value={`${analytics.winRate.toFixed(0)}%`} color={analytics.winRate >= 50 ? "text-success" : "text-warning"} />
         <StatCell label="R:R" value={analytics.rrRatio.toFixed(1)} color="text-primary" />
@@ -730,13 +730,13 @@ const AnalyticsPanel = ({ analytics }: { analytics: any }) => (
     </motion.div>
 
     {analytics.closed > 0 && (
-      <motion.div variants={fade} className="rounded-lg p-3 border border-border/10 bg-card/40">
-        <p className="text-[9px] font-mono text-muted-foreground/50 mb-1.5">معدل الفوز</p>
-        <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden flex">
-          <div className="h-full bg-success/60 transition-all" style={{ width: `${analytics.winRate}%` }} />
-          <div className="h-full bg-destructive/30 transition-all" style={{ width: `${100 - analytics.winRate}%` }} />
+      <motion.div variants={fade} className="nx-card">
+        <p className="nx-label mb-2">معدل الفوز</p>
+        <div className="h-2 rounded-full bg-secondary overflow-hidden flex">
+          <div className="h-full bg-success transition-all" style={{ width: `${analytics.winRate}%` }} />
+          <div className="h-full bg-destructive/50 transition-all" style={{ width: `${100 - analytics.winRate}%` }} />
         </div>
-        <div className="flex justify-between mt-1 text-[8px] font-mono text-muted-foreground/40">
+        <div className="flex justify-between mt-2 nx-meta">
           <span>{analytics.wins} ربح</span>
           <span>{analytics.losses} خسارة</span>
         </div>
@@ -744,15 +744,15 @@ const AnalyticsPanel = ({ analytics }: { analytics: any }) => (
     )}
 
     {analytics.emotionStats.some((e: any) => e.count > 0) && (
-      <motion.div variants={fade} className="rounded-lg p-3 border border-border/10 bg-card/40">
-        <p className="text-[9px] font-mono text-muted-foreground/50 mb-2">تحليل الحالة النفسية</p>
-        <div className="space-y-1">
+      <motion.div variants={fade} className="nx-card">
+        <p className="nx-label mb-2">تحليل الحالة النفسية</p>
+        <div className="space-y-1.5">
           {analytics.emotionStats.filter((e: any) => e.count > 0).map((e: any) => (
-            <div key={e.emoji} className="flex items-center gap-2 px-2 py-1.5 rounded-sm bg-muted/15">
-              <span>{e.emoji}</span>
-              <span className="text-[9px] font-mono text-muted-foreground/60 flex-1">{e.label}</span>
-              <span className="text-[8px] font-mono text-muted-foreground/40">{e.count}x</span>
-              <span className={cn("text-[9px] font-mono font-semibold", e.avgPnl >= 0 ? "text-success" : "text-destructive")}>
+            <div key={e.emoji} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/60">
+              <span className="text-base">{e.emoji}</span>
+              <span className="text-[14px] text-muted-foreground flex-1">{e.label}</span>
+              <span className="nx-meta">{e.count}x</span>
+              <span className={cn("text-[13px] font-semibold nx-ltr", e.avgPnl >= 0 ? "text-success" : "text-destructive")}>
                 {e.avgPnl >= 0 ? "+" : ""}${e.avgPnl.toFixed(0)}
               </span>
             </div>
@@ -762,17 +762,17 @@ const AnalyticsPanel = ({ analytics }: { analytics: any }) => (
     )}
 
     {analytics.pairStats.length > 0 && (
-      <motion.div variants={fade} className="rounded-lg p-3 border border-border/10 bg-card/40">
-        <p className="text-[9px] font-mono text-muted-foreground/50 mb-2 flex items-center gap-1">
-          <Target className="w-3 h-3 text-primary/50" /> أداء الأزواج
+      <motion.div variants={fade} className="nx-card">
+        <p className="nx-label mb-2 flex items-center gap-1.5">
+          <Target className="w-4 h-4 text-primary" /> أداء الأزواج
         </p>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {analytics.pairStats.map((p: any) => (
-            <div key={p.pair} className="flex items-center gap-2 px-2 py-1.5 rounded-sm bg-muted/15">
-              <span className="text-[10px] font-mono font-semibold flex-1">{p.pair}</span>
-              <span className="text-[8px] font-mono text-muted-foreground/40">{p.total}x</span>
-              <span className={cn("text-[8px] font-mono", p.winRate >= 50 ? "text-success/60" : "text-warning/60")}>{p.winRate.toFixed(0)}%</span>
-              <span className={cn("text-[9px] font-mono font-semibold", p.pnl >= 0 ? "text-success" : "text-destructive")}>
+            <div key={p.pair} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/60">
+              <span className="text-[14px] font-semibold flex-1">{p.pair}</span>
+              <span className="nx-meta">{p.total}x</span>
+              <span className={cn("text-[13px]", p.winRate >= 50 ? "text-success" : "text-warning")}>{p.winRate.toFixed(0)}%</span>
+              <span className={cn("text-[13px] font-semibold nx-ltr", p.pnl >= 0 ? "text-success" : "text-destructive")}>
                 {p.pnl >= 0 ? "+" : ""}${p.pnl.toFixed(0)}
               </span>
             </div>
@@ -782,18 +782,18 @@ const AnalyticsPanel = ({ analytics }: { analytics: any }) => (
     )}
 
     {analytics.closed === 0 && (
-      <motion.div variants={fade} className="rounded-lg p-8 border border-border/10 bg-card/30 text-center">
-        <BarChart3 className="w-6 h-6 text-muted-foreground/20 mx-auto mb-2" />
-        <p className="text-[10px] text-muted-foreground/40 font-mono">لا توجد بيانات كافية</p>
+      <motion.div variants={fade} className="nx-card text-center py-10">
+        <BarChart3 className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+        <p className="nx-body text-muted-foreground">لا توجد بيانات كافية</p>
       </motion.div>
     )}
   </div>
 );
 
 const StatCell = ({ label, value, color }: { label: string; value: string; color: string }) => (
-  <div className="bg-muted/15 rounded-sm px-2 py-1.5 text-center">
-    <p className="text-[7px] font-mono text-muted-foreground/40">{label}</p>
-    <p className={cn("text-[11px] font-mono font-bold", color)}>{value}</p>
+  <div className="bg-secondary/60 rounded-xl px-2 py-2 text-center">
+    <p className="nx-meta">{label}</p>
+    <p className={cn("text-[15px] font-bold nx-ltr", color)}>{value}</p>
   </div>
 );
 

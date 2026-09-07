@@ -217,11 +217,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                           ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                           : "rounded-bl-md text-foreground"
                       )}
-                      style={msg.role === "assistant" ? {
-                        background: "hsla(43, 100%, 50%, 0.06)",
-                        boxShadow: "0 0 15px hsla(43, 100%, 50%, 0.08)",
-                        border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                      } : undefined}
+                      className={cn(msg.role === "assistant" && "bg-primary/6 border border-primary/10")}
                     >
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
@@ -230,10 +226,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
 
                 {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="flex justify-start">
-                    <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md" style={{
-                      background: "hsla(43, 100%, 50%, 0.06)",
-                      border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                    }}>
+                    <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-primary/6 border border-primary/10">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.2s" }} />
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.4s" }} />

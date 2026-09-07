@@ -35,12 +35,7 @@ export const BuyCreditsModal = ({ open, onClose, currentCredits }: Props) => {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-sm rounded-2xl p-5 space-y-4"
-            style={{
-              background: "hsla(240, 15%, 3%, 0.95)",
-              border: "1px solid hsla(43, 100%, 50%, 0.15)",
-              boxShadow: "0 20px 60px hsla(0,0%,0%,0.5), 0 0 40px hsla(43,100%,50%,0.08)",
-            }}
+            className="relative w-full max-w-sm rounded-2xl p-5 space-y-4 bg-card border border-primary/15 shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-display font-bold tracking-wider">NEXUS CREDITS</h3>
@@ -61,15 +56,9 @@ export const BuyCreditsModal = ({ open, onClose, currentCredits }: Props) => {
                   key={pkg.id}
                   onClick={() => handleBuy(pkg)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all hover:brightness-110",
-                    pkg.id === "pro" ? "border-primary/25" : "border-border/15",
+                    "w-full flex items-center gap-3 p-3.5 rounded-xl transition-all hover:brightness-110 border",
+                    pkg.id === "pro" ? "border-primary/25 bg-primary/5" : pkg.id === "whale" ? "bg-primary/10 border-primary/20" : "bg-secondary/60 border-border"
                   )}
-                  style={{
-                    background: pkg.id === "whale"
-                      ? "linear-gradient(135deg, hsla(43,100%,50%,0.1), hsla(190,100%,50%,0.05))"
-                      : "hsla(240, 15%, 5%, 0.8)",
-                    border: `1px solid ${pkg.id === "whale" ? "hsla(43,100%,50%,0.2)" : "hsla(240,10%,15%,0.5)"}`,
-                  }}
                 >
                   <div className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center",
@@ -118,12 +107,7 @@ export const InsufficientCreditsPopup = ({ open, onClose, onBuyCredits, required
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="relative w-full max-w-xs rounded-2xl p-5 text-center space-y-4"
-          style={{
-            background: "hsla(240, 15%, 3%, 0.95)",
-            border: "1px solid hsla(350, 100%, 50%, 0.2)",
-            boxShadow: "0 20px 60px hsla(0,0%,0%,0.5), 0 0 30px hsla(350,100%,50%,0.1)",
-          }}
+          className="relative w-full max-w-xs rounded-2xl p-5 text-center space-y-4 bg-card border border-destructive/20 shadow-2xl"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
             <AlertTriangle className="w-7 h-7 text-destructive" />

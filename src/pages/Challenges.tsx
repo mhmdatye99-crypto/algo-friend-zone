@@ -45,7 +45,7 @@ const Challenges = () => {
       {/* Discipline Score Hero */}
       <motion.div
         variants={fadeUp}
-        className="rounded-[14px] p-5 text-center"
+        className="rounded-2xl p-5 text-center"
         style={{
           background: "linear-gradient(135deg, hsla(43, 100%, 50%, 0.08) 0%, hsla(190, 100%, 50%, 0.04) 100%)",
           border: "1px solid hsla(43, 100%, 50%, 0.12)",
@@ -105,7 +105,7 @@ const Challenges = () => {
               return (
                 <div
                   key={c.id}
-                  className="glass rounded-[12px] p-4 border border-border/20"
+                  className="glass rounded-xl p-4 border border-border/20"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
@@ -168,7 +168,7 @@ const Challenges = () => {
                 <div
                   key={plan.id}
                   className={cn(
-                    "glass rounded-[12px] p-4 border transition-all",
+                    "glass rounded-xl p-4 border transition-all",
                     isSelected ? "border-primary/40 bg-primary/5" : typeColors[plan.plan_type] || "border-border/20"
                   )}
                 >
@@ -216,7 +216,7 @@ const Challenges = () => {
           {/* Badges Tab */}
           <TabsContent value="badges" className="mt-4">
             {badges.length === 0 ? (
-              <div className="glass rounded-[14px] p-8 text-center">
+              <div className="glass rounded-2xl p-8 text-center">
                 <Award className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground font-mono">لا توجد شارات بعد</p>
                 <p className="text-[13px] text-muted-foreground font-mono mt-1">أكمل التحديات لكسب شارات!</p>
@@ -224,7 +224,7 @@ const Challenges = () => {
             ) : (
               <div className="grid grid-cols-3 gap-2.5">
                 {badges.map((b) => (
-                  <div key={b.id} className="glass rounded-[12px] p-3 text-center border border-primary/10">
+                  <div key={b.id} className="glass rounded-xl p-3 text-center border border-primary/10">
                     <span className="text-2xl block mb-1">{b.badge_icon}</span>
                     <p className="text-[13px] font-mono font-bold">{b.badge_name_ar}</p>
                     <p className="text-[13px] font-mono text-muted-foreground mt-0.5">
@@ -242,12 +242,12 @@ const Challenges = () => {
               <Users className="w-3 h-3" /> أفضل المنضبطين هذا الأسبوع
             </p>
             {leaderboard.length === 0 ? (
-              <div className="glass rounded-[14px] p-8 text-center">
+              <div className="glass rounded-2xl p-8 text-center">
                 <Crown className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground font-mono">لا توجد بيانات بعد</p>
               </div>
             ) : (
-              <div className="glass rounded-[12px] divide-y divide-border/10">
+              <div className="glass rounded-xl divide-y divide-border/10">
                 {leaderboard.slice(0, 10).map((entry: any, i: number) => {
                   const medals = ["🥇", "🥈", "🥉"];
                   const isMe = entry.user_id === user?.id;
@@ -282,7 +282,7 @@ const Challenges = () => {
               </div>
             )}
 
-            <div className="glass rounded-[12px] p-3 border border-border/10">
+            <div className="glass rounded-xl p-3 border border-border/10">
               <p className="text-[13px] font-mono text-muted-foreground text-center">
                 ⚠️ التصنيف يعتمد على الانضباط والثبات — وليس الأرباح. نحن نكافئ المتداولين المسؤولين.
               </p>

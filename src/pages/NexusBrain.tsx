@@ -150,7 +150,7 @@ const NexusBrain = () => {
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-mono font-bold transition-all",
+              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[13px] font-mono font-bold transition-all",
               activeTab === t.key
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "bg-secondary/40 text-muted-foreground border border-border/10"
@@ -193,10 +193,7 @@ const NexusBrain = () => {
                       ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                       : "rounded-bl-md text-foreground"
                   )}
-                  style={msg.role === "assistant" ? {
-                    background: "hsla(43, 100%, 50%, 0.06)",
-                    border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                  } : undefined}
+                  className={cn(msg.role === "assistant" && "bg-primary/6 border border-primary/10")}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -204,10 +201,7 @@ const NexusBrain = () => {
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md" style={{
-                  background: "hsla(43, 100%, 50%, 0.06)",
-                  border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                }}>
+                <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-primary/6 border border-primary/10">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.2s" }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.4s" }} />
@@ -245,7 +239,7 @@ const NexusBrain = () => {
       {/* Chart Scan Tab */}
       {activeTab === "scan" && (
         <motion.div variants={fadeUp} className="space-y-4">
-          <div className="glass rounded-[14px] p-6 text-center">
+          <div className="glass rounded-2xl p-6 text-center">
             <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40 animate-pulse" />
             <h4 className="text-xs font-semibold font-mono mb-1">المحرك العصبي جاهز</h4>
             <p className="text-[13px] text-muted-foreground font-mono mb-4">
@@ -267,7 +261,7 @@ const NexusBrain = () => {
               { label: "دعم/مقاومة", desc: "مستويات ذكية" },
               { label: "استراتيجية", desc: "توليد فوري" },
             ].map((cap, i) => (
-              <div key={i} className="glass rounded-[10px] p-3 text-center">
+              <div key={i} className="glass rounded-lg p-3 text-center">
                 <p className="text-[13px] font-mono font-bold text-foreground">{cap.label}</p>
                 <p className="text-[13px] font-mono text-muted-foreground mt-0.5">{cap.desc}</p>
               </div>
@@ -279,7 +273,7 @@ const NexusBrain = () => {
       {/* Market Brief Tab */}
       {activeTab === "brief" && (
         <motion.div variants={fadeUp} className="space-y-4">
-          <div className="glass rounded-[14px] p-6 text-center">
+          <div className="glass rounded-2xl p-6 text-center">
             <Sun className="w-10 h-10 mx-auto mb-3 text-warning animate-pulse" />
             <h4 className="text-xs font-semibold font-mono mb-1">الملخص الصباحي</h4>
             <p className="text-[13px] text-muted-foreground font-mono mb-4">

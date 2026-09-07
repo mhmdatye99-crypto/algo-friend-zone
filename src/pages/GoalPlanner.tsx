@@ -378,7 +378,7 @@ const ProgressTracker = () => {
 
       {/* Live P&L from Trades */}
       {tradeStats && (
-        <motion.div variants={fadeUp} className="rounded-[14px] p-4 bg-card border border-border/30">
+        <motion.div variants={fadeUp} className="rounded-2xl p-4 bg-card border border-border/30">
           <div className="flex items-center gap-2 mb-3">
             <div className="live-dot" />
             <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider">الأداء الحي من الصفقات</p>

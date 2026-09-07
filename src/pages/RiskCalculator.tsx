@@ -75,7 +75,7 @@ const RiskCalculator = () => {
       className="px-4 pt-4 pb-28 space-y-4 max-w-lg mx-auto"
     >
       {/* Capital Slider */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-4">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <DollarSign className="w-4 h-4 text-primary" />
           <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">رأس المال</p>
@@ -120,7 +120,7 @@ const RiskCalculator = () => {
       </motion.div>
 
       {/* Risk % Slider */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Percent className="w-4 h-4 text-warning" />
@@ -155,7 +155,7 @@ const RiskCalculator = () => {
         </div>
 
         {/* Live risk amount */}
-        <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] bg-secondary/40 border border-border/10">
+        <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-secondary/40 border border-border/10">
           <Zap className="w-3.5 h-3.5 text-primary" />
           <span className="text-[13px] font-mono text-muted-foreground">المبلغ المُعرّض:</span>
           <motion.span
@@ -170,7 +170,7 @@ const RiskCalculator = () => {
       </motion.div>
 
       {/* Price Inputs */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2 mb-1">
           <Shield className="w-4 h-4 text-accent" />
           <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">مستويات الأسعار</p>
@@ -207,7 +207,7 @@ const RiskCalculator = () => {
           {/* Direction badge */}
           <motion.div variants={fadeUp} className="flex justify-center">
             <span className={cn(
-              "px-4 py-1.5 rounded-[10px] text-[13px] font-mono font-bold border",
+              "px-4 py-1.5 rounded-lg text-[13px] font-mono font-bold border",
               isLong
                 ? "bg-success/10 text-success border-success/20"
                 : "bg-destructive/10 text-destructive border-destructive/20"
@@ -217,7 +217,7 @@ const RiskCalculator = () => {
           </motion.div>
 
           {/* Core metrics */}
-          <motion.div variants={fadeUp} className="glass rounded-[12px] p-4">
+          <motion.div variants={fadeUp} className="glass rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="w-4 h-4 text-accent" />
               <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">نتائج التحليل</p>
@@ -253,7 +253,7 @@ const RiskCalculator = () => {
 
           {/* Risk/Reward */}
           {calc.rrRatio > 0 && (
-            <motion.div variants={fadeUp} className="glass rounded-[12px] p-4">
+            <motion.div variants={fadeUp} className="glass rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Target className="w-4 h-4 text-primary" />
                 <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة للعائد</p>
@@ -261,7 +261,7 @@ const RiskCalculator = () => {
 
               {/* RR visual bar */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex-1 h-8 rounded-[10px] overflow-hidden flex bg-muted">
+                <div className="flex-1 h-8 rounded-lg overflow-hidden flex bg-muted">
                   <div
                     className="h-full bg-destructive/60 flex items-center justify-center"
                     style={{ width: `${(1 / (1 + calc.rrRatio)) * 100}%` }}
@@ -299,18 +299,10 @@ const RiskCalculator = () => {
               </div>
 
               {/* Quality assessment */}
-              <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-[10px]" style={{
-                background: calc.rrRatio >= 2
-                  ? "hsla(155, 100%, 45%, 0.08)"
-                  : calc.rrRatio >= 1
-                  ? "hsla(38, 100%, 50%, 0.08)"
-                  : "hsla(350, 100%, 50%, 0.08)",
-                border: `1px solid ${calc.rrRatio >= 2
-                  ? "hsla(155, 100%, 45%, 0.15)"
-                  : calc.rrRatio >= 1
-                  ? "hsla(38, 100%, 50%, 0.15)"
-                  : "hsla(350, 100%, 50%, 0.15)"}`,
-              }}>
+              <div className={cn(
+                "mt-3 flex items-center gap-2 px-3 py-2 rounded-lg border",
+                calc.rrRatio >= 2 ? "bg-success/8 border-success/15" : calc.rrRatio >= 1 ? "bg-warning/8 border-warning/15" : "bg-destructive/8 border-destructive/15"
+              )}>
                 <span className="text-sm">{calc.rrRatio >= 2 ? "✅" : calc.rrRatio >= 1 ? "⚠️" : "❌"}</span>
                 <span className={cn("text-[13px] font-mono font-bold", calc.rrRatio >= 2 ? "text-success" : calc.rrRatio >= 1 ? "text-warning" : "text-destructive")}>
                   {calc.rrRatio >= 3 ? "صفقة ممتازة — إدارة مخاطر مؤسسية" : calc.rrRatio >= 2 ? "صفقة جيدة — نسبة مقبولة مؤسسياً" : calc.rrRatio >= 1 ? "صفقة متوسطة — احذر" : "صفقة ضعيفة — غير مُوصى بها"}
@@ -348,7 +340,7 @@ const InputField = ({ label, icon, value, onChange, placeholder }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-secondary/60 border border-border/30 rounded-[10px] pr-7 pl-2 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
+        className="w-full bg-secondary/60 border border-border/30 rounded-lg pr-7 pl-2 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
       />
     </div>
   </div>
@@ -360,7 +352,7 @@ const ResultCard = ({ label, value, sub, color }: {
   sub: string;
   color: string;
 }) => (
-  <div className="bg-secondary/40 rounded-[10px] px-3 py-2.5 border border-border/10">
+  <div className="bg-secondary/40 rounded-lg px-3 py-2.5 border border-border/10">
     <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
     <p className={cn("text-[15px] font-mono font-bold tabular-nums", color)}>{value}</p>
     <p className="text-[13px] font-mono text-muted-foreground">{sub}</p>
