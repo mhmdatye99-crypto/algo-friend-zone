@@ -8,7 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Markets from "./pages/Markets";
 import SignalsPage from "./pages/SignalsPage";
 import CommunityPage from "./pages/CommunityPage";
-import ProfilePage from "./pages/ProfilePage";
+
 import Auth from "./pages/Auth";
 import AssetDetail from "./pages/AssetDetail";
 import Subscription from "./pages/Subscription";
@@ -57,11 +57,10 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthRoute />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-              {/* 5 Main Tabs */}
+              {/* 4 Main Tabs */}
               <Route path="/" element={<Dashboard />} />
               <Route path="/markets" element={<Markets />} />
               <Route path="/signals" element={<SignalsPage />} />
-              <Route path="/portfolio" element={<ProfilePage />} />
               <Route path="/community" element={<CommunityPage />} />
 
               {/* Side menu pages */}
@@ -79,12 +78,13 @@ const App = () => (
               {/* Legacy redirects */}
               <Route path="/hub" element={<Navigate to="/" replace />} />
               <Route path="/trade-center" element={<Navigate to="/signals" replace />} />
-              <Route path="/profile" element={<Navigate to="/portfolio" replace />} />
+              <Route path="/portfolio" element={<Navigate to="/journal" replace />} />
+              <Route path="/profile" element={<Navigate to="/journal" replace />} />
               <Route path="/nexus-brain" element={<Navigate to="/learning" replace />} />
               <Route path="/mentor" element={<Navigate to="/learning" replace />} />
               <Route path="/academy" element={<Navigate to="/learning" replace />} />
               <Route path="/challenges" element={<Navigate to="/community" replace />} />
-              <Route path="/more" element={<Navigate to="/portfolio" replace />} />
+              <Route path="/more" element={<Navigate to="/" replace />} />
               <Route path="/goal-planner" element={<Navigate to="/tools" replace />} />
               <Route path="/risk-calculator" element={<Navigate to="/tools" replace />} />
               <Route path="/trade-journal" element={<Navigate to="/journal" replace />} />

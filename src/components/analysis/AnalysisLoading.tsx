@@ -3,12 +3,10 @@ import { CheckCircle2, Loader2, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const analysisLoadingSteps = [
-  { label: "رفع بيانات الصورة" },
-  { label: "تحديد الزوج والإطار الزمني" },
-  { label: "التعرف على الأنماط الفنية" },
-  { label: "تحليل المؤشرات والزخم" },
-  { label: "حساب مستويات الدعم والمقاومة" },
-  { label: "توليد التوصية النهائية" },
+  { label: "قراءة الشارت" },
+  { label: "تحليل الاتجاه" },
+  { label: "تحديد المستويات" },
+  { label: "بناء السيناريو" },
 ];
 
 interface Props {

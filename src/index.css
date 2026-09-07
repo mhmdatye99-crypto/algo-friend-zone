@@ -145,7 +145,7 @@
   .nx-title { @apply text-[26px] sm:text-[28px] font-bold text-foreground leading-tight; }
   .nx-section { @apply text-[20px] font-bold text-foreground leading-snug; }
   .nx-card-title { @apply text-[17px] font-semibold text-foreground; }
-  .nx-body { @apply text-[15px] sm:text-base font-normal text-foreground/90 leading-[1.75]; }
+  .nx-body { @apply text-[16px] font-normal text-foreground/90 leading-[1.7]; }
   .nx-label { @apply text-[14px] font-semibold text-muted-foreground; }
   .nx-meta { @apply text-[13px] font-normal text-muted-foreground; }
   .nx-num { @apply font-mono text-[19px] font-semibold tabular-nums text-foreground; }
@@ -154,13 +154,13 @@
 
   /* ---------- Cards ---------- */
   .nx-card {
-    @apply bg-card border border-border rounded-2xl p-4 sm:p-5;
+    @apply bg-card border border-border rounded-2xl p-[18px];
   }
   .nx-card-flat {
     @apply bg-secondary/60 border border-border rounded-xl p-4;
   }
   .nx-card-premium {
-    @apply bg-card border border-primary/30 rounded-2xl p-4 sm:p-5;
+    @apply bg-card border border-primary/30 rounded-2xl p-[18px];
   }
   .nx-row {
     @apply flex items-center gap-3 min-h-[72px] px-4 border-b border-border/70 last:border-b-0;
@@ -168,7 +168,7 @@
 
   /* ---------- Buttons ---------- */
   .nx-btn {
-    @apply inline-flex items-center justify-center gap-2 h-12 px-5 rounded-xl text-[16px] font-semibold
+    @apply inline-flex items-center justify-center gap-2 h-[50px] px-5 rounded-xl text-[16px] font-semibold
            transition-colors disabled:opacity-45 disabled:pointer-events-none active:scale-[0.99];
   }
   .nx-btn-primary { @apply nx-btn bg-primary text-primary-foreground hover:bg-accent; }
@@ -176,7 +176,23 @@
   .nx-btn-success { @apply nx-btn bg-success text-success-foreground hover:opacity-90; }
   .nx-btn-danger { @apply nx-btn bg-destructive text-destructive-foreground hover:opacity-90; }
   .nx-btn-ghost { @apply nx-btn bg-transparent text-muted-foreground hover:text-foreground hover:bg-secondary; }
-  .nx-btn-sm { @apply h-10 px-4 text-[14px] rounded-lg; }
+  .nx-btn-sm { @apply h-11 px-4 text-[15px] rounded-xl; }
+  .nx-btn-text {
+    @apply inline-flex items-center gap-1 min-h-[44px] text-[15px] font-semibold text-primary
+           transition-opacity hover:opacity-80;
+  }
+
+  /* ---------- Inputs & chips ---------- */
+  .nx-input {
+    @apply w-full h-12 bg-card border border-border rounded-xl px-4 text-[16px] text-foreground
+           placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors;
+  }
+  .nx-chip {
+    @apply inline-flex items-center justify-center h-11 px-4 rounded-xl text-[15px] font-semibold
+           whitespace-nowrap border border-border bg-transparent text-muted-foreground
+           transition-colors shrink-0 hover:border-primary/40;
+  }
+  .nx-chip-on { @apply bg-primary text-primary-foreground border-primary hover:border-primary; }
 
   /* ---------- Badges ---------- */
   .nx-badge {
@@ -190,7 +206,7 @@
   .nx-badge-neutral { @apply nx-badge bg-secondary text-secondary-foreground border border-border; }
 
   /* ---------- Layout helpers ---------- */
-  .nx-page { @apply px-4 sm:px-5 pt-4 pb-32 max-w-lg mx-auto space-y-6; }
+  .nx-page { @apply px-4 sm:px-5 pt-5 pb-32 max-w-lg mx-auto space-y-7; }
   .nx-stack { @apply space-y-4; }
   .nx-tap { @apply min-h-[44px] min-w-[44px]; }
 }
