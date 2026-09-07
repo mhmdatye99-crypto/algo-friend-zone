@@ -122,8 +122,8 @@ const ChartAnalysisPage = () => {
       {analysisStep === "idle" && (
         <motion.div variants={fadeUp} className="space-y-4">
           <div>
-            <h1 className="nx-title">تحليل الشارت</h1>
-            <p className="nx-body text-muted-foreground mt-1">
+            <h1 className="sr-only">تحليل الشارت</h1>
+            <p className="nx-body text-muted-foreground">
               ارفع صورة الشارت واحصل على تحليل منظم للسوق.
             </p>
           </div>
