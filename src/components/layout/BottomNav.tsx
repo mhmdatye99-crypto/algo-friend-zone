@@ -17,9 +17,9 @@ const BottomNav = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] bg-background/95 backdrop-blur-xl border-t border-border">
       <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-around h-[50px] mx-2 mb-1.5 bg-card/95 backdrop-blur-lg border border-border/20" style={{ borderRadius: '4px' }}>
+        <div className="flex items-center justify-around h-[68px] px-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = isActive(tab.path);
@@ -28,19 +28,25 @@ const BottomNav = () => {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="relative flex flex-col items-center justify-center gap-[2px] w-14 h-11 transition-all duration-100"
+                aria-label={tab.label}
+                aria-current={active ? "page" : undefined}
+                className="relative flex flex-col items-center justify-center gap-1.5 flex-1 min-w-[56px] h-[56px] rounded-xl transition-colors active:bg-secondary"
               >
-                {active && (
-                  <div className="absolute -top-px w-6 h-[1px] bg-primary" />
-                )}
-                <Icon className={cn(
-                  "w-[17px] h-[17px] transition-colors duration-100",
-                  active ? "text-primary" : "text-muted-foreground/40"
-                )} strokeWidth={active ? 2 : 1.4} />
-                <span className={cn(
-                  "text-[8px] font-mono font-medium transition-colors duration-100 leading-none tracking-wide",
-                  active ? "text-primary" : "text-muted-foreground/30"
-                )}>{tab.label}</span>
+                <Icon
+                  className={cn(
+                    "w-[22px] h-[22px] transition-colors",
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
+                <span
+                  className={cn(
+                    "text-[12px] font-medium leading-none transition-colors",
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  {tab.label}
+                </span>
               </button>
             );
           })}
