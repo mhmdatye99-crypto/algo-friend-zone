@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronLeft, ScanLine, Sun, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Sun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";

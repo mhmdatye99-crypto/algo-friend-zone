@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, X, AlertTriangle } from "lucide-react";
+import { Search, X, AlertTriangle, ScanLine } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useSignals } from "@/hooks/useSignals";
 import SignalCard from "@/components/signals/SignalCard";
@@ -21,6 +22,7 @@ const filters: { key: FilterKey; label: string }[] = [
 ];
 
 const SignalsPage = () => {
+  const navigate = useNavigate();
   const { signals } = useSignals();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -55,6 +57,13 @@ const SignalsPage = () => {
           <span className="font-mono font-bold tabular-nums nx-ltr">{bearish}</span>
           <span>SHORT</span>
         </div>
+      </motion.div>
+
+      {/* Chart analysis entry */}
+      <motion.div variants={fade}>
+        <button onClick={() => navigate("/chart-analysis")} className="nx-btn-secondary w-full">
+          <ScanLine className="w-5 h-5 text-primary" /> تحليل شارت
+        </button>
       </motion.div>
 
       {/* Search */}
