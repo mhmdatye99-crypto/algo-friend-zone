@@ -30,6 +30,17 @@ const Dashboard = () => {
     [assets]
   );
 
+  const pulse = useMemo(() => {
+    const pct = (cat: string) => {
+      const rows = assets.filter((a) => a.category === cat);
+      if (!rows.length) return 0;
+      return Math.round((rows.filter((a) => a.up).length / rows.length) * 100);
+    };
+    const topMover = [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change))[0] ?? null;
+    return { crypto: pct("كريبتو"), forex: pct("فوركس"), topMover };
+  }, [assets]);
+
+
   return (
     <motion.div
       initial="hidden"
@@ -87,19 +98,47 @@ const Dashboard = () => {
         </motion.section>
       )}
 
-      {/* ═══ DAILY INTELLIGENCE ═══ */}
+      {/* ═══ DAILY INTELLIGENCE (LIVE) ═══ */}
       <motion.section variants={fade} className="nx-card space-y-4">
         <div className="flex items-center gap-2.5">
           <Sun className="w-5 h-5 text-primary" strokeWidth={1.8} />
           <h2 className="nx-card-title">إحاطة NEXUS اليومية</h2>
         </div>
-        <p className="nx-body text-muted-foreground">
-          ملخص يومي للسيولة والاتجاه العام ومستويات التقلب عبر أهم الأسواق.
-        </p>
+        <div className="grid grid-cols-3 gap-2.5 text-center">
+          <div className="rounded-xl border border-border/70 bg-secondary/30 p-3">
+            <p className="nx-meta">ميل الكريبتو</p>
+            <p className={cn(
+              "font-mono text-lg font-bold tabular-nums",
+              pulse.crypto >= 55 ? "text-success" : pulse.crypto >= 45 ? "text-warning" : "text-destructive"
+            )}>{pulse.crypto}%</p>
+          </div>
+          <div className="rounded-xl border border-border/70 bg-secondary/30 p-3">
+            <p className="nx-meta">ميل الفوركس</p>
+            <p className={cn(
+              "font-mono text-lg font-bold tabular-nums",
+              pulse.forex >= 55 ? "text-success" : pulse.forex >= 45 ? "text-warning" : "text-destructive"
+            )}>{pulse.forex}%</p>
+          </div>
+          <div className="rounded-xl border border-border/70 bg-secondary/30 p-3">
+            <p className="nx-meta">الأكثر حركة</p>
+            <p className="font-mono text-[14px] font-bold nx-ltr truncate">
+              {pulse.topMover ? pulse.topMover.pair.replace("/USDT", "") : "—"}
+            </p>
+            {pulse.topMover && (
+              <p className={cn(
+                "font-mono text-[13px] font-semibold tabular-nums nx-ltr",
+                pulse.topMover.up ? "text-success" : "text-destructive"
+              )}>
+                {pulse.topMover.up ? "+" : ""}{pulse.topMover.change}%
+              </p>
+            )}
+          </div>
+        </div>
         <button onClick={() => navigate("/morning-brief")} className="nx-btn-secondary w-full">
-          قراءة الإحاطة
+          الاتجاهات ومستويات الدعم والمقاومة
         </button>
       </motion.section>
+
 
       {/* ═══ DISCLAIMER ═══ */}
       <motion.div variants={fade} className="flex items-start gap-2 px-1">
