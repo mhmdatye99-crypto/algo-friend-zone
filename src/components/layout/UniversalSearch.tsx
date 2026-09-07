@@ -77,7 +77,7 @@ const UniversalSearch = ({ open, onClose }: Props) => {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="ابحث عن أصل أو أداة... BTC, Gold, صفقات"
-                className="flex-1 bg-transparent text-[13px] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                className="flex-1 bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
               {query && (
                 <button onClick={() => setQuery("")} className="text-muted-foreground hover:text-foreground">
@@ -89,7 +89,7 @@ const UniversalSearch = ({ open, onClose }: Props) => {
             {/* Results */}
             <div className="max-h-[60vh] overflow-y-auto">
               {!query.trim() && (
-                <div className="p-4 text-center text-[12px] font-mono text-muted-foreground">
+                <div className="p-4 text-center nx-meta">
                   ابحث عن أي أصل أو أداة في التطبيق
                 </div>
               )}
@@ -97,23 +97,23 @@ const UniversalSearch = ({ open, onClose }: Props) => {
               {/* Asset Results */}
               {results.assets.length > 0 && (
                 <div className="p-2">
-                  <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider px-2 mb-1">الأصول</p>
+                  <p className="nx-label text-[12px] px-2 mb-1">الأصول</p>
                   {results.assets.map(asset => (
                     <button
                       key={asset.pair}
                       onClick={() => handleSelect(`/asset/${encodeURIComponent(asset.pair)}`)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-secondary/40 transition-colors text-right"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20 shrink-0">
-                        <span className="text-sm">{asset.icon}</span>
+                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-border shrink-0">
+                        <span className="text-base">{asset.icon}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-mono font-bold truncate">{asset.pair}</p>
-                        <p className="text-[10px] font-mono text-muted-foreground">{asset.category}</p>
+                        <p className="font-mono font-bold text-[14px] truncate nx-ltr">{asset.pair}</p>
+                        <p className="nx-meta">{asset.category}</p>
                       </div>
                       <div className="text-left">
-                        <p className="text-[11px] font-mono font-medium tabular-nums">{formatPrice(asset.price)}</p>
-                        <p className={cn("text-[10px] font-mono font-bold", asset.up ? "text-success" : "text-destructive")}>
+                        <p className="font-mono font-medium text-[14px] tabular-nums nx-ltr">{formatPrice(asset.price)}</p>
+                        <p className={cn("font-mono font-bold text-[13px] tabular-nums nx-ltr", asset.up ? "text-success" : "text-destructive")}>
                           {asset.up ? "+" : ""}{asset.change}%
                         </p>
                       </div>
@@ -125,19 +125,19 @@ const UniversalSearch = ({ open, onClose }: Props) => {
               {/* Tool Results */}
               {results.tools.length > 0 && (
                 <div className="p-2 border-t border-border/10">
-                  <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider px-2 mb-1">الأدوات</p>
+                  <p className="nx-label text-[12px] px-2 mb-1">الأدوات</p>
                   {results.tools.map(tool => {
                     const Icon = tool.icon;
                     return (
                       <button
                         key={tool.path}
                         onClick={() => handleSelect(tool.path)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-secondary/40 transition-colors text-right"
+                        className="w-full min-h-[56px] flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary/40 transition-colors text-right"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
                           <Icon className="w-4 h-4 text-primary" />
                         </div>
-                        <p className="text-[12px] font-mono font-medium">{tool.name}</p>
+                        <p className="text-[14px] font-medium">{tool.name}</p>
                       </button>
                     );
                   })}
@@ -145,7 +145,7 @@ const UniversalSearch = ({ open, onClose }: Props) => {
               )}
 
               {query.trim() && results.assets.length === 0 && results.tools.length === 0 && (
-                <div className="p-6 text-center text-[12px] font-mono text-muted-foreground">
+                <div className="p-6 text-center nx-meta">
                   لا توجد نتائج لـ "{query}"
                 </div>
               )}

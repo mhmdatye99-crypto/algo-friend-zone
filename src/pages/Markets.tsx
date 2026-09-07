@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Star, X, SlidersHorizontal, ArrowUpDown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Search, Star, X, SlidersHorizontal, ArrowUpDown, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useLivePrices, formatPrice, assetCategories, CRYPTO_LOGO_MAP, FOREX_FLAG_MAP, type AssetCategory } from "@/hooks/useLivePrices";
@@ -20,10 +20,10 @@ const signalFilters: SignalFilter[] = ["الكل", "شراء", "بيع", "محا
 
 const signalColor = (s: string) => {
   switch (s) {
-    case "شراء": return "text-success bg-success/8";
-    case "بيع": return "text-destructive bg-destructive/8";
-    case "تشبع": return "text-warning bg-warning/8";
-    default: return "text-muted-foreground bg-muted/30";
+    case "شراء": return "nx-badge-long";
+    case "بيع": return "nx-badge-short";
+    case "تشبع": return "nx-badge-warn";
+    default: return "nx-badge-neutral";
   }
 };
 
@@ -33,23 +33,23 @@ const AssetLogo = ({ pair, icon, category }: { pair: string; icon: string; categ
 
   if (category === "كريبتو" && logoUrl) {
     return (
-      <div className="w-7 h-7 rounded bg-secondary/40 flex items-center justify-center overflow-hidden border border-border/20 shrink-0">
-        <img src={logoUrl} alt={pair} className="w-5 h-5 rounded object-cover" loading="lazy" />
+      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center overflow-hidden border border-border shrink-0">
+        <img src={logoUrl} alt={pair} className="w-7 h-7 rounded-lg object-cover" loading="lazy" />
       </div>
     );
   }
 
   if (category === "فوركس" && flags) {
     return (
-      <div className="w-7 h-7 rounded bg-secondary/40 flex items-center justify-center border border-border/20 shrink-0">
-        <span className="text-[10px] leading-none">{flags}</span>
+      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-border shrink-0">
+        <span className="text-sm leading-none">{flags}</span>
       </div>
     );
   }
 
   return (
-    <div className="w-7 h-7 rounded bg-secondary/40 flex items-center justify-center border border-border/20 shrink-0">
-      <span className="text-xs">{icon}</span>
+    <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-border shrink-0">
+      <span className="text-base">{icon}</span>
     </div>
   );
 };
@@ -119,21 +119,21 @@ const Markets = () => {
       initial="hidden"
       animate="show"
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
-      className="px-4 pt-4 pb-28 space-y-2.5 max-w-lg mx-auto"
+      className="nx-page"
     >
       {/* Market Summary */}
-      <motion.div variants={fade} className="flex items-center gap-3 text-[9px] font-mono">
-        <div className="flex items-center gap-1.5 text-success px-2 py-1 border border-success/10" style={{ borderRadius: '3px' }}>
-          <TrendingUp className="w-3 h-3" />
-          <span className="font-bold tabular-nums">{gainers}</span>
-          <span className="text-success/60">صاعد</span>
+      <motion.div variants={fade} className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 text-success px-3 py-1.5 rounded-lg bg-success/10 border border-success/15">
+          <TrendingUp className="w-4 h-4" />
+          <span className="nx-num text-[14px] nx-ltr">{gainers}</span>
+          <span className="nx-meta text-success/80">صاعد</span>
         </div>
-        <div className="flex items-center gap-1.5 text-destructive px-2 py-1 border border-destructive/10" style={{ borderRadius: '3px' }}>
-          <TrendingDown className="w-3 h-3" />
-          <span className="font-bold tabular-nums">{losers}</span>
-          <span className="text-destructive/60">هابط</span>
+        <div className="flex items-center gap-1.5 text-destructive px-3 py-1.5 rounded-lg bg-destructive/10 border border-destructive/15">
+          <TrendingDown className="w-4 h-4" />
+          <span className="nx-num text-[14px] nx-ltr">{losers}</span>
+          <span className="nx-meta text-destructive/80">هابط</span>
         </div>
-        <div className="mr-auto text-muted-foreground/50 tabular-nums">
+        <div className="mr-auto nx-meta nx-ltr">
           {assets.length} أصل
         </div>
       </motion.div>
@@ -141,32 +141,30 @@ const Markets = () => {
       {/* Search */}
       <motion.div variants={fade} className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ابحث... BTC, EUR/USD"
-            className="w-full bg-card border border-border/30 pr-9 pl-9 py-2 text-[11px] font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40 transition-colors"
-            style={{ borderRadius: '4px' }}
+            className="w-full h-12 bg-card border border-border rounded-xl pr-10 pl-10 text-[14px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => setSearchQuery("")} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            "relative w-9 h-9 flex items-center justify-center transition-colors shrink-0 border",
-            showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground/50 border-border/30 hover:border-border/50"
+            "relative w-12 h-12 flex items-center justify-center transition-colors shrink-0 rounded-xl border",
+            showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border hover:border-primary/40"
           )}
-          style={{ borderRadius: '4px' }}
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <SlidersHorizontal className="w-4 h-4" />
           {activeFiltersCount > 0 && (
-            <span className="absolute -top-1 -left-1 w-3.5 h-3.5 bg-primary text-primary-foreground text-[7px] flex items-center justify-center font-bold" style={{ borderRadius: '2px' }}>
+            <span className="absolute -top-1.5 -left-1.5 w-5 h-5 bg-primary text-primary-foreground text-[11px] rounded-full flex items-center justify-center font-bold">
               {activeFiltersCount}
             </span>
           )}
@@ -174,19 +172,18 @@ const Markets = () => {
       </motion.div>
 
       {/* Category tabs */}
-      <motion.div variants={fade} className="flex items-center gap-1.5">
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide flex-1">
+      <motion.div variants={fade} className="flex items-center gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
           {assetCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "px-3 py-1.5 text-[9px] font-mono font-semibold transition-all whitespace-nowrap border",
+                "px-4 h-10 rounded-full text-[14px] font-semibold transition-all whitespace-nowrap border",
                 activeCategory === cat
                   ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-transparent text-muted-foreground/50 border-border/20 hover:border-border/40"
+                  : "bg-secondary text-foreground border-border hover:border-primary/40"
               )}
-              style={{ borderRadius: '3px' }}
             >
               {cat}
             </button>
@@ -196,12 +193,11 @@ const Markets = () => {
           <button
             onClick={() => setShowFavOnly(!showFavOnly)}
             className={cn(
-              "w-8 h-8 flex items-center justify-center transition-colors shrink-0 border",
-              showFavOnly ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground/40 border-border/20"
+              "w-10 h-10 flex items-center justify-center transition-colors shrink-0 rounded-full border",
+              showFavOnly ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border"
             )}
-            style={{ borderRadius: '3px' }}
           >
-            <Star className={cn("w-3.5 h-3.5", showFavOnly && "fill-current")} />
+            <Star className={cn("w-4 h-4", showFavOnly && "fill-current")} />
           </button>
         )}
       </motion.div>
@@ -216,21 +212,20 @@ const Markets = () => {
             transition={{ duration: 0.15 }}
             className="overflow-hidden"
           >
-            <div className="p-3 space-y-3 border border-border/15 bg-card/80" style={{ borderRadius: '4px' }}>
+            <div className="nx-card space-y-4">
               <div>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5">فلتر الإشارة</p>
-                <div className="flex gap-1 flex-wrap">
+                <p className="nx-label mb-2">فلتر الإشارة</p>
+                <div className="flex gap-2 flex-wrap">
                   {signalFilters.map((s) => (
                     <button
                       key={s}
                       onClick={() => setSignalFilter(s)}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
+                        "px-3 h-9 rounded-full text-[13px] font-medium transition-all border",
                         signalFilter === s
                           ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-transparent text-muted-foreground/50 border-border/15 hover:border-border/30"
+                          : "bg-secondary text-foreground border-border hover:border-primary/40"
                       )}
-                      style={{ borderRadius: '3px' }}
                     >
                       {s}
                     </button>
@@ -239,8 +234,8 @@ const Markets = () => {
               </div>
 
               <div>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5">اتجاه التغيير</p>
-                <div className="flex gap-1">
+                <p className="nx-label mb-2">اتجاه التغيير</p>
+                <div className="flex gap-2">
                   {([
                     { key: "all", label: "الكل" },
                     { key: "up", label: "صاعد ↑" },
@@ -250,12 +245,11 @@ const Markets = () => {
                       key={key}
                       onClick={() => setChangeFilter(key)}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
+                        "px-3 h-9 rounded-full text-[13px] font-medium transition-all border",
                         changeFilter === key
                           ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-transparent text-muted-foreground/50 border-border/15"
+                          : "bg-secondary text-foreground border-border"
                       )}
-                      style={{ borderRadius: '3px' }}
                     >
                       {label}
                     </button>
@@ -264,8 +258,8 @@ const Markets = () => {
               </div>
 
               <div>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider mb-1.5">ترتيب حسب</p>
-                <div className="flex gap-1 flex-wrap">
+                <p className="nx-label mb-2">ترتيب حسب</p>
+                <div className="flex gap-2 flex-wrap">
                   {([
                     { field: "change" as SortField, label: "التغيير" },
                     { field: "price" as SortField, label: "السعر" },
@@ -276,15 +270,14 @@ const Markets = () => {
                       key={field}
                       onClick={() => toggleSort(field)}
                       className={cn(
-                        "flex items-center gap-1 px-2.5 py-1 text-[9px] font-mono font-medium transition-all border",
+                        "flex items-center gap-1 px-3 h-9 rounded-full text-[13px] font-medium transition-all border",
                         sortField === field
                           ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-transparent text-muted-foreground/50 border-border/15"
+                          : "bg-secondary text-foreground border-border"
                       )}
-                      style={{ borderRadius: '3px' }}
                     >
                       {label}
-                      {sortField === field && <ArrowUpDown className="w-2.5 h-2.5" />}
+                      {sortField === field && <ArrowUpDown className="w-3.5 h-3.5" />}
                     </button>
                   ))}
                 </div>
@@ -293,7 +286,7 @@ const Markets = () => {
               {activeFiltersCount > 0 && (
                 <button
                   onClick={() => { setSignalFilter("الكل"); setChangeFilter("all"); setShowFavOnly(false); }}
-                  className="text-[9px] font-mono text-destructive/70 hover:text-destructive transition-colors"
+                  className="text-[13px] font-semibold text-destructive hover:opacity-80 transition-colors"
                 >
                   إعادة تعيين
                 </button>
@@ -305,7 +298,7 @@ const Markets = () => {
 
       {/* Results count */}
       <motion.div variants={fade}>
-        <p className="text-[8px] font-mono text-muted-foreground/30 uppercase tracking-wider">
+        <p className="nx-meta">
           {filteredAssets.length} أصل
           {searchQuery && ` — "${searchQuery}"`}
           {signalFilter !== "الكل" && ` — ${signalFilter}`}
@@ -313,65 +306,57 @@ const Markets = () => {
       </motion.div>
 
       {/* Asset Table */}
-      <motion.div variants={fade} className="border border-border/15 bg-card/50 overflow-hidden" style={{ borderRadius: '4px' }}>
-        {/* Header */}
-        <div className="grid grid-cols-[1fr_auto_52px_44px] gap-2 px-3 py-2 text-[7px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em] border-b border-border/10 bg-secondary/20">
-          <span>الأصل</span>
-          <span className="text-start w-20">السعر</span>
-          <span className="text-center">24H</span>
-          <span className="text-center">CHART</span>
-        </div>
-
+      <motion.div variants={fade} className="rounded-2xl border border-border bg-card overflow-hidden">
         {/* Rows */}
         {filteredAssets.length === 0 && (
-          <div className="py-10 text-center text-[10px] font-mono text-muted-foreground/30">
+          <div className="py-12 text-center nx-meta">
             لا توجد نتائج مطابقة
           </div>
         )}
-        {filteredAssets.map((item, i) => (
+        {filteredAssets.map((item) => (
           <div
             key={item.pair}
             onClick={() => navigate(`/asset/${encodeURIComponent(item.pair)}`)}
-            className="grid grid-cols-[1fr_auto_52px_44px] gap-2 items-center px-3 py-2.5 hover:bg-secondary/10 active:bg-secondary/15 transition-colors cursor-pointer border-b border-border/5 last:border-0"
+            className="nx-row nx-tap cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 transition-colors"
           >
-            {/* Asset */}
-            <div className="flex items-center gap-2 min-w-0">
-              <button
-                onClick={(e) => { e.stopPropagation(); isLoggedIn && toggleFavorite(item.pair); }}
-                className="relative"
-              >
-                <AssetLogo pair={item.pair} icon={item.icon} category={item.category} />
-                {favorites.has(item.pair) && (
-                  <Star className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 fill-primary text-primary" />
-                )}
-              </button>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-[11px] font-mono font-bold truncate">{item.pair.replace("/USDT", "")}</p>
-                  <span className={cn("text-[7px] font-mono font-semibold px-1.5 py-0.5", signalColor(item.signal))} style={{ borderRadius: '2px' }}>
-                    {item.signal}
-                  </span>
-                </div>
-                <p className="text-[8px] font-mono text-muted-foreground/30 tabular-nums">{item.vol}</p>
+            {/* Favorite */}
+            <button
+              onClick={(e) => { e.stopPropagation(); isLoggedIn && toggleFavorite(item.pair); }}
+              className="relative w-11 h-11 flex items-center justify-center shrink-0 -ml-1"
+            >
+              <AssetLogo pair={item.pair} icon={item.icon} category={item.category} />
+              {favorites.has(item.pair) && (
+                <Star className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 fill-primary text-primary" />
+              )}
+            </button>
+
+            {/* Asset name */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className="font-mono font-bold text-[15px] truncate nx-ltr">{item.pair.replace("/USDT", "")}</p>
+                <span className={cn(signalColor(item.signal), "text-[11px] px-1.5 py-0.5")}>
+                  {item.signal}
+                </span>
               </div>
+              <p className="nx-meta truncate">{item.vol}</p>
             </div>
 
-            {/* Price */}
-            <span className="text-[11px] font-mono font-semibold w-20 text-start tabular-nums text-foreground/80">
-              {formatPrice(item.price)}
-            </span>
-
-            {/* Change */}
-            <span className={cn(
-              "text-[10px] font-mono font-bold text-center tabular-nums px-1 py-0.5",
-              item.up ? "text-success" : "text-destructive"
-            )} style={{ borderRadius: '2px', background: item.up ? 'hsla(145, 63%, 42%, 0.06)' : 'hsla(0, 62%, 50%, 0.06)' }}>
-              {item.up ? "+" : ""}{item.change}%
-            </span>
+            {/* Price + change */}
+            <div className="text-left shrink-0">
+              <p className="font-mono font-semibold text-[16px] tabular-nums nx-ltr">
+                {formatPrice(item.price)}
+              </p>
+              <p className={cn(
+                "font-mono font-bold text-[13px] tabular-nums nx-ltr",
+                item.up ? "text-success" : "text-destructive"
+              )}>
+                {item.up ? "+" : ""}{item.change}%
+              </p>
+            </div>
 
             {/* Sparkline */}
-            <div className="flex justify-center">
-              <MiniChart data={item.sparkline} up={item.up} width={36} height={16} />
+            <div className="hidden xs:flex shrink-0">
+              <MiniChart data={item.sparkline} up={item.up} width={40} height={20} />
             </div>
           </div>
         ))}

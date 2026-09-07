@@ -513,16 +513,16 @@ const AssetDetail = () => {
       initial="hidden"
       animate="show"
       variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-      className="px-4 pt-8 pb-28 max-w-lg mx-auto space-y-4"
+      className="nx-page"
     >
       {/* Header */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 h-11 px-1 text-muted-foreground hover:text-foreground transition-colors">
           <ChevronRight className="w-5 h-5" />
-          <span className="text-[12px] font-mono">رجوع</span>
+          <span className="text-[14px] font-medium">رجوع</span>
         </button>
         {isLoggedIn && (
-          <button onClick={() => toggle(asset.pair)} className={cn("transition-colors", isFav ? "text-primary" : "text-muted-foreground")}>
+          <button onClick={() => toggle(asset.pair)} className={cn("w-11 h-11 flex items-center justify-center transition-colors", isFav ? "text-primary" : "text-muted-foreground")}>
             <Star className={cn("w-5 h-5", isFav && "fill-current")} />
           </button>
         )}
@@ -530,50 +530,50 @@ const AssetDetail = () => {
 
       {/* Asset Info */}
       <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center border border-border/20">
+        <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center border border-border">
           <span className="text-xl">{asset.icon}</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-xl font-bold font-mono">{asset.pair}</h1>
+          <h1 className="text-xl font-bold font-mono nx-ltr">{asset.pair}</h1>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded-md">{asset.category}</span>
-            <span className="text-[11px] font-mono text-muted-foreground">حجم: {asset.vol}</span>
+            <span className="nx-badge-neutral text-[12px]">{asset.category}</span>
+            <span className="nx-meta">حجم: {asset.vol}</span>
           </div>
         </div>
       </motion.div>
 
       {/* Price */}
-      <motion.div variants={fadeUp} className="intel-card rounded-xl p-4">
+      <motion.div variants={fadeUp} className="nx-card">
         <div className="flex items-end justify-between mb-1">
           <div>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">السعر الحالي</p>
-            <p className="text-3xl font-bold font-mono tabular-nums">{formatPrice(asset.price)}</p>
+            <p className="nx-label">السعر الحالي</p>
+            <p className="nx-num-lg nx-ltr">{formatPrice(asset.price)}</p>
           </div>
           <div className={cn(
-            "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-mono font-bold",
+            "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[15px] font-mono font-bold nx-ltr",
             asset.up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
           )}>
             {asset.up ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
             {asset.up ? "+" : ""}{asset.change}%
           </div>
         </div>
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center gap-1.5 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          <span className="text-[10px] font-mono text-muted-foreground">تحديث لحظي</span>
+          <span className="nx-meta">تحديث لحظي</span>
         </div>
       </motion.div>
 
       {/* Chart */}
-      <motion.div variants={fadeUp} className="intel-card rounded-xl p-4">
+      <motion.div variants={fadeUp} className="nx-card">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">الشارت</p>
-          <div className="flex gap-1">
+          <p className="nx-label">الشارت</p>
+          <div className="flex gap-1.5">
             {chartTimeframes.map(tf => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-all",
+                  "px-3 h-9 rounded-lg text-[13px] font-mono font-semibold transition-all",
                   timeframe === tf ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
                 )}
               >
@@ -633,50 +633,50 @@ const AssetDetail = () => {
           onUnlock={() => setIndicatorsUnlocked(true)}
           locked={!indicatorsUnlocked}
         >
-        <div className="glass rounded-xl p-4">
-        <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-3">المؤشرات الفنية</p>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-secondary/50 rounded-lg p-3">
+        <div className="nx-card">
+        <p className="nx-label mb-3">المؤشرات الفنية</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="nx-card-flat">
             <div className="flex items-center gap-1.5 mb-1">
-              <Gauge className="w-3.5 h-3.5 text-accent" />
-              <span className="text-[10px] font-mono text-muted-foreground">RSI (14)</span>
+              <Gauge className="w-4 h-4 text-accent" />
+              <span className="nx-meta">RSI (14)</span>
             </div>
-            <p className={cn("text-xl font-bold font-mono",
+            <p className={cn("text-xl font-bold font-mono nx-ltr",
               asset.rsi > 70 ? "text-destructive" : asset.rsi < 30 ? "text-success" : "text-foreground"
             )}>{asset.rsi}</p>
-            <p className="text-[10px] font-mono text-muted-foreground">
+            <p className="nx-meta">
               {asset.rsi > 70 ? "تشبع شرائي" : asset.rsi < 30 ? "تشبع بيعي" : "منطقة محايدة"}
             </p>
           </div>
-          <div className="bg-secondary/50 rounded-lg p-3">
+          <div className="nx-card-flat">
             <div className="flex items-center gap-1.5 mb-1">
-              <Activity className="w-3.5 h-3.5 text-accent" />
-              <span className="text-[10px] font-mono text-muted-foreground">MACD</span>
+              <Activity className="w-4 h-4 text-accent" />
+              <span className="nx-meta">MACD</span>
             </div>
             <p className={cn("text-xl font-bold font-mono",
               asset.macd === "صعودي" ? "text-success" : asset.macd === "هبوطي" ? "text-destructive" : "text-muted-foreground"
             )}>{asset.macd}</p>
-            <p className="text-[10px] font-mono text-muted-foreground">
+            <p className="nx-meta">
               {asset.macd === "صعودي" ? "إشارة شراء" : asset.macd === "هبوطي" ? "إشارة بيع" : "لا إشارة"}
             </p>
           </div>
-          <div className="bg-secondary/50 rounded-lg p-3">
+          <div className="nx-card-flat">
             <div className="flex items-center gap-1.5 mb-1">
-              <ArrowUpRight className="w-3.5 h-3.5 text-success" />
-              <span className="text-[10px] font-mono text-muted-foreground">الإشارة</span>
+              <ArrowUpRight className="w-4 h-4 text-success" />
+              <span className="nx-meta">الإشارة</span>
             </div>
             <p className={cn("text-lg font-bold font-mono",
               asset.signal === "شراء" ? "text-success" : asset.signal === "بيع" ? "text-destructive" : "text-warning"
             )}>{asset.signal}</p>
-            <p className="text-[10px] font-mono text-muted-foreground">توصية AI</p>
+            <p className="nx-meta">توصية AI</p>
           </div>
-          <div className="bg-secondary/50 rounded-lg p-3">
+          <div className="nx-card-flat">
             <div className="flex items-center gap-1.5 mb-1">
-              <Activity className="w-3.5 h-3.5 text-accent" />
-              <span className="text-[10px] font-mono text-muted-foreground">الحجم</span>
+              <Activity className="w-4 h-4 text-accent" />
+              <span className="nx-meta">الحجم</span>
             </div>
-            <p className="text-lg font-bold font-mono">{asset.vol}</p>
-            <p className="text-[10px] font-mono text-muted-foreground">حجم التداول اليومي</p>
+            <p className="text-lg font-bold font-mono nx-ltr">{asset.vol}</p>
+            <p className="nx-meta">حجم التداول اليومي</p>
           </div>
         </div>
         </div>
@@ -704,14 +704,14 @@ const AssetDetail = () => {
       <motion.div variants={fadeUp} className="grid grid-cols-2 gap-2">
         <button
           onClick={() => navigate("/trade-center")}
-          className="flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary font-mono text-[12px] font-bold hover:bg-primary/20 transition-colors"
+          className="nx-btn-primary"
         >
           <TrendingUp className="w-4 h-4" />
           إشارات التداول
         </button>
         <button
           onClick={() => navigate("/chart-vision")}
-          className="flex items-center justify-center gap-2 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent font-mono text-[12px] font-bold hover:bg-accent/20 transition-colors"
+          className="nx-btn-secondary"
         >
           <Gauge className="w-4 h-4" />
           تحليل الشارت
@@ -719,8 +719,8 @@ const AssetDetail = () => {
       </motion.div>
 
       {/* Disclaimer */}
-      <motion.div variants={fadeUp} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-secondary/30 border border-border/10">
-        <p className="text-[10px] text-muted-foreground font-mono">
+      <motion.div variants={fadeUp} className="nx-card-flat">
+        <p className="nx-meta">
           بيانات السوق للأغراض التعليمية فقط — ليست إشارة دخول مالية
         </p>
       </motion.div>

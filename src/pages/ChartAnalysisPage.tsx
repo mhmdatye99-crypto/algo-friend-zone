@@ -11,6 +11,8 @@ import { useCommunity } from "@/hooks/useCommunity";
 import { useLivePrices } from "@/hooks/useLivePrices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import AIAnalysisCard from "@/components/analysis/AIAnalysisCard";
+import AnalysisLoading from "@/components/analysis/AnalysisLoading";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
@@ -213,77 +215,21 @@ const ChartAnalysisPage = () => {
       )}
 
       {analysisStep === "loading" && (
-        <motion.div variants={fadeUp} className="space-y-4 py-8">
-          {imagePreview && !imagePreview.startsWith("symbol:") && (
-            <div className="rounded-xl overflow-hidden border border-border/20 max-h-48">
-              <img src={imagePreview} alt="Chart" className="w-full h-full object-cover" />
-            </div>
-          )}
-          <div className="space-y-2">
-            {loadingSteps.map((step, i) => {
-              const Icon = step.icon;
-              const active = i === loadingStep;
-              const done = i < loadingStep;
-              return (
-                <div key={i} className={cn("flex items-center gap-3 px-3 py-2 rounded-xl transition-all",
-                  active ? "bg-accent/8 border border-accent/20" : done ? "opacity-50" : "opacity-20"
-                )}>
-                  {done ? <CheckCircle2 className="w-4 h-4 text-success" /> :
-                    active ? <Loader2 className="w-4 h-4 text-accent animate-spin" /> :
-                    <Icon className="w-4 h-4 text-muted-foreground" />}
-                  <span className="text-[11px] font-mono">{step.label}</span>
-                </div>
-              );
-            })}
-          </div>
+        <motion.div variants={fadeUp}>
+          <AnalysisLoading imagePreview={imagePreview} currentStep={loadingStep} />
         </motion.div>
       )}
 
       {analysisStep === "results" && analysis && (
         <motion.div variants={fadeUp} className="space-y-3">
-          {/* Header */}
-          <div className="rounded-xl p-4 border border-border/15 bg-card/50">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-mono font-bold">{analysis.pair}</span>
-                <span className="text-[9px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-md">{analysis.timeframe}</span>
-              </div>
-              <span className={cn("text-[11px] font-mono font-bold px-2 py-1 rounded-lg",
-                analysis.direction === "bullish" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-              )}>
-                {analysis.direction === "bullish" ? "↑ صعودي" : "↓ هبوطي"} {analysis.directionConfidence}%
-              </span>
-            </div>
-            {analysis.patternAr && (
-              <p className="text-[10px] font-mono text-muted-foreground">نمط: {analysis.patternAr} ({analysis.patternConfidence}%)</p>
-            )}
-          </div>
-
-          {/* Levels */}
-          {(analysis.entry || analysis.stopLoss || analysis.takeProfit1) && (
-            <div className="rounded-xl p-3 border border-border/15 bg-card/50 space-y-2">
-              {analysis.entry && <div className="flex justify-between"><span className="text-[10px] font-mono text-muted-foreground">الدخول</span><span className="text-[11px] font-mono font-bold">{analysis.entry}</span></div>}
-              {analysis.takeProfit1 && <div className="flex justify-between"><span className="text-[10px] font-mono text-success/70">TP1</span><span className="text-[11px] font-mono font-bold text-success">{analysis.takeProfit1}</span></div>}
-              {analysis.takeProfit2 && <div className="flex justify-between"><span className="text-[10px] font-mono text-success/70">TP2</span><span className="text-[11px] font-mono font-bold text-success">{analysis.takeProfit2}</span></div>}
-              {analysis.stopLoss && <div className="flex justify-between"><span className="text-[10px] font-mono text-destructive/70">SL</span><span className="text-[11px] font-mono font-bold text-destructive">{analysis.stopLoss}</span></div>}
-              {analysis.riskReward && <div className="flex justify-between"><span className="text-[10px] font-mono text-muted-foreground">R:R</span><span className="text-[11px] font-mono font-bold text-primary">{analysis.riskReward}</span></div>}
-            </div>
-          )}
-
-          {/* Summary */}
-          {analysis.summary && (
-            <div className="rounded-xl p-3 border border-border/15 bg-card/50">
-              <p className="text-[10px] font-mono text-foreground/80 leading-relaxed">{analysis.summary}</p>
-            </div>
-          )}
+          <AIAnalysisCard analysis={analysis} imagePreview={imagePreview} />
 
           {/* Actions */}
           <div className="flex gap-2">
-            <button onClick={resetAnalysis} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-secondary text-foreground text-[11px] font-mono font-bold border border-border/20">
+            <button onClick={resetAnalysis} className="nx-btn-secondary nx-btn-sm flex-1">
               <RotateCcw className="w-4 h-4" /> تحليل جديد
             </button>
-            <button onClick={shareToFeed} disabled={sharing}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-mono font-bold">
+            <button onClick={shareToFeed} disabled={sharing} className="nx-btn-primary nx-btn-sm flex-1">
               {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
               نشر في المجتمع
             </button>

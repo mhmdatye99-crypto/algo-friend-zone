@@ -9,17 +9,17 @@ import SideDrawer from "@/components/layout/SideDrawer";
 
 const pageTitles: Record<string, string> = {
   "/": "",
-  "/markets": "MARKETS",
-  "/signals": "SIGNALS",
-  "/community": "COMMUNITY",
-  "/portfolio": "PORTFOLIO",
-  "/learning": "ACADEMY",
-  "/subscription": "SUBSCRIPTION",
-  "/admin": "ADMIN",
-  "/tools": "TOOLS",
-  "/journal": "JOURNAL",
-  "/morning-brief": "BRIEFING",
-  "/chart-analysis": "CHART",
+  "/markets": "الأسواق",
+  "/signals": "الإشارات",
+  "/community": "المجتمع",
+  "/portfolio": "المحفظة",
+  "/learning": "الأكاديمية",
+  "/subscription": "الاشتراك",
+  "/admin": "لوحة التحكم",
+  "/tools": "الأدوات",
+  "/journal": "سجل الصفقات",
+  "/morning-brief": "الإحاطة الصباحية",
+  "/chart-analysis": "تحليل الشارت",
 };
 
 const TopBar = () => {
@@ -35,37 +35,36 @@ const TopBar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-background/90 backdrop-blur-md border-b border-border/40">
-        <div className="flex items-center justify-between px-4 h-11 max-w-lg mx-auto">
-          {/* Left: Menu */}
+      <header className="sticky top-0 z-40 w-full bg-background/90 backdrop-blur-xl border-b border-border">
+        <div className="flex items-center justify-between px-3 h-14 max-w-lg mx-auto">
           <button
             onClick={() => setShowDrawer(true)}
-            className="w-7 h-7 flex items-center justify-center hover:opacity-70 transition-opacity"
+            aria-label="القائمة"
+            className="nx-tap flex items-center justify-center rounded-xl hover:bg-secondary transition-colors"
           >
-            <Menu className="w-[18px] h-[18px] text-foreground/60" strokeWidth={1.5} />
+            <Menu className="w-[22px] h-[22px] text-foreground" strokeWidth={1.8} />
           </button>
 
-          {/* Center */}
           {isHome ? (
-            <p className="text-[11px] font-mono font-semibold tracking-[0.3em] text-foreground/50 uppercase">
-              Nexus
-            </p>
+            <div className="text-center leading-tight">
+              <p className="text-[17px] font-bold tracking-[0.3em] text-primary">NEXUS</p>
+              <p className="text-[12px] text-muted-foreground -mt-0.5">Trading Intelligence</p>
+            </div>
           ) : (
-            <p className="text-[10px] font-mono font-medium tracking-[0.2em] text-foreground/50 uppercase">{currentTitle}</p>
+            <p className="text-[17px] font-semibold text-foreground">{currentTitle}</p>
           )}
 
-          {/* Right */}
-          <div className="flex items-center gap-1">
-            <button onClick={() => setShowSearch(true)} className="w-7 h-7 flex items-center justify-center hover:opacity-70 transition-opacity">
-              <Search className="w-[15px] h-[15px] text-foreground/40" strokeWidth={1.5} />
+          <div className="flex items-center">
+            <button onClick={() => setShowSearch(true)} aria-label="بحث" className="nx-tap flex items-center justify-center rounded-xl hover:bg-secondary transition-colors">
+              <Search className="w-5 h-5 text-muted-foreground" strokeWidth={1.8} />
             </button>
-            <button onClick={toggle} className="w-7 h-7 flex items-center justify-center hover:opacity-70 transition-opacity">
-              {isDark ? <Sun className="w-[15px] h-[15px] text-primary/60" strokeWidth={1.5} /> : <Moon className="w-[15px] h-[15px] text-foreground/40" strokeWidth={1.5} />}
+            <button onClick={toggle} aria-label="تبديل السمة" className="nx-tap flex items-center justify-center rounded-xl hover:bg-secondary transition-colors">
+              {isDark ? <Sun className="w-5 h-5 text-primary" strokeWidth={1.8} /> : <Moon className="w-5 h-5 text-muted-foreground" strokeWidth={1.8} />}
             </button>
-            <button onClick={() => setShowNotifications(true)} className="relative w-7 h-7 flex items-center justify-center hover:opacity-70 transition-opacity">
-              <Bell className="w-[15px] h-[15px] text-foreground/40" strokeWidth={1.5} />
+            <button onClick={() => setShowNotifications(true)} aria-label="التنبيهات" className="relative nx-tap flex items-center justify-center rounded-xl hover:bg-secondary transition-colors">
+              <Bell className="w-5 h-5 text-muted-foreground" strokeWidth={1.8} />
               {unreadCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
               )}
             </button>
           </div>

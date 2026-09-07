@@ -75,10 +75,10 @@ const RiskCalculator = () => {
       className="px-4 pt-4 pb-28 space-y-4 max-w-lg mx-auto"
     >
       {/* Capital Slider */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-4">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <DollarSign className="w-4 h-4 text-primary" />
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">رأس المال</p>
+          <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">رأس المال</p>
         </div>
 
         <div className="text-center">
@@ -107,7 +107,7 @@ const RiskCalculator = () => {
               key={p}
               onClick={() => setCapital(p)}
               className={cn(
-                "px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-all",
+                "px-2.5 py-1 rounded-lg text-[13px] font-mono font-medium transition-all",
                 capital === p
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "bg-secondary/50 text-muted-foreground border border-border/10 hover:text-foreground"
@@ -120,11 +120,11 @@ const RiskCalculator = () => {
       </motion.div>
 
       {/* Risk % Slider */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Percent className="w-4 h-4 text-warning" />
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة</p>
+            <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة</p>
           </div>
           <motion.span
             key={riskPercent}
@@ -148,16 +148,16 @@ const RiskCalculator = () => {
           className="w-full"
         />
 
-        <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+        <div className="flex justify-between text-[13px] font-mono text-muted-foreground">
           <span className="text-success">محافظ 0.5%</span>
           <span className="text-warning">معتدل 2%</span>
           <span className="text-destructive">عدواني 10%</span>
         </div>
 
         {/* Live risk amount */}
-        <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] bg-secondary/40 border border-border/10">
+        <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-secondary/40 border border-border/10">
           <Zap className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[12px] font-mono text-muted-foreground">المبلغ المُعرّض:</span>
+          <span className="text-[13px] font-mono text-muted-foreground">المبلغ المُعرّض:</span>
           <motion.span
             key={`${capital}-${riskPercent}`}
             initial={{ opacity: 0.5, y: -4 }}
@@ -170,10 +170,10 @@ const RiskCalculator = () => {
       </motion.div>
 
       {/* Price Inputs */}
-      <motion.div variants={fadeUp} className="glass rounded-[12px] p-4 space-y-3">
+      <motion.div variants={fadeUp} className="glass rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2 mb-1">
           <Shield className="w-4 h-4 text-accent" />
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">مستويات الأسعار</p>
+          <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">مستويات الأسعار</p>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
@@ -207,7 +207,7 @@ const RiskCalculator = () => {
           {/* Direction badge */}
           <motion.div variants={fadeUp} className="flex justify-center">
             <span className={cn(
-              "px-4 py-1.5 rounded-[10px] text-[12px] font-mono font-bold border",
+              "px-4 py-1.5 rounded-lg text-[13px] font-mono font-bold border",
               isLong
                 ? "bg-success/10 text-success border-success/20"
                 : "bg-destructive/10 text-destructive border-destructive/20"
@@ -217,10 +217,10 @@ const RiskCalculator = () => {
           </motion.div>
 
           {/* Core metrics */}
-          <motion.div variants={fadeUp} className="glass rounded-[12px] p-4">
+          <motion.div variants={fadeUp} className="glass rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="w-4 h-4 text-accent" />
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">نتائج التحليل</p>
+              <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">نتائج التحليل</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -253,26 +253,26 @@ const RiskCalculator = () => {
 
           {/* Risk/Reward */}
           {calc.rrRatio > 0 && (
-            <motion.div variants={fadeUp} className="glass rounded-[12px] p-4">
+            <motion.div variants={fadeUp} className="glass rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Target className="w-4 h-4 text-primary" />
-                <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة للعائد</p>
+                <p className="text-[13px] font-mono uppercase tracking-wider text-muted-foreground">نسبة المخاطرة للعائد</p>
               </div>
 
               {/* RR visual bar */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex-1 h-8 rounded-[10px] overflow-hidden flex bg-muted">
+                <div className="flex-1 h-8 rounded-lg overflow-hidden flex bg-muted">
                   <div
                     className="h-full bg-destructive/60 flex items-center justify-center"
                     style={{ width: `${(1 / (1 + calc.rrRatio)) * 100}%` }}
                   >
-                    <span className="text-[10px] font-mono font-bold text-destructive-foreground">1</span>
+                    <span className="text-[13px] font-mono font-bold text-destructive-foreground">1</span>
                   </div>
                   <div
                     className="h-full bg-success/60 flex items-center justify-center"
                     style={{ width: `${(calc.rrRatio / (1 + calc.rrRatio)) * 100}%` }}
                   >
-                    <span className="text-[10px] font-mono font-bold text-success-foreground">{calc.rrRatio.toFixed(1)}</span>
+                    <span className="text-[13px] font-mono font-bold text-success-foreground">{calc.rrRatio.toFixed(1)}</span>
                   </div>
                 </div>
                 <span className={cn(
@@ -299,20 +299,12 @@ const RiskCalculator = () => {
               </div>
 
               {/* Quality assessment */}
-              <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-[10px]" style={{
-                background: calc.rrRatio >= 2
-                  ? "hsla(155, 100%, 45%, 0.08)"
-                  : calc.rrRatio >= 1
-                  ? "hsla(38, 100%, 50%, 0.08)"
-                  : "hsla(350, 100%, 50%, 0.08)",
-                border: `1px solid ${calc.rrRatio >= 2
-                  ? "hsla(155, 100%, 45%, 0.15)"
-                  : calc.rrRatio >= 1
-                  ? "hsla(38, 100%, 50%, 0.15)"
-                  : "hsla(350, 100%, 50%, 0.15)"}`,
-              }}>
+              <div className={cn(
+                "mt-3 flex items-center gap-2 px-3 py-2 rounded-lg border",
+                calc.rrRatio >= 2 ? "bg-success/8 border-success/15" : calc.rrRatio >= 1 ? "bg-warning/8 border-warning/15" : "bg-destructive/8 border-destructive/15"
+              )}>
                 <span className="text-sm">{calc.rrRatio >= 2 ? "✅" : calc.rrRatio >= 1 ? "⚠️" : "❌"}</span>
-                <span className={cn("text-[11px] font-mono font-bold", calc.rrRatio >= 2 ? "text-success" : calc.rrRatio >= 1 ? "text-warning" : "text-destructive")}>
+                <span className={cn("text-[13px] font-mono font-bold", calc.rrRatio >= 2 ? "text-success" : calc.rrRatio >= 1 ? "text-warning" : "text-destructive")}>
                   {calc.rrRatio >= 3 ? "صفقة ممتازة — إدارة مخاطر مؤسسية" : calc.rrRatio >= 2 ? "صفقة جيدة — نسبة مقبولة مؤسسياً" : calc.rrRatio >= 1 ? "صفقة متوسطة — احذر" : "صفقة ضعيفة — غير مُوصى بها"}
                 </span>
               </div>
@@ -324,7 +316,7 @@ const RiskCalculator = () => {
       {!calc && (
         <motion.div variants={fadeUp} className="flex flex-col items-center justify-center py-12 text-center">
           <Shield className="w-10 h-10 text-muted-foreground/30 mb-3" />
-          <p className="text-[12px] font-mono text-muted-foreground">أدخل مستويات الأسعار لحساب المخاطر</p>
+          <p className="text-[13px] font-mono text-muted-foreground">أدخل مستويات الأسعار لحساب المخاطر</p>
         </motion.div>
       )}
     </motion.div>
@@ -339,7 +331,7 @@ const InputField = ({ label, icon, value, onChange, placeholder }: {
   placeholder: string;
 }) => (
   <div>
-    <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">{label}</label>
+    <label className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider mb-1 block">{label}</label>
     <div className="relative">
       <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</div>
       <input
@@ -348,7 +340,7 @@ const InputField = ({ label, icon, value, onChange, placeholder }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-secondary/60 border border-border/30 rounded-[10px] pr-7 pl-2 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
+        className="w-full bg-secondary/60 border border-border/30 rounded-lg pr-7 pl-2 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all tabular-nums"
       />
     </div>
   </div>
@@ -360,10 +352,10 @@ const ResultCard = ({ label, value, sub, color }: {
   sub: string;
   color: string;
 }) => (
-  <div className="bg-secondary/40 rounded-[10px] px-3 py-2.5 border border-border/10">
-    <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
+  <div className="bg-secondary/40 rounded-lg px-3 py-2.5 border border-border/10">
+    <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
     <p className={cn("text-[15px] font-mono font-bold tabular-nums", color)}>{value}</p>
-    <p className="text-[9px] font-mono text-muted-foreground">{sub}</p>
+    <p className="text-[13px] font-mono text-muted-foreground">{sub}</p>
   </div>
 );
 

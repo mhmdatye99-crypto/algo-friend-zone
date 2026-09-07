@@ -57,8 +57,6 @@ const ProfilePage = () => {
     enabled: !!user,
   });
 
-  // totalEquity now comes from usePortfolioSync (realized + unrealized)
-
   const pairAllocation = useMemo(() => {
     if (!perf?.pairBreakdown || perf.pairBreakdown.length === 0) return [];
     const total = perf.pairBreakdown.reduce((s, p) => s + p.count, 0);
@@ -69,200 +67,153 @@ const ProfilePage = () => {
     }));
   }, [perf]);
 
+  const totalPnl = realizedPnl + unrealizedPnl;
+  const equityBase = totalEquity - totalPnl;
+  const totalPnlPct = equityBase !== 0 ? (totalPnl / Math.abs(equityBase)) * 100 : 0;
+
   const handleSignOut = async () => { await signOut(); navigate("/auth"); };
 
   return (
     <motion.div
       initial="hidden" animate="show"
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
-      className="px-4 pt-3 pb-28 space-y-3 max-w-lg mx-auto"
+      className="nx-page"
     >
-      {/* TOTAL EQUITY */}
-      <motion.div variants={fade} className="p-4 border border-border/15 bg-card/50" style={{ borderRadius: '4px' }}>
-        <div className="flex items-center justify-between mb-1">
+      {/* TOTAL EQUITY — PRIMARY CARD */}
+      <motion.div variants={fade} className="nx-card-premium">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <Wallet className="w-3 h-3 text-muted-foreground/40" />
-            <span className="text-[7px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em]">إجمالي رأس المال</span>
+            <Wallet className="w-4 h-4 text-muted-foreground" />
+            <span className="nx-label">إجمالي المحفظة</span>
           </div>
-          <span className={cn("text-[7px] font-mono font-bold px-1.5 py-0.5",
-            hasSubscription ? "text-success bg-success/8" : "text-muted-foreground/50 bg-secondary/30"
-          )} style={{ borderRadius: '2px' }}>
+          <span className={cn("nx-badge",
+            hasSubscription ? "nx-badge-gold" : "nx-badge-neutral"
+          )}>
             {hasSubscription ? "PRO" : "FREE"}
           </span>
         </div>
-        <p className="text-[28px] font-mono font-bold tabular-nums tracking-tight">
+        <p className="nx-num-lg nx-ltr">
           ${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </p>
-        <div className="flex items-center gap-4 mt-2">
-          <div className="flex items-center gap-1">
-            {realizedPnl >= 0 ? (
-              <ArrowUpRight className="w-3 h-3 text-success" />
-            ) : (
-              <ArrowDownRight className="w-3 h-3 text-destructive" />
-            )}
-            <span className={cn("text-[11px] font-mono font-bold tabular-nums",
-              realizedPnl >= 0 ? "text-success" : "text-destructive"
-            )}>
-              {realizedPnl >= 0 ? "+" : ""}${realizedPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            </span>
-            <span className="text-[7px] font-mono text-muted-foreground/30">REALIZED</span>
-          </div>
-          {unrealizedPnl !== 0 && (
-            <>
-              <div className="h-3 w-px bg-border/10" />
-              <div className="flex items-center gap-1">
-                <Activity className="w-2.5 h-2.5 text-warning animate-pulse" />
-                <span className={cn("text-[11px] font-mono font-bold tabular-nums",
-                  unrealizedPnl >= 0 ? "text-success" : "text-destructive"
-                )}>
-                  {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </span>
-                <span className="text-[7px] font-mono text-muted-foreground/30">LIVE</span>
-              </div>
-            </>
+        <div className="flex items-center gap-2 mt-3">
+          {totalPnl >= 0 ? (
+            <ArrowUpRight className="w-4 h-4 text-success" />
+          ) : (
+            <ArrowDownRight className="w-4 h-4 text-destructive" />
           )}
-          <div className="h-3 w-px bg-border/10" />
-          <div>
-            <span className={cn("text-[10px] font-mono font-bold tabular-nums",
-              (perf?.winRate ?? 0) >= 50 ? "text-success" : "text-destructive"
-            )}>
-              {(perf?.winRate ?? 0).toFixed(1)}%
+          <span className={cn("nx-ltr font-mono text-[16px] font-bold tabular-nums",
+            totalPnl >= 0 ? "text-success" : "text-destructive"
+          )}>
+            {totalPnl >= 0 ? "+" : ""}${totalPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </span>
+          <span className={cn("nx-ltr font-mono text-[14px] font-semibold",
+            totalPnl >= 0 ? "text-success" : "text-destructive"
+          )}>
+            ({totalPnl >= 0 ? "+" : ""}{totalPnlPct.toFixed(1)}%)
+          </span>
+          {unrealizedPnl !== 0 && (
+            <span className="nx-badge nx-badge-warn mr-auto flex items-center gap-1">
+              <Activity className="w-3 h-3 animate-pulse" /> غير محقق
             </span>
-            <span className="text-[7px] font-mono text-muted-foreground/30 mr-1">WIN</span>
-          </div>
+          )}
         </div>
       </motion.div>
 
-      {/* KPI ROW */}
-      <motion.div variants={fade} className="grid grid-cols-3 gap-1.5">
-        {[
-          { label: "PROFIT FACTOR", value: perf?.profitFactor === Infinity ? "∞" : (perf?.profitFactor ?? 0).toFixed(2), color: "text-primary" },
-          { label: "MAX DD", value: `$${(perf?.maxDrawdown ?? 0).toFixed(0)}`, color: "text-destructive" },
-          { label: "AVG WIN", value: `$${(perf?.avgWin ?? 0).toFixed(0)}`, color: "text-success" },
-        ].map((kpi, i) => (
-          <div key={i} className="p-2.5 bg-card/40 border border-border/8 text-center" style={{ borderRadius: '4px' }}>
-            <p className={cn("text-[13px] font-mono font-bold tabular-nums", kpi.color)}>{kpi.value}</p>
-            <p className="text-[6px] font-mono text-muted-foreground/30 uppercase tracking-wider mt-0.5">{kpi.label}</p>
-          </div>
-        ))}
+      {/* 2x2 METRIC GRID */}
+      <motion.div variants={fade} className="grid grid-cols-2 gap-3">
+        <div className="nx-card-flat text-center">
+          <p className="nx-meta mb-1">الأرباح/الخسائر</p>
+          <p className={cn("nx-num nx-ltr", realizedPnl >= 0 ? "text-success" : "text-destructive")}>
+            {realizedPnl >= 0 ? "+" : ""}${realizedPnl.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </p>
+        </div>
+        <div className="nx-card-flat text-center">
+          <p className="nx-meta mb-1">نسبة الفوز</p>
+          <p className={cn("nx-num nx-ltr", (perf?.winRate ?? 0) >= 50 ? "text-success" : "text-destructive")}>
+            {(perf?.winRate ?? 0).toFixed(1)}%
+          </p>
+        </div>
+        <div className="nx-card-flat text-center">
+          <p className="nx-meta mb-1">عامل الربح</p>
+          <p className="nx-num nx-ltr text-primary">
+            {perf?.profitFactor === Infinity ? "∞" : (perf?.profitFactor ?? 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="nx-card-flat text-center">
+          <p className="nx-meta mb-1">أقصى تراجع</p>
+          <p className="nx-num nx-ltr text-destructive">
+            ${(perf?.maxDrawdown ?? 0).toFixed(0)}
+          </p>
+        </div>
       </motion.div>
 
       {/* GOAL PROGRESS */}
       {goal && stats && (
-        <motion.div variants={fade} className="p-3 border border-border/12 bg-card/40" style={{ borderRadius: '4px' }}>
-          <div className="flex items-center justify-between mb-2">
+        <motion.div variants={fade} className="nx-card">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
-              <Target className="w-3 h-3 text-primary/50" />
-              <span className="text-[7px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em]">مستهدفات النمو</span>
+              <Target className="w-4 h-4 text-primary" />
+              <span className="nx-label">مستهدفات النمو</span>
             </div>
-            <button onClick={() => navigate("/tools")} className="text-[7px] font-mono text-primary/40 flex items-center gap-0.5 hover:text-primary transition-colors">
-              التفاصيل <ChevronLeft className="w-2.5 h-2.5" />
+            <button onClick={() => navigate("/tools")} className="nx-meta flex items-center gap-0.5 text-primary hover:text-primary/80 transition-colors">
+              التفاصيل <ChevronLeft className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">
+          <div className="flex items-center justify-between mb-2">
+            <span className="nx-meta nx-ltr">
               ${goal.initial_capital.toLocaleString()} → ${goal.target_goal.toLocaleString()}
             </span>
-            <span className="text-[10px] font-mono font-bold text-primary tabular-nums">{stats.progress.toFixed(1)}%</span>
+            <span className="font-mono text-[15px] font-bold text-primary tabular-nums">{stats.progress.toFixed(1)}%</span>
           </div>
-          <Progress value={stats.progress} className="h-1.5 bg-secondary/20" />
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[7px] font-mono text-muted-foreground/30 tabular-nums">
-              الرصيد: <span className="text-foreground/60 font-bold">${stats.effectiveBalance.toLocaleString()}</span>
+          <Progress value={stats.progress} className="h-2 bg-secondary" />
+          <div className="flex items-center justify-between mt-3">
+            <span className="nx-meta">
+              الرصيد: <span className="text-foreground font-semibold nx-ltr">${stats.effectiveBalance.toLocaleString()}</span>
             </span>
-            <span className="text-[7px] font-mono text-muted-foreground/30 tabular-nums">
-              المتبقي: <span className="text-warning font-bold">${stats.remaining.toLocaleString()}</span>
+            <span className="nx-meta">
+              المتبقي: <span className="text-warning font-semibold nx-ltr">${stats.remaining.toLocaleString()}</span>
             </span>
-          </div>
-        </motion.div>
-      )}
-
-      {/* EQUITY CURVE */}
-      {closedTrades.length > 0 && (
-        <motion.div variants={fade} className="p-3 border border-border/8 bg-card/30" style={{ borderRadius: '4px' }}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Activity className="w-3 h-3 text-primary/40" />
-            <span className="text-[7px] font-mono text-muted-foreground/30 uppercase tracking-[0.15em]">EQUITY CURVE</span>
-          </div>
-          <div className="h-14 flex items-end gap-px">
-            {closedTrades.slice().reverse().slice(0, 30).map((t: any, i: number) => {
-              const pnl = t.pnl ?? 0;
-              const max = Math.max(...closedTrades.map((tt: any) => Math.abs(tt.pnl ?? 0)), 1);
-              const h = Math.max((Math.abs(pnl) / max) * 100, 6);
-              return <div key={i} className={cn("flex-1 min-w-[3px]", pnl >= 0 ? "bg-success/30" : "bg-destructive/30")} style={{ height: `${h}%`, borderRadius: '1px' }} />;
-            })}
-          </div>
-        </motion.div>
-      )}
-
-      {/* PAIR ALLOCATION */}
-      {pairAllocation.length > 0 && (
-        <motion.div variants={fade} className="p-3 border border-border/8 bg-card/30" style={{ borderRadius: '4px' }}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <PieChart className="w-3 h-3 text-accent/40" />
-            <span className="text-[7px] font-mono text-muted-foreground/30 uppercase tracking-[0.15em]">ALLOCATION</span>
-          </div>
-          <div className="space-y-1">
-            {pairAllocation.map((p) => (
-              <div key={p.pair} className="flex items-center gap-2">
-                <span className="text-[9px] font-mono font-bold w-16 truncate">{p.pair}</span>
-                <div className="flex-1 h-1 bg-secondary/15 overflow-hidden" style={{ borderRadius: '1px' }}>
-                  <div
-                    className={cn("h-full", p.pnl >= 0 ? "bg-success/40" : "bg-destructive/40")}
-                    style={{ width: `${Math.max(p.pct, 4)}%`, borderRadius: '1px' }}
-                  />
-                </div>
-                <span className="text-[8px] font-mono text-muted-foreground/40 tabular-nums w-7 text-left">{p.pct}%</span>
-                <span className={cn("text-[8px] font-mono font-bold tabular-nums w-12 text-left",
-                  p.pnl >= 0 ? "text-success" : "text-destructive"
-                )}>
-                  {p.pnl >= 0 ? "+" : ""}${p.pnl}
-                </span>
-              </div>
-            ))}
           </div>
         </motion.div>
       )}
 
       {/* OPEN POSITIONS */}
-      <motion.div variants={fade} className="space-y-1.5">
+      <motion.div variants={fade} className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[7px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em]">المراكز المفتوحة ({openTrades.length})</span>
-          <button onClick={() => navigate("/journal")} className="text-[7px] font-mono text-primary/40 flex items-center gap-0.5 hover:text-primary transition-colors">
-            سجل صفقة <ChevronLeft className="w-2.5 h-2.5" />
+          <span className="nx-label">المراكز المفتوحة ({openTrades.length})</span>
+          <button onClick={() => navigate("/journal")} className="nx-meta flex items-center gap-0.5 text-primary hover:text-primary/80 transition-colors">
+            سجل صفقة <ChevronLeft className="w-3.5 h-3.5" />
           </button>
         </div>
         {openTrades.length === 0 ? (
-          <div className="p-4 bg-card/20 border border-border/5 text-center" style={{ borderRadius: '4px' }}>
-            <p className="text-[9px] font-mono text-muted-foreground/25">لا توجد مراكز مفتوحة</p>
+          <div className="nx-card-flat text-center">
+            <p className="nx-meta">لا توجد مراكز مفتوحة</p>
           </div>
         ) : (
-          <div className="space-y-0.5">
+          <div className="space-y-2">
             {openTrades.map((trade: any) => (
-              <div key={trade.id} className="px-3 py-2 bg-card/30 border border-border/5 flex items-center gap-2" style={{ borderRadius: '4px' }}>
-                <div className={cn("w-5 h-5 flex items-center justify-center shrink-0",
-                  trade.direction === "long" ? "text-success" : "text-destructive")}>
+              <div key={trade.id} className="nx-row px-4 py-3 flex items-center gap-3">
+                <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
+                  trade.direction === "long" ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}>
                   {trade.direction === "long" ?
-                    <TrendingUp className="w-3 h-3" /> :
-                    <TrendingDown className="w-3 h-3" />}
+                    <TrendingUp className="w-4 h-4" /> :
+                    <TrendingDown className="w-4 h-4" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-mono font-bold">{trade.pair}</span>
-                    <span className={cn("text-[7px] font-mono font-bold px-1 py-0.5",
-                      trade.direction === "long" ? "text-success bg-success/6" : "text-destructive bg-destructive/6"
-                    )} style={{ borderRadius: '2px' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-[15px]">{trade.pair}</span>
+                    <span className={trade.direction === "long" ? "nx-badge-long" : "nx-badge-short"}>
                       {trade.direction === "long" ? "LONG" : "SHORT"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[7px] font-mono text-muted-foreground/35 tabular-nums">E {trade.entry_price}</span>
-                    {trade.stop_loss && <span className="text-[7px] font-mono text-destructive/40 tabular-nums">SL {trade.stop_loss}</span>}
-                    {trade.take_profit && <span className="text-[7px] font-mono text-success/40 tabular-nums">TP {trade.take_profit}</span>}
+                  <div className="flex items-center gap-3 mt-1 nx-meta nx-ltr">
+                    <span>E {trade.entry_price}</span>
+                    {trade.stop_loss && <span className="text-destructive">SL {trade.stop_loss}</span>}
+                    {trade.take_profit && <span className="text-success">TP {trade.take_profit}</span>}
                   </div>
                 </div>
                 {trade.position_size && (
-                  <span className="text-[8px] font-mono text-muted-foreground/30 tabular-nums">${trade.position_size}</span>
+                  <span className="nx-meta nx-ltr shrink-0">${trade.position_size}</span>
                 )}
               </div>
             ))}
@@ -270,28 +221,84 @@ const ProfilePage = () => {
         )}
       </motion.div>
 
-      {/* RECENT CLOSED */}
-      {closedTrades.length > 0 && (
-        <motion.div variants={fade} className="space-y-1">
-          <span className="text-[7px] font-mono text-muted-foreground/40 uppercase tracking-[0.15em]">آخر الصفقات المغلقة</span>
-          <div className="space-y-px">
+      {/* PERFORMANCE — EQUITY CURVE + ALLOCATION */}
+      {(closedTrades.length > 0 || pairAllocation.length > 0) && (
+        <motion.div variants={fade} className="space-y-3">
+          <span className="nx-label">الأداء</span>
+
+          {closedTrades.length > 0 && (
+            <div className="nx-card">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Activity className="w-4 h-4 text-primary" />
+                <span className="nx-meta">منحنى الأداء</span>
+              </div>
+              <div className="h-16 flex items-end gap-1">
+                {closedTrades.slice().reverse().slice(0, 30).map((t: any, i: number) => {
+                  const pnl = t.pnl ?? 0;
+                  const max = Math.max(...closedTrades.map((tt: any) => Math.abs(tt.pnl ?? 0)), 1);
+                  const h = Math.max((Math.abs(pnl) / max) * 100, 8);
+                  return <div key={i} className={cn("flex-1 min-w-[3px] rounded-sm", pnl >= 0 ? "bg-success/50" : "bg-destructive/50")} style={{ height: `${h}%` }} />;
+                })}
+              </div>
+            </div>
+          )}
+
+          {pairAllocation.length > 0 && (
+            <div className="nx-card">
+              <div className="flex items-center gap-1.5 mb-3">
+                <PieChart className="w-4 h-4 text-accent" />
+                <span className="nx-meta">توزيع الأزواج</span>
+              </div>
+              <div className="space-y-2">
+                {pairAllocation.map((p) => (
+                  <div key={p.pair} className="flex items-center gap-2">
+                    <span className="text-[14px] font-semibold w-16 truncate">{p.pair}</span>
+                    <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full", p.pnl >= 0 ? "bg-success/60" : "bg-destructive/60")}
+                        style={{ width: `${Math.max(p.pct, 4)}%` }}
+                      />
+                    </div>
+                    <span className="nx-meta nx-ltr w-9 text-left">{p.pct}%</span>
+                    <span className={cn("font-mono text-[13px] font-semibold nx-ltr w-14 text-left",
+                      p.pnl >= 0 ? "text-success" : "text-destructive"
+                    )}>
+                      {p.pnl >= 0 ? "+" : ""}${p.pnl}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* RECENT CLOSED — سجل الصفقات */}
+      <motion.div variants={fade} className="space-y-3">
+        <span className="nx-label">سجل الصفقات</span>
+        {closedTrades.length === 0 ? (
+          <div className="nx-card-flat text-center">
+            <p className="nx-meta">لا توجد صفقات مغلقة بعد</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
             {closedTrades.slice(0, 8).map((trade: any) => (
-              <div key={trade.id} className="px-3 py-1.5 bg-card/20 border border-border/3 flex items-center justify-between" style={{ borderRadius: '3px' }}>
-                <div className="flex items-center gap-2">
-                  <div className={cn("w-4 h-4 flex items-center justify-center",
-                    trade.direction === "long" ? "text-success" : "text-destructive")}>
+              <div key={trade.id} className="nx-row px-4 py-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center",
+                    trade.direction === "long" ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}>
                     {trade.direction === "long" ?
-                      <TrendingUp className="w-2.5 h-2.5" /> :
-                      <TrendingDown className="w-2.5 h-2.5" />}
+                      <TrendingUp className="w-3.5 h-3.5" /> :
+                      <TrendingDown className="w-3.5 h-3.5" />}
                   </div>
                   <div>
-                    <p className="text-[8px] font-mono font-bold">{trade.pair}</p>
-                    <p className="text-[6px] font-mono text-muted-foreground/25">
+                    <p className="font-semibold text-[14px]">{trade.pair}</p>
+                    <p className="nx-meta">
                       {trade.closed_at ? new Date(trade.closed_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" }) : ""}
                     </p>
                   </div>
                 </div>
-                <span className={cn("text-[9px] font-mono font-bold tabular-nums",
+                <span className={cn("font-mono text-[15px] font-bold tabular-nums nx-ltr",
                   (trade.pnl ?? 0) >= 0 ? "text-success" : "text-destructive"
                 )}>
                   {(trade.pnl ?? 0) >= 0 ? "+" : ""}${(trade.pnl ?? 0).toFixed(2)}
@@ -299,49 +306,46 @@ const ProfilePage = () => {
               </div>
             ))}
           </div>
-        </motion.div>
-      )}
+        )}
+      </motion.div>
 
       {/* QUICK LINKS */}
-      <motion.div variants={fade} className="grid grid-cols-2 gap-1.5">
-        <button onClick={() => navigate("/journal")} className="flex items-center gap-2 p-3 bg-card/30 border border-border/8 hover:border-border/20 transition-all" style={{ borderRadius: '4px' }}>
-          <BookOpen className="w-3.5 h-3.5 text-primary/40" />
-          <span className="text-[8px] font-mono font-bold text-foreground/60">سجل الصفقات</span>
+      <motion.div variants={fade} className="grid grid-cols-2 gap-3">
+        <button onClick={() => navigate("/journal")} className="nx-card-flat nx-tap flex items-center gap-2 hover:border-primary/30 transition-all">
+          <BookOpen className="w-4 h-4 text-primary" />
+          <span className="text-[14px] font-semibold">سجل الصفقات</span>
         </button>
-        <button onClick={() => navigate("/tools")} className="flex items-center gap-2 p-3 bg-card/30 border border-border/8 hover:border-border/20 transition-all" style={{ borderRadius: '4px' }}>
-          <Target className="w-3.5 h-3.5 text-accent/40" />
-          <span className="text-[8px] font-mono font-bold text-foreground/60">حاسبة المخاطر</span>
+        <button onClick={() => navigate("/tools")} className="nx-card-flat nx-tap flex items-center gap-2 hover:border-accent/30 transition-all">
+          <Target className="w-4 h-4 text-accent" />
+          <span className="text-[14px] font-semibold">حاسبة المخاطر</span>
         </button>
       </motion.div>
 
       {!hasSubscription && (
         <motion.button variants={fade} onClick={() => navigate("/subscription")}
-          className="w-full p-3 flex items-center gap-3 hover:brightness-110 transition-all border border-primary/10 bg-primary/4"
-          style={{ borderRadius: '4px' }}>
-          <Crown className="w-3.5 h-3.5 text-primary" />
+          className="nx-tap w-full p-4 rounded-2xl flex items-center gap-3 hover:brightness-110 transition-all border border-primary/20 bg-primary/5">
+          <Crown className="w-5 h-5 text-primary" />
           <div className="flex-1 text-right">
-            <p className="text-[9px] font-mono font-bold">ترقية إلى Pro</p>
-            <p className="text-[6px] font-mono text-muted-foreground/30">فتح جميع الميزات</p>
+            <p className="text-[15px] font-bold">ترقية إلى Pro</p>
+            <p className="nx-meta">فتح جميع الميزات</p>
           </div>
-          <ChevronLeft className="w-3 h-3 text-primary/30" />
+          <ChevronLeft className="w-4 h-4 text-primary" />
         </motion.button>
       )}
 
       {isAdmin && (
         <motion.div variants={fade}>
           <button onClick={() => navigate("/admin")}
-            className="w-full flex items-center gap-3 px-3 py-2.5 bg-destructive/4 border border-destructive/8"
-            style={{ borderRadius: '4px' }}>
-            <ShieldCheck className="w-3.5 h-3.5 text-destructive/60" />
-            <span className="text-[9px] font-mono font-bold text-foreground/60">لوحة الإدارة</span>
+            className="nx-tap w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-destructive/5 border border-destructive/15">
+            <ShieldCheck className="w-4 h-4 text-destructive" />
+            <span className="text-[14px] font-semibold">لوحة الإدارة</span>
           </button>
         </motion.div>
       )}
 
       <motion.button variants={fade} onClick={handleSignOut}
-        className="w-full flex items-center justify-center gap-2 py-2.5 text-destructive/60 text-[9px] font-mono font-bold hover:bg-destructive/5 transition-all border border-destructive/6"
-        style={{ borderRadius: '4px' }}>
-        <LogOut className="w-3 h-3" /> تسجيل الخروج
+        className="nx-tap w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-destructive text-[14px] font-semibold hover:bg-destructive/5 transition-all border border-destructive/15">
+        <LogOut className="w-4 h-4" /> تسجيل الخروج
       </motion.button>
     </motion.div>
   );

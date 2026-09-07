@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ScanLine, BookOpen, Brain, X, Plus } from "lucide-react";
+import { ScanLine, BookOpen, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const actions = [
-  { icon: ScanLine, label: "مسح شارت", path: "/chart-vision", color: "text-primary", bg: "bg-primary/15 border-primary/25" },
-  { icon: BookOpen, label: "سجّل صفقة", path: "/trade-journal", color: "text-success", bg: "bg-success/15 border-success/25" },
-  { icon: Brain, label: "اسأل الذكاء", path: "/nexus-brain", color: "text-accent", bg: "bg-accent/15 border-accent/25" },
+  { icon: ScanLine, label: "مسح شارت", path: "/chart-analysis", classes: "text-primary bg-primary/10 border-primary/25" },
+  { icon: BookOpen, label: "سجّل صفقة", path: "/journal", classes: "text-success bg-success/10 border-success/25" },
+  { icon: Brain, label: "اسأل الذكاء", path: "/learning", classes: "text-accent bg-accent/10 border-accent/25" },
 ];
 
 const GlobalActionButton = () => {
@@ -21,7 +21,6 @@ const GlobalActionButton = () => {
 
   return (
     <>
-      {/* Backdrop */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -34,7 +33,6 @@ const GlobalActionButton = () => {
         )}
       </AnimatePresence>
 
-      {/* Action Items — appear above bottom nav */}
       <AnimatePresence>
         {open && (
           <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2.5">
@@ -43,18 +41,18 @@ const GlobalActionButton = () => {
               return (
                 <motion.button
                   key={action.path}
-                  initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                  initial={{ opacity: 0, y: 16, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 16, scale: 0.9 }}
+                  exit={{ opacity: 0, y: 16, scale: 0.95 }}
                   transition={{ delay: i * 0.05, type: "spring", stiffness: 400, damping: 25 }}
                   onClick={() => handleAction(action.path)}
                   className={cn(
-                    "flex items-center gap-3 px-5 py-3 rounded-2xl border backdrop-blur-xl shadow-lg",
-                    action.bg
+                    "nx-tap flex items-center gap-3 px-5 py-3 rounded-2xl border backdrop-blur-xl shadow-lg",
+                    action.classes
                   )}
                 >
-                  <Icon className={cn("w-5 h-5", action.color)} />
-                  <span className={cn("text-[13px] font-mono font-bold", action.color)}>{action.label}</span>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[14px] font-semibold">{action.label}</span>
                 </motion.button>
               );
             })}
@@ -65,6 +63,5 @@ const GlobalActionButton = () => {
   );
 };
 
-// Export the open state setter for BottomNav integration
 export { GlobalActionButton };
 export default GlobalActionButton;

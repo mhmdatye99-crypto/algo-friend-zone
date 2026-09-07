@@ -152,7 +152,7 @@ const Mentor = () => {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-sm font-bold font-display">المُرشد AI</h1>
-          <p className="text-[9px] font-mono text-muted-foreground">مستشارك الذكي للتداول والتحليل</p>
+          <p className="text-[13px] font-mono text-muted-foreground">مستشارك الذكي للتداول والتحليل</p>
         </div>
         <button
           onClick={() => setShowSearch(!showSearch)}
@@ -183,7 +183,7 @@ const Mentor = () => {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="ابحث عن عملة أو زوج..."
-                  className="w-full bg-secondary/40 border border-border/20 rounded-lg px-3 py-2 pr-9 text-[11px] font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                  className="w-full bg-secondary/40 border border-border/20 rounded-lg px-3 py-2 pr-9 text-[13px] font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
                 />
               </div>
               <div className="grid grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
@@ -193,10 +193,10 @@ const Mentor = () => {
                     onClick={() => selectAsset(a)}
                     className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-secondary/30 border border-border/10 hover:bg-secondary/60 hover:border-primary/20 transition-all text-right"
                   >
-                    <span className="text-[11px]">{a.icon}</span>
+                    <span className="text-[13px]">{a.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-mono font-bold truncate">{a.pair}</p>
-                      <p className={cn("text-[8px] font-mono", a.up ? "text-success" : "text-destructive")}>
+                      <p className="text-[13px] font-mono font-bold truncate">{a.pair}</p>
+                      <p className={cn("text-[13px] font-mono", a.up ? "text-success" : "text-destructive")}>
                         {a.up ? "+" : ""}{a.change.toFixed(2)}%
                       </p>
                     </div>
@@ -214,8 +214,8 @@ const Mentor = () => {
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-base">{selectedAsset.icon}</span>
             <div>
-              <p className="text-[11px] font-mono font-bold">{selectedAsset.pair}</p>
-              <div className="flex items-center gap-2 text-[9px] font-mono">
+              <p className="text-[13px] font-mono font-bold">{selectedAsset.pair}</p>
+              <div className="flex items-center gap-2 text-[13px] font-mono">
                 <span className="text-foreground">${selectedAsset.price.toLocaleString()}</span>
                 <span className={cn("flex items-center gap-0.5", selectedAsset.up ? "text-success" : "text-destructive")}>
                   {selectedAsset.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -242,7 +242,7 @@ const Mentor = () => {
               <Brain className="w-8 h-8 text-primary/60" />
             </div>
             <h2 className="text-sm font-bold mb-1">مرحباً، أنا مُرشدك الذكي</h2>
-            <p className="text-[10px] font-mono text-muted-foreground mb-5 max-w-[250px]">
+            <p className="text-[13px] font-mono text-muted-foreground mb-5 max-w-[250px]">
               {selectedAsset
                 ? `اختر سؤالاً عن ${selectedAsset.pair} أو اكتب سؤالك`
                 : "ابحث عن عملة للتحليل أو اسألني أي سؤال عن التداول"
@@ -263,7 +263,7 @@ const Mentor = () => {
                       <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
                         <Icon className="w-3.5 h-3.5 text-primary" />
                       </div>
-                      <span className="text-[11px] font-mono">{action.label}</span>
+                      <span className="text-[13px] font-mono">{action.label}</span>
                     </button>
                   );
                 })
@@ -277,7 +277,7 @@ const Mentor = () => {
                     <div className="w-7 h-7 rounded-lg bg-accent/8 flex items-center justify-center shrink-0">
                       <Zap className="w-3.5 h-3.5 text-accent" />
                     </div>
-                    <span className="text-[11px] font-mono">{q}</span>
+                    <span className="text-[13px] font-mono">{q}</span>
                   </button>
                 ))
               )}
@@ -293,7 +293,7 @@ const Mentor = () => {
                   </div>
                 )}
                 <div className={cn(
-                  "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[11px] font-mono leading-relaxed",
+                  "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] font-mono leading-relaxed",
                   msg.role === "user"
                     ? "bg-primary/12 border border-primary/15 rounded-br-md"
                     : "bg-secondary/50 border border-border/15 rounded-bl-md"
@@ -326,7 +326,7 @@ const Mentor = () => {
               <button
                 key={action.label}
                 onClick={() => send(action.prompt(selectedAsset.pair))}
-                className="shrink-0 px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/10 text-[9px] font-mono hover:bg-secondary/70 transition-all whitespace-nowrap"
+                className="shrink-0 px-2.5 py-1.5 rounded-lg bg-secondary/40 border border-border/10 text-[13px] font-mono hover:bg-secondary/70 transition-all whitespace-nowrap"
               >
                 {action.label}
               </button>
@@ -339,7 +339,7 @@ const Mentor = () => {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && send(input)}
             placeholder={selectedAsset ? `اسأل عن ${selectedAsset.pair}...` : "اكتب سؤالك..."}
-            className="flex-1 bg-secondary/40 border border-border/20 rounded-xl px-4 py-2.5 text-[11px] font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 transition-colors"
+            className="flex-1 bg-secondary/40 border border-border/20 rounded-xl px-4 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 transition-colors"
             dir="rtl"
           />
           <button

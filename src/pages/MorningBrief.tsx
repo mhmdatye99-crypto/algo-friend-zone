@@ -63,14 +63,14 @@ const MorningBrief = () => {
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center">
-            <span className="text-[10px] font-black text-accent">X</span>
+            <span className="text-[13px] font-black text-accent">X</span>
           </div>
           <div>
-            <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-mono font-bold">Private Desk Briefing</p>
+            <p className="text-[13px] uppercase tracking-[0.2em] text-accent font-mono font-bold">Private Desk Briefing</p>
             <h1 className="text-base font-bold">الإحاطة اليومية الخاصة</h1>
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground font-mono leading-relaxed">
+        <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">
           تقرير مكتب التداول — تحليل مؤسسي للأسواق العالمية وفرص التمركز الاستراتيجي
         </p>
       </div>
@@ -83,7 +83,7 @@ const MorningBrief = () => {
                 <span className="text-lg font-black text-accent">X</span>
               </div>
               <h3 className="text-sm font-bold font-mono mb-1">إحاطة مكتب التداول</h3>
-              <p className="text-[10px] text-muted-foreground font-mono mb-4">
+              <p className="text-[13px] text-muted-foreground font-mono mb-4">
                 تحليل شامل للبيئة السوقية · فرص التمركز · مخاطر الجلسة
               </p>
               <motion.button
@@ -96,7 +96,7 @@ const MorningBrief = () => {
               </motion.button>
             </div>
 
-            <h3 className="text-[10px] font-bold uppercase tracking-wider mb-2 font-mono text-muted-foreground">محتويات الإحاطة</h3>
+            <h3 className="text-[13px] font-bold uppercase tracking-wider mb-2 font-mono text-muted-foreground">محتويات الإحاطة</h3>
             <div className="grid grid-cols-2 gap-1.5">
               {[
                 { icon: BarChart3, label: "البيئة السوقية" },
@@ -108,7 +108,7 @@ const MorningBrief = () => {
               ].map((item, i) => (
                 <div key={i} className="rounded-lg p-3 flex items-center gap-2 border border-border/10 bg-card/50">
                   <item.icon className="w-3.5 h-3.5 text-accent shrink-0" />
-                  <span className="text-[10px] font-mono text-muted-foreground">{item.label}</span>
+                  <span className="text-[13px] font-mono text-muted-foreground">{item.label}</span>
                 </div>
               ))}
             </div>
@@ -120,7 +120,7 @@ const MorningBrief = () => {
             <div className="rounded-xl p-10 text-center border border-accent/10 bg-accent/3">
               <Loader2 className="w-8 h-8 mx-auto mb-3 text-accent animate-spin" />
               <h3 className="text-sm font-bold font-mono mb-1">جارٍ إعداد الإحاطة...</h3>
-              <p className="text-[10px] text-muted-foreground font-mono">
+              <p className="text-[13px] text-muted-foreground font-mono">
                 تحليل مؤسسي للأسواق العالمية والتدفقات المالية
               </p>
             </div>
@@ -138,23 +138,23 @@ const MorningBrief = () => {
           >
             {/* Date + Greeting */}
             <div className="rounded-xl p-3 border border-accent/10 bg-accent/3">
-              <p className="text-[8px] font-mono text-muted-foreground mb-0.5">{brief.date}</p>
-              <p className="text-[11px] font-mono font-bold">{brief.greeting}</p>
+              <p className="text-[13px] font-mono text-muted-foreground mb-0.5">{brief.date}</p>
+              <p className="text-[13px] font-mono font-bold">{brief.greeting}</p>
             </div>
 
             {/* Market Overview */}
             <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-              <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
+              <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
                 <BarChart3 className="w-3 h-3" />
                 البيئة السوقية
               </h3>
-              <p className="text-[11px] text-muted-foreground font-mono leading-relaxed">{brief.marketOverview}</p>
+              <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{brief.marketOverview}</p>
             </div>
 
             {/* Institutional Sentiment */}
             {brief.sentiment && (
               <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
                   <Activity className="w-3 h-3" />
                   المعنويات المؤسسية
                 </h3>
@@ -165,9 +165,9 @@ const MorningBrief = () => {
                     { key: "commodities", label: "سلع", data: brief.sentiment.commodities },
                   ].map((s) => s.data && (
                     <div key={s.key} className="bg-secondary/40 rounded-lg p-2 text-center border border-border/10">
-                      <p className="text-[7px] font-mono text-muted-foreground uppercase tracking-wider">{s.label}</p>
+                      <p className="text-[13px] font-mono text-muted-foreground uppercase tracking-wider">{s.label}</p>
                       <p className={cn("text-base font-bold font-mono", sentimentColor(s.data.score))}>{s.data.score}</p>
-                      <p className="text-[8px] font-mono text-muted-foreground">{s.data.label}</p>
+                      <p className="text-[13px] font-mono text-muted-foreground">{s.data.label}</p>
                     </div>
                   ))}
                 </div>
@@ -177,23 +177,23 @@ const MorningBrief = () => {
             {/* Key Events */}
             {brief.keyEvents && brief.keyEvents.length > 0 && (
               <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
                   <Clock className="w-3 h-3" />
                   أحداث اقتصادية مؤثرة
                 </h3>
                 <div className="space-y-1.5">
                   {brief.keyEvents.map((ev, i) => (
                     <div key={i} className="flex items-start gap-2 bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/5">
-                      <span className={cn("text-[7px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 mt-0.5", impactColor(ev.impact))}>
+                      <span className={cn("text-[13px] font-mono font-bold px-1.5 py-0.5 rounded-lg border shrink-0 mt-0.5", impactColor(ev.impact))}>
                         {ev.impact === "high" ? "عالي" : ev.impact === "medium" ? "متوسط" : "منخفض"}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-mono font-medium">{ev.event}</p>
+                        <p className="text-[13px] font-mono font-medium">{ev.event}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] font-mono text-muted-foreground">{ev.time}</span>
+                          <span className="text-[13px] font-mono text-muted-foreground">{ev.time}</span>
                           <div className="flex gap-1">
                             {ev.assets?.map((a, ai) => (
-                              <span key={ai} className="text-[7px] font-mono bg-secondary px-1 py-0.5 rounded border border-border/10">{a}</span>
+                              <span key={ai} className="text-[13px] font-mono bg-secondary px-1 py-0.5 rounded-lg border border-border/10">{a}</span>
                             ))}
                           </div>
                         </div>
@@ -207,7 +207,7 @@ const MorningBrief = () => {
             {/* Positioning Opportunities */}
             {brief.topOpportunities && brief.topOpportunities.length > 0 && (
               <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
                   <Crosshair className="w-3 h-3" />
                   فرص التمركز
                 </h3>
@@ -222,18 +222,18 @@ const MorningBrief = () => {
                         )}
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-mono font-bold">{opp.pair}</span>
+                            <span className="text-[13px] font-mono font-bold">{opp.pair}</span>
                             <span className={cn(
-                              "text-[7px] font-mono font-bold px-1.5 py-0.5 rounded border",
+                              "text-[13px] font-mono font-bold px-1.5 py-0.5 rounded-lg border",
                               opp.direction === "شراء" ? "bg-success/10 text-success border-success/20" : "bg-destructive/10 text-destructive border-destructive/20"
                             )}>
                               {opp.direction}
                             </span>
                           </div>
-                          <p className="text-[9px] font-mono text-muted-foreground">{opp.reason}</p>
+                          <p className="text-[13px] font-mono text-muted-foreground">{opp.reason}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-accent">{opp.confidence}%</span>
+                      <span className="text-[13px] font-mono font-bold text-accent">{opp.confidence}%</span>
                     </div>
                   ))}
                 </div>
@@ -243,7 +243,7 @@ const MorningBrief = () => {
             {/* Risk Alerts */}
             {brief.riskAlerts && brief.riskAlerts.length > 0 && (
               <div className="rounded-xl p-3 border border-destructive/10 bg-destructive/3">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-destructive">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-destructive">
                   <Shield className="w-3 h-3" />
                   تحذيرات المخاطر
                 </h3>
@@ -251,7 +251,7 @@ const MorningBrief = () => {
                   {brief.riskAlerts.map((alert, i) => (
                     <div key={i} className="flex items-start gap-2 bg-destructive/5 rounded-lg px-2.5 py-2 border border-destructive/10">
                       <AlertTriangle className={cn("w-3 h-3 shrink-0 mt-0.5", alert.severity === "high" ? "text-destructive" : "text-warning")} />
-                      <p className="text-[11px] font-mono">{alert.alert}</p>
+                      <p className="text-[13px] font-mono">{alert.alert}</p>
                     </div>
                   ))}
                 </div>
@@ -261,13 +261,13 @@ const MorningBrief = () => {
             {/* Focus Assets */}
             {brief.focusAssets && brief.focusAssets.length > 0 && (
               <div className="rounded-xl p-3 border border-border/10 bg-card/60">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-2 flex items-center gap-1.5 text-accent">
                   <Eye className="w-3 h-3" />
                   أصول تحت المراقبة
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
                   {brief.focusAssets.map((asset, i) => (
-                    <span key={i} className="text-[10px] font-mono bg-accent/10 text-accent px-2 py-1 rounded-lg border border-accent/10">
+                    <span key={i} className="text-[13px] font-mono bg-accent/10 text-accent px-2 py-1 rounded-lg border border-accent/10">
                       {asset}
                     </span>
                   ))}
@@ -278,11 +278,11 @@ const MorningBrief = () => {
             {/* Daily Tip */}
             {brief.dailyTip && (
               <div className="rounded-xl p-3 border border-accent/10 bg-accent/3">
-                <h3 className="text-[10px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
+                <h3 className="text-[13px] font-bold font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5 text-accent">
                   <Lightbulb className="w-3 h-3" />
                   توصية الجلسة
                 </h3>
-                <p className="text-[11px] text-muted-foreground font-mono leading-relaxed">{brief.dailyTip}</p>
+                <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">{brief.dailyTip}</p>
               </div>
             )}
 

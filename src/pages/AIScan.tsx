@@ -16,6 +16,8 @@ import { useLivePrices, formatPrice, CRYPTO_LOGO_MAP, FOREX_FLAG_MAP } from "@/h
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
+import AIAnalysisCard from "@/components/analysis/AIAnalysisCard";
+import AnalysisLoading from "@/components/analysis/AnalysisLoading";
 
 interface AnalysisResult {
   pair?: string;
@@ -226,138 +228,27 @@ const AIScan = () => {
             )}
 
             {step === "loading" && (
-              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                {imagePreview && (
-                  <div className="rounded-xl overflow-hidden border border-primary/15 relative">
-                    <img src={imagePreview} alt="Chart" className="w-full h-40 object-cover opacity-50" />
-                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-                      <motion.div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center"
-                        animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                        <Cpu className="w-6 h-6 text-primary" />
-                      </motion.div>
-                    </div>
-                  </div>
-                )}
-                <div className="rounded-xl p-5 bg-card/60 border border-border/10 text-center">
-                  <h3 className="text-sm font-bold font-mono mb-4">جارٍ التحليل...</h3>
-                  <div className="space-y-2">
-                    {loadingSteps.map((s, i) => (
-                      <div key={i} className={cn("flex items-center gap-2 text-xs font-mono", i <= loadingStep ? "text-foreground" : "text-muted-foreground/40")}>
-                        {i < loadingStep ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" /> :
-                         i === loadingStep ? <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" /> :
-                         <div className="w-4 h-4 rounded border border-border/30 shrink-0" />}
-                        {s.label}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <AnalysisLoading imagePreview={imagePreview} currentStep={loadingStep} />
               </motion.div>
             )}
 
             {step === "results" && analysis && (
               <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                {imagePreview && (
-                  <div className="rounded-xl overflow-hidden border border-primary/10 relative">
-                    <img src={imagePreview} alt="Chart" className="w-full h-36 object-cover" />
-                    <div className="absolute bottom-2 right-2 bg-background/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[8px] font-mono text-primary border border-primary/20">
-                      تحليل مكتمل
-                    </div>
-                  </div>
-                )}
-
-                {/* Direction & Pair */}
-                <div className="rounded-xl p-3 bg-card/60 border border-border/10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h2 className="text-base font-bold font-mono">{analysis.pair || "—"}</h2>
-                      <span className="text-[9px] text-muted-foreground font-mono">{analysis.timeframe}</span>
-                    </div>
-                    <div className={cn("flex items-center gap-1 text-sm font-bold font-mono", dirColor)}>
-                      {analysis.direction === "bullish" ? <ArrowUp className="w-4 h-4" /> : analysis.direction === "bearish" ? <ArrowDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
-                      {analysis.directionAr || analysis.direction}
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                    الثقة: {analysis.directionConfidence}%
-                  </span>
-                </div>
-
-                {/* Scenarios */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl p-3 bg-success/5 border border-success/10">
-                    <p className="text-[9px] font-mono font-bold text-success uppercase mb-1">سيناريو صعودي</p>
-                    {analysis.takeProfit1 && <p className="text-[10px] font-mono">TP1: {analysis.takeProfit1}</p>}
-                    {analysis.takeProfit2 && <p className="text-[10px] font-mono">TP2: {analysis.takeProfit2}</p>}
-                  </div>
-                  <div className="rounded-xl p-3 bg-destructive/5 border border-destructive/10">
-                    <p className="text-[9px] font-mono font-bold text-destructive uppercase mb-1">سيناريو هبوطي</p>
-                    {analysis.stopLoss && <p className="text-[10px] font-mono">SL: {analysis.stopLoss}</p>}
-                    {analysis.riskReward && <p className="text-[10px] font-mono">R:R {analysis.riskReward}</p>}
-                  </div>
-                </div>
-
-                {/* Support/Resistance */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl p-3 bg-card/60 border border-border/10">
-                    <p className="text-[8px] font-mono font-bold text-success uppercase mb-1">الدعم</p>
-                    {analysis.supportLevels?.map((l, i) => (
-                      <p key={i} className="text-[10px] font-mono text-success">{l}</p>
-                    ))}
-                  </div>
-                  <div className="rounded-xl p-3 bg-card/60 border border-border/10">
-                    <p className="text-[8px] font-mono font-bold text-destructive uppercase mb-1">المقاومة</p>
-                    {analysis.resistanceLevels?.map((l, i) => (
-                      <p key={i} className="text-[10px] font-mono text-destructive">{l}</p>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Indicators */}
-                {analysis.indicators && analysis.indicators.length > 0 && (
-                  <div className="rounded-xl p-3 bg-card/60 border border-border/10">
-                    <p className="text-[9px] font-mono font-bold uppercase mb-2">المؤشرات الفنية</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {analysis.indicators.map((ind, i) => (
-                        <span key={i} className={cn(
-                          "text-[9px] font-mono px-2 py-1 rounded-lg border",
-                          ind.signal === "buy" || ind.signal === "bullish" ? "bg-success/8 text-success border-success/15" :
-                          ind.signal === "sell" || ind.signal === "bearish" ? "bg-destructive/8 text-destructive border-destructive/15" :
-                          "bg-secondary text-muted-foreground border-border/15"
-                        )}>
-                          {ind.name} {ind.value && `• ${ind.value}`}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Risk Level */}
-                <div className="rounded-xl p-3 bg-card/60 border border-warning/10">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-warning" />
-                    <div>
-                      <p className="text-[9px] font-mono text-muted-foreground">مستوى المخاطرة</p>
-                      <p className="text-[11px] font-mono font-bold text-warning">
-                        {(analysis.directionConfidence ?? 0) >= 75 ? "منخفض" : (analysis.directionConfidence ?? 0) >= 50 ? "متوسط" : "مرتفع"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <AIAnalysisCard analysis={analysis} imagePreview={imagePreview} />
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <button onClick={resetAnalysis}
-                    className="flex-1 py-2.5 rounded-xl bg-secondary/60 text-foreground text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-border/10">
+                  <button onClick={resetAnalysis} className="nx-btn-secondary nx-btn-sm flex-1">
                     <RotateCcw className="w-3.5 h-3.5" /> تحليل جديد
                   </button>
-                  <button onClick={shareToFeed} disabled={sharing}
-                    className="flex-1 py-2.5 rounded-xl bg-primary/10 text-primary text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 border border-primary/20">
+                  <button onClick={shareToFeed} disabled={sharing} className="nx-btn-primary nx-btn-sm flex-1">
                     <Share2 className="w-3.5 h-3.5" /> {sharing ? "جارٍ النشر..." : "شارك في المجتمع"}
                   </button>
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+                    </AnimatePresence>
         </TabsContent>
 
         {/* Symbol Search Tab */}

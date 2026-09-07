@@ -137,7 +137,7 @@ const NexusBrain = () => {
     >
       {/* Header */}
       <motion.div variants={fadeUp}>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">INTELLIGENCE CENTER</p>
+        <p className="text-[13px] uppercase tracking-[0.2em] text-muted-foreground font-mono">INTELLIGENCE CENTER</p>
         <h1 className="text-xl font-display font-bold text-foreground tracking-wide">
           <span className="text-gradient-gold">NEXUS</span> BRAIN
         </h1>
@@ -150,7 +150,7 @@ const NexusBrain = () => {
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-mono font-bold transition-all",
+              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[13px] font-mono font-bold transition-all",
               activeTab === t.key
                 ? "bg-primary/15 text-primary border border-primary/30"
                 : "bg-secondary/40 text-muted-foreground border border-border/10"
@@ -173,10 +173,10 @@ const NexusBrain = () => {
                   <Brain className="w-7 h-7 text-accent" />
                 </div>
                 <p className="text-sm font-display font-bold text-foreground tracking-wide">NEXUS ORACLE</p>
-                <p className="text-[11px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
+                <p className="text-[13px] text-muted-foreground font-mono mt-1">اسألني عن أي عملة، استراتيجية، أو تحليل</p>
                 <div className="flex flex-col gap-2 mt-4">
                   {["ما أفضل فرصة تداول اليوم؟", "حلل لي البيتكوين الآن", "اقترح استراتيجية منخفضة المخاطر"].map(q => (
-                    <button key={q} onClick={() => send(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-[11px] font-mono text-foreground hover:bg-secondary/80 transition-all text-right">
+                    <button key={q} onClick={() => send(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-[13px] font-mono text-foreground hover:bg-secondary/80 transition-all text-right">
                       <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
                       {q}
                     </button>
@@ -188,15 +188,12 @@ const NexusBrain = () => {
               <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                 <div
                   className={cn(
-                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed font-mono",
+                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed font-mono",
                     msg.role === "user"
                       ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                       : "rounded-bl-md text-foreground"
                   )}
-                  style={msg.role === "assistant" ? {
-                    background: "hsla(43, 100%, 50%, 0.06)",
-                    border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                  } : undefined}
+                  className={cn(msg.role === "assistant" && "bg-primary/6 border border-primary/10")}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -204,10 +201,7 @@ const NexusBrain = () => {
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md" style={{
-                  background: "hsla(43, 100%, 50%, 0.06)",
-                  border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                }}>
+                <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-primary/6 border border-primary/10">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.2s" }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.4s" }} />
@@ -223,7 +217,7 @@ const NexusBrain = () => {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && send(input)}
               placeholder="اسأل Nexus Oracle..."
-              className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
+              className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
               dir="rtl"
             />
             <button
@@ -245,15 +239,15 @@ const NexusBrain = () => {
       {/* Chart Scan Tab */}
       {activeTab === "scan" && (
         <motion.div variants={fadeUp} className="space-y-4">
-          <div className="glass rounded-[14px] p-6 text-center">
+          <div className="glass rounded-2xl p-6 text-center">
             <Cpu className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40 animate-pulse" />
             <h4 className="text-xs font-semibold font-mono mb-1">المحرك العصبي جاهز</h4>
-            <p className="text-[10px] text-muted-foreground font-mono mb-4">
+            <p className="text-[13px] text-muted-foreground font-mono mb-4">
               ارفع صورة شارت لتحليل مؤسسي بالذكاء الاصطناعي
             </p>
             <button
               onClick={() => navigate("/chart-vision")}
-              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground text-[12px] font-mono font-bold hover:brightness-110 transition-all"
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground text-[13px] font-mono font-bold hover:brightness-110 transition-all"
               style={{ boxShadow: "0 0 20px hsl(43 100% 50% / 0.2)" }}
             >
               <Camera className="w-4 h-4 inline-block ml-2" />
@@ -267,9 +261,9 @@ const NexusBrain = () => {
               { label: "دعم/مقاومة", desc: "مستويات ذكية" },
               { label: "استراتيجية", desc: "توليد فوري" },
             ].map((cap, i) => (
-              <div key={i} className="glass rounded-[10px] p-3 text-center">
-                <p className="text-[10px] font-mono font-bold text-foreground">{cap.label}</p>
-                <p className="text-[8px] font-mono text-muted-foreground mt-0.5">{cap.desc}</p>
+              <div key={i} className="glass rounded-lg p-3 text-center">
+                <p className="text-[13px] font-mono font-bold text-foreground">{cap.label}</p>
+                <p className="text-[13px] font-mono text-muted-foreground mt-0.5">{cap.desc}</p>
               </div>
             ))}
           </div>
@@ -279,15 +273,15 @@ const NexusBrain = () => {
       {/* Market Brief Tab */}
       {activeTab === "brief" && (
         <motion.div variants={fadeUp} className="space-y-4">
-          <div className="glass rounded-[14px] p-6 text-center">
+          <div className="glass rounded-2xl p-6 text-center">
             <Sun className="w-10 h-10 mx-auto mb-3 text-warning animate-pulse" />
             <h4 className="text-xs font-semibold font-mono mb-1">الملخص الصباحي</h4>
-            <p className="text-[10px] text-muted-foreground font-mono mb-4">
+            <p className="text-[13px] text-muted-foreground font-mono mb-4">
               تقرير شامل عن حالة الأسواق والفرص بالذكاء الاصطناعي
             </p>
             <button
               onClick={() => navigate("/morning-brief")}
-              className="px-6 py-3 rounded-xl text-[12px] font-mono font-bold transition-all"
+              className="px-6 py-3 rounded-xl text-[13px] font-mono font-bold transition-all"
               style={{
                 background: "linear-gradient(135deg, hsla(38, 100%, 50%, 0.15) 0%, hsla(43, 80%, 40%, 0.08) 100%)",
                 border: "1px solid hsla(38, 100%, 50%, 0.2)",

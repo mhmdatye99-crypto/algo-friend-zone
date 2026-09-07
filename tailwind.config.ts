@@ -14,14 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "IBM Plex Sans Arabic", "system-ui", "-apple-system", "sans-serif"],
-        display: ["Inter", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["IBM Plex Sans Arabic", "Noto Sans Arabic", "system-ui", "-apple-system", "sans-serif"],
+        display: ["IBM Plex Sans Arabic", "Noto Sans Arabic", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 1px)",
-        sm: "calc(var(--radius) - 2px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
       },
       colors: {
         border: "hsl(var(--border))",

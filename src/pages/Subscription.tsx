@@ -106,7 +106,7 @@ const Subscription = () => {
     >
       {/* Header */}
       <motion.div variants={fadeUp} custom={0}>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono font-medium">الاشتراك</p>
+        <p className="text-[13px] uppercase tracking-[0.2em] text-muted-foreground font-mono font-medium">الاشتراك</p>
         <h1 className="text-xl font-bold tracking-tight">خطة الاشتراك</h1>
       </motion.div>
 
@@ -122,14 +122,14 @@ const Subscription = () => {
             </div>
             <div>
               <h3 className="text-sm font-bold font-mono">اشتراك فعّال</h3>
-              <p className="text-[11px] text-muted-foreground font-mono">
+              <p className="text-[13px] text-muted-foreground font-mono">
                 {stripeTier === "elite" ? "X-Elite" : "X-Pro"}
               </p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="bg-secondary/40 rounded-xl p-3 border border-border/10">
-              <p className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider mb-1">ينتهي في</p>
+              <p className="text-[13px] text-muted-foreground font-mono uppercase tracking-wider mb-1">ينتهي في</p>
               <p className="text-xs font-bold font-mono">
                 {stripeSubscriptionEnd ? new Date(stripeSubscriptionEnd).toLocaleDateString("ar-EG") : "—"}
               </p>
@@ -137,14 +137,14 @@ const Subscription = () => {
             <div className="bg-secondary/40 rounded-xl p-3 border border-border/10">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3 h-3 text-primary" />
-                <p className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider">متبقي</p>
+                <p className="text-[13px] text-muted-foreground font-mono uppercase tracking-wider">متبقي</p>
               </div>
               <p className="text-xs font-bold font-mono text-primary mt-1">{daysRemaining} يوم</p>
             </div>
           </div>
           <button
             onClick={openCustomerPortal}
-            className="w-full py-2.5 rounded-xl bg-secondary/60 text-foreground text-[11px] font-mono font-bold flex items-center justify-center gap-2 border border-border/10 hover:bg-secondary/80 transition-colors"
+            className="w-full py-2.5 rounded-xl bg-secondary/60 text-foreground text-[13px] font-mono font-bold flex items-center justify-center gap-2 border border-border/10 hover:bg-secondary/80 transition-colors"
           >
             <Settings className="w-3.5 h-3.5" /> إدارة الاشتراك
           </button>
@@ -168,7 +168,7 @@ const Subscription = () => {
               <CheckCircle2 className="w-14 h-14 text-success mx-auto mb-3" />
             </motion.div>
             <h3 className="text-base font-bold mb-1">تم الاشتراك بنجاح!</h3>
-            <p className="text-[11px] text-muted-foreground font-mono">
+            <p className="text-[13px] text-muted-foreground font-mono">
               مبروك! تم تفعيل اشتراكك. استمتع بجميع الميزات المتقدمة.
             </p>
           </motion.div>
@@ -197,12 +197,12 @@ const Subscription = () => {
                 whileHover={{ scale: 1.01 }}
               >
                 {plan.popular && (
-                  <div className="absolute top-0 left-0 bg-primary/20 text-primary text-[8px] font-mono font-bold px-3 py-1 rounded-br-lg border-b border-r border-primary/20">
+                  <div className="absolute top-0 left-0 bg-primary/20 text-primary text-[13px] font-mono font-bold px-3 py-1 rounded-br-lg border-b border-r border-primary/20">
                     <Sparkles className="w-2.5 h-2.5 inline mr-1" />الأكثر شعبية
                   </div>
                 )}
                 {isCurrentPlan && (
-                  <div className="absolute top-0 right-0 bg-success/20 text-success text-[8px] font-mono font-bold px-3 py-1 rounded-bl-lg border-b border-l border-success/20">
+                  <div className="absolute top-0 right-0 bg-success/20 text-success text-[13px] font-mono font-bold px-3 py-1 rounded-bl-lg border-b border-l border-success/20">
                     <Check className="w-2.5 h-2.5 inline mr-1" />خطتك الحالية
                   </div>
                 )}
@@ -210,14 +210,14 @@ const Subscription = () => {
                 <div className="flex items-center justify-between mb-3 mt-1">
                   <div>
                     <h3 className="text-sm font-bold font-mono">{plan.name_ar}</h3>
-                    <p className="text-[10px] text-muted-foreground font-mono">{plan.name}</p>
+                    <p className="text-[13px] text-muted-foreground font-mono">{plan.name}</p>
                   </div>
                   <div className="text-left">
                     <p className="text-lg font-bold font-mono text-primary">
                       {plan.price === 0 ? "مجاني" : `$${plan.price}`}
                     </p>
                     {plan.price > 0 && (
-                      <p className="text-[9px] text-muted-foreground font-mono">/ شهرياً</p>
+                      <p className="text-[13px] text-muted-foreground font-mono">/ شهرياً</p>
                     )}
                   </div>
                 </div>
@@ -227,7 +227,7 @@ const Subscription = () => {
                   {plan.features.map((f, fi) => (
                     <div key={fi} className="flex items-center gap-2">
                       <Check className={cn("w-3 h-3 shrink-0", `text-${plan.color}`)} />
-                      <p className="text-[10px] font-mono text-foreground/70">{f}</p>
+                      <p className="text-[13px] font-mono text-foreground/70">{f}</p>
                     </div>
                   ))}
                 </div>
@@ -239,7 +239,7 @@ const Subscription = () => {
                     onClick={() => handleSubscribe(plan.tier as "pro" | "elite")}
                     disabled={checkoutLoading}
                     className={cn(
-                      "w-full py-3 rounded-xl font-mono font-bold text-[11px] flex items-center justify-center gap-2 transition-all",
+                      "w-full py-3 rounded-xl font-mono font-bold text-[13px] flex items-center justify-center gap-2 transition-all",
                       plan.tier === "elite"
                         ? "bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 text-accent hover:from-accent/30 hover:to-primary/30"
                         : "bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-primary hover:from-primary/30 hover:to-accent/30"
@@ -271,8 +271,8 @@ const Subscription = () => {
       >
         <Shield className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
         <div>
-          <p className="text-[10px] font-mono font-bold text-foreground/70 mb-1">دفع آمن عبر Stripe</p>
-          <p className="text-[9px] text-muted-foreground font-mono leading-relaxed">
+          <p className="text-[13px] font-mono font-bold text-foreground/70 mb-1">دفع آمن عبر Stripe</p>
+          <p className="text-[13px] text-muted-foreground font-mono leading-relaxed">
             جميع عمليات الدفع مشفرة ومعالجة بأمان عبر Stripe. لا نحفظ بيانات بطاقتك على خوادمنا.
             يمكنك الإلغاء في أي وقت من إدارة الاشتراك.
           </p>

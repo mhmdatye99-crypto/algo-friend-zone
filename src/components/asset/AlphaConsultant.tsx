@@ -128,7 +128,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(true)}
         className={cn(
-          "flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-[12px] font-bold transition-all",
+          "flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-[13px] font-bold transition-all",
           "bg-accent/10 border border-accent/30 text-accent",
           "hover:bg-accent/20 hover:border-accent/50",
           "animate-glow"
@@ -169,7 +169,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">Alpha Consultant</p>
-                    <p className="text-[10px] font-mono text-muted-foreground">
+                    <p className="text-[13px] font-mono text-muted-foreground">
                       {asset.icon} {asset.pair} — <span className="font-mono">{formatPrice(asset.price)}</span>
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                         <Brain className="w-7 h-7 text-accent" />
                       </div>
                       <p className="text-sm font-bold text-foreground">مرحباً، أنا Alpha</p>
-                      <p className="text-[11px] text-muted-foreground font-mono mt-1">
+                      <p className="text-[13px] text-muted-foreground font-mono mt-1">
                         مستشارك الذكي لـ <span className="text-accent font-bold">{asset.pair}</span>
                       </p>
                     </div>
@@ -198,7 +198,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                         <button
                           key={chip.label}
                           onClick={() => send(chip.prompt)}
-                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-foreground text-[11px] font-mono hover:bg-secondary/80 hover:border-accent/20 transition-all text-right"
+                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border/20 text-foreground text-[13px] font-mono hover:bg-secondary/80 hover:border-accent/20 transition-all text-right"
                         >
                           <chip.icon className="w-4 h-4 text-accent shrink-0" />
                           {chip.label}
@@ -212,16 +212,12 @@ export const AlphaConsultant = ({ asset }: Props) => {
                   <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed font-mono",
+                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed font-mono",
                         msg.role === "user"
                           ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                           : "rounded-bl-md text-foreground"
                       )}
-                      style={msg.role === "assistant" ? {
-                        background: "hsla(43, 100%, 50%, 0.06)",
-                        boxShadow: "0 0 15px hsla(43, 100%, 50%, 0.08)",
-                        border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                      } : undefined}
+                      className={cn(msg.role === "assistant" && "bg-primary/6 border border-primary/10")}
                     >
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
@@ -230,10 +226,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
 
                 {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="flex justify-start">
-                    <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md" style={{
-                      background: "hsla(43, 100%, 50%, 0.06)",
-                      border: "1px solid hsla(43, 100%, 50%, 0.1)",
-                    }}>
+                    <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-primary/6 border border-primary/10">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.2s" }} />
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.4s" }} />
@@ -250,7 +243,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && send(input)}
                     placeholder="اسأل Alpha عن هذا الأصل..."
-                    className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[12px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
+                    className="flex-1 bg-secondary/50 border border-border/20 rounded-xl px-3 py-2.5 text-[13px] font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/40 transition-colors"
                     dir="rtl"
                   />
                   <button
@@ -266,7 +259,7 @@ export const AlphaConsultant = ({ asset }: Props) => {
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted-foreground font-mono text-center mt-2">
+                <p className="text-[13px] text-muted-foreground font-mono text-center mt-2">
                   ليست إشارة دخول مالية — للأغراض التعليمية فقط
                 </p>
               </div>
