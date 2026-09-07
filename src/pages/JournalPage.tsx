@@ -5,7 +5,7 @@ import TradeJournal from "./TradeJournal";
 import MyAnalyses from "./MyAnalyses";
 
 const tabs = [
-  { key: "trades", label: "سجل الصفقات" },
+  { key: "trades", label: "السجل" },
   { key: "analyses", label: "التحليلات المحفوظة" },
 ] as const;
 
@@ -15,7 +15,7 @@ const JournalPage = () => {
   return (
     <div className="max-w-lg mx-auto pb-32">
       <div className="px-4 sm:px-5 pt-5 space-y-4">
-        <h1 className="nx-title">سجل الصفقات</h1>
+        <h1 className="sr-only">سجل الصفقات</h1>
         <div className="flex gap-2">
           {tabs.map((tab) => (
             <button
