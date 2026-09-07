@@ -310,11 +310,7 @@ const TradeJournal = () => {
       className="nx-page"
     >
       {/* Header */}
-      <motion.div variants={fade} className="flex items-center justify-between">
-        <div>
-          <h1 className="nx-section">سجل الصفقات</h1>
-          <p className="nx-meta">TRADE JOURNAL</p>
-        </div>
+      <motion.div variants={fade} className="flex items-center justify-end">
         <button onClick={() => setShowForm(true)}
           className="nx-btn-primary nx-btn-sm">
           <Plus className="w-4 h-4" /> تسجيل صفقة
@@ -343,7 +339,7 @@ const TradeJournal = () => {
             className={cn("flex-1 nx-tap py-2.5 rounded-xl text-[14px] font-semibold transition-colors",
               tab === t ? "bg-primary/10 text-primary border border-primary/30" : "bg-secondary text-muted-foreground border border-border"
             )}>
-            {t === "trades" ? "الصفقات" : "التحليلات"}
+            {t === "trades" ? "الصفقات" : "الأداء"}
           </button>
         ))}
       </motion.div>

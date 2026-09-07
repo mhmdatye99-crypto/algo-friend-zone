@@ -12,13 +12,12 @@ const pageTitles: Record<string, string> = {
   "/markets": "الأسواق",
   "/signals": "الإشارات",
   "/community": "المجتمع",
-  "/portfolio": "المحفظة",
   "/learning": "الأكاديمية",
   "/subscription": "الاشتراك",
   "/admin": "لوحة التحكم",
   "/tools": "الأدوات",
   "/journal": "سجل الصفقات",
-  "/morning-brief": "الإحاطة الصباحية",
+  "/morning-brief": "الإحاطة اليومية",
   "/chart-analysis": "تحليل الشارت",
 };
 

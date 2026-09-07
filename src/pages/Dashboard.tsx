@@ -1,43 +1,34 @@
 import { motion } from "framer-motion";
-import {
-  ChevronLeft, Camera, Zap, LineChart, Calculator,
-  AlertTriangle, Activity, Sparkles,
-} from "lucide-react";
+import { ChevronLeft, ScanLine, Sun, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import { useSignals } from "@/hooks/useSignals";
-import { useAuth } from "@/contexts/AuthContext";
-import { useSmartAlgorithms } from "@/hooks/useSmartAlgorithms";
-import { usePortfolioSync } from "@/hooks/usePortfolioSync";
-import { Progress } from "@/components/ui/progress";
-import MarketMovers from "@/components/dashboard/MarketMovers";
-import MorningBriefCard from "@/components/dashboard/MorningBriefCard";
-import AICoachTip from "@/components/dashboard/AICoachTip";
+import { useLivePrices, formatPrice } from "@/hooks/useLivePrices";
+import SignalCard from "@/components/signals/SignalCard";
+import AssetLogo from "@/components/shared/AssetLogo";
 
 const fade = {
   hidden: { opacity: 0, y: 8 },
   show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
-const quickActions = [
-  { icon: Camera, label: "تحليل الشارت", path: "/chart-analysis" },
-  { icon: Zap, label: "الإشارات", path: "/signals" },
-  { icon: LineChart, label: "الأسواق", path: "/markets" },
-  { icon: Calculator, label: "حاسبة المخاطر", path: "/tools" },
-];
+const OVERVIEW_PAIRS = ["BTC/USDT", "ETH/USDT", "BNB/USDT"];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { signals } = useSignals();
-  const { signalProbabilities } = useSmartAlgorithms();
-  const {
-    totalEquity, realizedPnl, unrealizedPnl,
-    goalProgress, targetGoal, openTradesCount
-  } = usePortfolioSync();
+  const assets = useLivePrices();
 
-  const topSignals = useMemo(() => signals.filter(s => s.confidence >= 65).slice(0, 3), [signals]);
+  const topSignals = useMemo(
+    () => [...signals].sort((a, b) => b.confidence - a.confidence).slice(0, 3),
+    [signals]
+  );
+
+  const overview = useMemo(
+    () => OVERVIEW_PAIRS.map((p) => assets.find((a) => a.pair === p)).filter(Boolean),
+    [assets]
+  );
 
   return (
     <motion.div
@@ -46,142 +37,90 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.06 } } }}
       className="nx-page"
     >
-      {/* ═══ PORTFOLIO / ACCOUNT SUMMARY ═══ */}
-      <motion.div variants={fade} className="nx-card-premium space-y-4">
+      {/* ═══ HERO — AI CHART ANALYSIS ═══ */}
+      <motion.section variants={fade} className="nx-card-premium space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
+            <ScanLine className="w-6 h-6 text-primary" strokeWidth={1.8} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="nx-section">تحليل الشارت بالذكاء الاصطناعي</h1>
+            <p className="nx-body text-[15px] text-muted-foreground mt-1">
+              ارفع صورة الشارت واحصل على تحليل منظم للسوق.
+            </p>
+          </div>
+        </div>
+        <button onClick={() => navigate("/chart-analysis")} className="nx-btn-primary w-full">
+          تحليل شارت جديد
+        </button>
+      </motion.section>
+
+      {/* ═══ MARKET OVERVIEW ═══ */}
+      <motion.section variants={fade} className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="nx-label">الرصيد الإجمالي</p>
-          {openTradesCount > 0 && (
-            <span className="nx-badge-warn">
-              <Activity className="w-3 h-3" />
-              {openTradesCount} صفقة مفتوحة
-            </span>
-          )}
-        </div>
-
-        <p className="nx-num-lg nx-ltr">
-          ${totalEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </p>
-
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <span className="nx-meta">محقق:</span>
-            <span className={cn("nx-num nx-ltr text-[15px]", realizedPnl >= 0 ? "text-success" : "text-destructive")}>
-              {realizedPnl >= 0 ? "+" : ""}${realizedPnl.toFixed(2)}
-            </span>
-          </div>
-          {unrealizedPnl !== 0 && (
-            <div className="flex items-center gap-1.5">
-              <span className="nx-meta">غير محقق:</span>
-              <span className={cn("nx-num nx-ltr text-[15px]", unrealizedPnl >= 0 ? "text-success" : "text-destructive")}>
-                {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toFixed(2)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="h-px bg-border" />
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="nx-label">الهدف الشهري</p>
-            <p className="nx-num text-[15px] text-primary">{Math.round(goalProgress)}%</p>
-          </div>
-          <Progress value={goalProgress} className="h-2 bg-secondary" />
-          <div className="flex justify-between">
-            <span className="nx-meta nx-ltr">${totalEquity.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
-            <span className="nx-meta nx-ltr">${targetGoal.toLocaleString()}</span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ═══ ملخص السوق ═══ */}
-      <motion.div variants={fade} className="space-y-3">
-        <h2 className="nx-section">ملخص السوق</h2>
-        <MarketMovers />
-      </motion.div>
-
-      {/* ═══ QUICK ACTIONS ═══ */}
-      <motion.div variants={fade} className="grid grid-cols-4 gap-2.5">
-        {quickActions.map((action) => (
-          <button
-            key={action.path}
-            onClick={() => navigate(action.path)}
-            className="nx-tap flex flex-col items-center justify-center gap-2 py-4 rounded-xl border border-border bg-card transition-all hover:border-primary/40 hover:bg-primary/5 active:scale-[0.97]"
-          >
-            <action.icon className="w-5 h-5 text-primary" strokeWidth={1.75} />
-            <span className="text-[13px] font-medium text-foreground text-center leading-tight">{action.label}</span>
+          <h2 className="nx-section">نظرة على السوق</h2>
+          <button onClick={() => navigate("/markets")} className="nx-btn-text">
+            الأسواق <ChevronLeft className="w-4 h-4" />
           </button>
-        ))}
-      </motion.div>
-
-      <motion.div variants={fade}>
-        <AICoachTip />
-      </motion.div>
-
-      {/* ═══ فرص مختارة بواسطة NEXUS ═══ */}
-      {topSignals.length > 0 && (
-        <motion.div variants={fade} className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <h2 className="nx-section">فرص مختارة بواسطة NEXUS</h2>
-            </div>
-            <button onClick={() => navigate("/signals")} className="nx-tap flex items-center gap-0.5 text-[13px] font-medium text-primary">
-              الكل <ChevronLeft className="w-4 h-4" />
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {overview.map((a) => (
+            <button
+              key={a!.pair}
+              onClick={() => navigate(`/asset/${encodeURIComponent(a!.pair)}`)}
+              className="nx-card !p-3 text-center space-y-2 active:scale-[0.98] transition-transform"
+            >
+              <AssetLogo pair={a!.pair} icon={a!.icon} category={a!.category} size={32} className="mx-auto" />
+              <p className="font-mono text-[14px] font-bold nx-ltr">{a!.pair.replace("/USDT", "")}</p>
+              <p className="font-mono text-[14px] font-semibold tabular-nums nx-ltr text-foreground">
+                {formatPrice(a!.price)}
+              </p>
+              <p
+                className={cn(
+                  "font-mono text-[13px] font-semibold tabular-nums nx-ltr",
+                  a!.up ? "text-success" : "text-destructive"
+                )}
+              >
+                {a!.up ? "+" : ""}
+                {a!.change}%
+              </p>
             </button>
-          </div>
+          ))}
+        </div>
+      </motion.section>
 
-          <div className="space-y-2.5">
-            {topSignals.map((signal) => {
-              const prob = signalProbabilities.get(signal.pair) ?? 50;
-              const isLong = signal.direction === "صعودي";
-              return (
-                <button
-                  key={signal.pair}
-                  onClick={() => navigate("/signals")}
-                  className="nx-card w-full text-right space-y-2.5 hover:border-primary/30 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="nx-card-title">{signal.pair}</span>
-                      <span className={isLong ? "nx-badge-long" : "nx-badge-short"}>
-                        {isLong ? "LONG" : "SHORT"}
-                      </span>
-                    </div>
-                    <span className={cn("nx-num nx-ltr text-[17px]", prob >= 65 ? "text-primary" : "text-muted-foreground")}>
-                      {prob}%
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-lg bg-secondary/60 py-1.5 text-center">
-                      <p className="nx-meta text-[11px]">دخول</p>
-                      <p className="nx-num nx-ltr text-[13px]">{signal.entry}</p>
-                    </div>
-                    <div className="rounded-lg bg-success/10 py-1.5 text-center">
-                      <p className="text-[11px] font-normal text-success/80">هدف</p>
-                      <p className="nx-num nx-ltr text-[13px] text-success">{signal.target1}</p>
-                    </div>
-                    <div className="rounded-lg bg-destructive/10 py-1.5 text-center">
-                      <p className="text-[11px] font-normal text-destructive/80">وقف</p>
-                      <p className="nx-num nx-ltr text-[13px] text-destructive">{signal.sl}</p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+      {/* ═══ NEXUS SIGNALS ═══ */}
+      {topSignals.length > 0 && (
+        <motion.section variants={fade} className="space-y-3">
+          <h2 className="nx-section">أقوى الإشارات</h2>
+          <div className="space-y-3">
+            {topSignals.map((s) => (
+              <SignalCard key={s.pair} signal={s} variant="compact" onOpen={() => navigate("/signals")} />
+            ))}
           </div>
-        </motion.div>
+          <button onClick={() => navigate("/signals")} className="nx-btn-secondary w-full">
+            عرض جميع الإشارات
+          </button>
+        </motion.section>
       )}
 
-      {/* ═══ الملخص الصباحي ═══ */}
-      <motion.div variants={fade}>
-        <MorningBriefCard />
-      </motion.div>
+      {/* ═══ DAILY INTELLIGENCE ═══ */}
+      <motion.section variants={fade} className="nx-card space-y-4">
+        <div className="flex items-center gap-2.5">
+          <Sun className="w-5 h-5 text-primary" strokeWidth={1.8} />
+          <h2 className="nx-card-title">إحاطة NEXUS اليومية</h2>
+        </div>
+        <p className="nx-body text-muted-foreground">
+          ملخص يومي للسيولة والاتجاه العام ومستويات التقلب عبر أهم الأسواق.
+        </p>
+        <button onClick={() => navigate("/morning-brief")} className="nx-btn-secondary w-full">
+          قراءة الإحاطة
+        </button>
+      </motion.section>
 
       {/* ═══ DISCLAIMER ═══ */}
       <motion.div variants={fade} className="flex items-start gap-2 px-1">
-        <AlertTriangle className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
         <p className="nx-meta leading-relaxed">
           جميع البيانات والتوصيات لأغراض تعليمية فقط. التداول ينطوي على مخاطر عالية.
         </p>

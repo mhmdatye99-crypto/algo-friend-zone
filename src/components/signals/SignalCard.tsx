@@ -1,200 +1,148 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, ChevronLeft, Calculator } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bookmark, BookmarkCheck, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Progress } from "@/components/ui/progress";
+import AssetLogo from "@/components/shared/AssetLogo";
+import type { DynamicSignal } from "@/hooks/useSignals";
 
-interface Signal {
-  pair: string;
-  direction: string;
-  icon?: string;
-  confidence: number;
-  entry: string;
-  target1: string;
-  target2: string;
-  sl: string;
-  rr: string;
-  timeFrame: string;
-  alphaScore: number;
-  rsi: number;
-  rsiSignal: string;
-  macd: string;
-  macdHist: string;
-  bbPosition: string;
-  volume: string;
-  sentiment: number;
-  liquidity: string;
-  convergence: number;
-  reasons: string[];
-  risk: string;
-  category?: string;
-  winProbability?: number;
+interface SignalCardProps {
+  signal: DynamicSignal;
+  variant?: "full" | "compact";
+  onOpen?: () => void;
 }
 
-interface Props {
-  signal: Signal;
-}
+const Level = ({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" }) => (
+  <div className="rounded-xl bg-secondary/60 border border-border/60 py-2 px-2 text-center">
+    <p className="text-[13px] font-medium text-muted-foreground leading-none mb-1.5">{label}</p>
+    <p
+      className={cn(
+        "font-mono text-[14px] font-semibold tabular-nums nx-ltr leading-none",
+        tone === "up" && "text-success",
+        tone === "down" && "text-destructive",
+        !tone && "text-foreground"
+      )}
+    >
+      {value}
+    </p>
+  </div>
+);
 
-const SignalCard = ({ signal }: Props) => {
-  const [showCalc, setShowCalc] = useState(false);
-  const [capital, setCapital] = useState(1000);
-  const [riskPct, setRiskPct] = useState(2);
+const SignalCard = ({ signal, variant = "full", onOpen }: SignalCardProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const isLong = signal.direction === "صعودي";
 
-  const entry = parseFloat(signal.entry.replace(/,/g, "")) || 0;
-  const tp1 = parseFloat(signal.target1.replace(/,/g, "")) || 0;
-  const tp2 = parseFloat(signal.target2.replace(/,/g, "")) || 0;
-  const sl = parseFloat(signal.sl.replace(/,/g, "")) || 0;
-
-  const totalRange = Math.abs(tp2 - sl) || 1;
-  const entryFromSL = Math.abs(entry - sl);
-  const tp1FromSL = Math.abs(tp1 - sl);
-  const tp1Progress = Math.min(100, Math.round((tp1FromSL / totalRange) * 100));
-  const entryProgress = Math.min(100, Math.round((entryFromSL / totalRange) * 100));
-
-  const isBullish = signal.direction === "صعودي";
-
-  // Portfolio Impact Calculator
-  const riskPerUnit = Math.abs(entry - sl);
-  const riskAmount = capital * (riskPct / 100);
-  const lotSize = riskPerUnit > 0 ? parseFloat((riskAmount / riskPerUnit).toFixed(4)) : 0;
-  const potentialProfit = lotSize * Math.abs(tp1 - entry);
+  const handlePrimary = () => {
+    if (onOpen) onOpen();
+    else setExpanded((v) => !v);
+  };
 
   return (
-    <motion.div
-      variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
-      transition={{ duration: 0.15 }}
-      className="nx-card hover-lift"
-    >
-      {/* Row 1: Pair + Direction + R:R */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          {signal.icon && (
-            <span className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-base">{signal.icon}</span>
-          )}
+    <div className="nx-card space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <AssetLogo pair={signal.pair} icon={signal.icon} category={signal.category} size={40} />
+        <div className="min-w-0 flex-1">
+          <p className="font-mono text-[16px] font-bold text-foreground nx-ltr truncate">{signal.pair}</p>
+          <p className="nx-meta">{signal.category} · {signal.timeFrame}</p>
+        </div>
+        <span className={isLong ? "nx-badge-long" : "nx-badge-short"}>{isLong ? "LONG" : "SHORT"}</span>
+      </div>
+
+      {/* Primary metric */}
+      <div className="flex items-baseline gap-2">
+        <span className="font-mono text-[30px] font-bold tabular-nums text-primary leading-none nx-ltr">
+          {signal.confidence}%
+        </span>
+        <span className="nx-label">ثقة التحليل</span>
+      </div>
+
+      {/* Trade setup */}
+      <div className="grid grid-cols-4 gap-2">
+        <Level label="ENTRY" value={signal.entry} />
+        <Level label="STOP" value={signal.sl} tone="down" />
+        <Level label="TP1" value={signal.target1} tone="up" />
+        <Level label="TP2" value={signal.target2} tone="up" />
+      </div>
+
+      {variant === "full" && (
+        <div className="flex items-center justify-between border-t border-border pt-3">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="nx-ltr font-mono font-bold text-[15px]">{signal.pair}</span>
-              <span className="nx-meta">{signal.timeFrame}</span>
-            </div>
+            <p className="nx-meta">الاتجاه</p>
+            <p className={cn("text-[15px] font-semibold", isLong ? "text-success" : "text-destructive")}>
+              {isLong ? "صاعد" : "هابط"}
+            </p>
+          </div>
+          <div>
+            <p className="nx-meta">المخاطرة</p>
+            <p className="text-[15px] font-semibold text-foreground">{signal.risk}</p>
+          </div>
+          <div>
+            <p className="nx-meta">R:R</p>
+            <p className="font-mono text-[15px] font-semibold text-foreground nx-ltr">{signal.rr}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className={cn(isBullish ? "nx-badge-long" : "nx-badge-short")}>
-            {isBullish ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-            {isBullish ? "LONG" : "SHORT"}
-          </span>
-          <span className="nx-badge-gold nx-ltr">
-            R:R {signal.rr}
-          </span>
-          <span className={cn(
-            "font-mono font-bold text-[13px] nx-ltr",
-            signal.confidence >= 85 ? "text-success" : signal.confidence >= 70 ? "text-primary" : "text-warning"
-          )}>
-            {signal.confidence}%
-          </span>
-        </div>
-      </div>
-
-      {/* Row 2: Entry + TP Progress Bar */}
-      <div className="mb-3">
-        <div className="flex items-baseline justify-between mb-1.5">
-          <span className="nx-num-lg text-[22px] nx-ltr">{signal.entry}</span>
-        </div>
-        <div className="relative h-2 rounded-full bg-muted overflow-hidden">
-          <div className="absolute left-0 top-0 h-full bg-destructive/25 rounded-l-full" style={{ width: `${Math.max(5, 100 - tp1Progress)}%` }} />
-          <div className="absolute right-0 top-0 h-full bg-success/20 rounded-r-full" style={{ width: `${tp1Progress}%` }} />
-          <div className="absolute top-0 h-full w-0.5 bg-primary" style={{ right: `${entryProgress}%` }} />
-        </div>
-        <div className="flex items-center justify-between mt-1.5 nx-meta nx-ltr">
-          <span className="text-destructive">SL {signal.sl}</span>
-          <div className="flex gap-3">
-            <span className="text-success/70">TP1 {signal.target1}</span>
-            <span className="text-success">TP2 {signal.target2}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 3: X-Insight Badges + Portfolio Impact Button */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={cn(
-            "nx-badge",
-            signal.convergence >= 4 ? "bg-success/10 text-success" :
-            signal.convergence >= 3 ? "bg-primary/10 text-primary" :
-            "bg-muted text-muted-foreground"
-          )}>
-            تقارب {signal.convergence}/5
-          </span>
-          <span className={cn(
-            "nx-badge nx-ltr",
-            signal.rsi > 70 ? "bg-destructive/10 text-destructive" :
-            signal.rsi < 30 ? "bg-success/10 text-success" :
-            "bg-muted text-muted-foreground"
-          )}>
-            RSI {signal.rsi}
-          </span>
-          {signal.alphaScore >= 90 && (
-            <span className="nx-badge-gold">
-              α+
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowCalc(!showCalc); }}
-            className="nx-btn-ghost nx-btn-sm text-primary"
-          >
-            <Calculator className="w-3.5 h-3.5" /> الحجم
-          </button>
-          <button className="nx-btn-ghost nx-btn-sm">
-            التفاصيل <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Portfolio Impact Calculator (expandable) */}
-      {showCalc && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-          className="mt-3 pt-3 border-t border-border space-y-2.5"
-        >
-          <div className="flex items-center gap-1.5 mb-1">
-            <Calculator className="w-3.5 h-3.5 text-primary" />
-            <span className="nx-label text-primary">حاسبة تأثير المحفظة</span>
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
-            {[500, 1000, 5000, 10000].map(c => (
-              <button key={c} onClick={() => setCapital(c)}
-                className={cn("px-3 h-9 rounded-lg text-[13px] font-mono nx-ltr transition-colors",
-                  capital === c ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                )}>
-                ${c.toLocaleString()}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="nx-meta">المخاطرة: {riskPct}%</span>
-            <input type="range" min={0.5} max={5} step={0.5} value={riskPct}
-              onChange={e => setRiskPct(parseFloat(e.target.value))}
-              className="w-28 h-2 accent-primary" />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-muted rounded-xl px-2 py-2 text-center">
-              <p className="nx-label text-[12px]">حجم اللوت</p>
-              <p className="font-mono font-bold text-primary nx-ltr">{lotSize}</p>
-            </div>
-            <div className="bg-muted rounded-xl px-2 py-2 text-center">
-              <p className="nx-label text-[12px]">مخاطرة</p>
-              <p className="font-mono font-bold text-destructive nx-ltr">${riskAmount.toFixed(0)}</p>
-            </div>
-            <div className="bg-muted rounded-xl px-2 py-2 text-center">
-              <p className="nx-label text-[12px]">ربح TP1</p>
-              <p className="font-mono font-bold text-success nx-ltr">${potentialProfit.toFixed(0)}</p>
-            </div>
-          </div>
-        </motion.div>
       )}
-    </motion.div>
+
+      {/* Action */}
+      <div className="flex items-center gap-2">
+        <button onClick={handlePrimary} className="nx-btn-secondary nx-btn-sm flex-1">
+          {variant === "compact" ? "عرض التحليل" : "عرض التحليل الكامل"}
+          {!onOpen && (
+            <ChevronDown className={cn("w-4 h-4 transition-transform", expanded && "rotate-180")} />
+          )}
+        </button>
+        {variant === "full" && (
+          <button
+            onClick={() => setSaved((v) => !v)}
+            aria-label="حفظ"
+            className={cn(
+              "nx-tap flex items-center justify-center rounded-xl border transition-colors shrink-0 w-11 h-11",
+              saved ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground"
+            )}
+          >
+            {saved ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-border pt-4 space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center">
+                  <p className="nx-meta">RSI</p>
+                  <p className="font-mono text-[16px] font-semibold nx-ltr">{signal.rsi}</p>
+                </div>
+                <div className="text-center">
+                  <p className="nx-meta">الزخم</p>
+                  <p className="text-[15px] font-semibold">{signal.rsiSignal}</p>
+                </div>
+                <div className="text-center">
+                  <p className="nx-meta">احتمال النجاح</p>
+                  <p className="font-mono text-[16px] font-semibold nx-ltr">{signal.winProbability}%</p>
+                </div>
+              </div>
+              <ul className="space-y-2">
+                {signal.reasons.map((r, i) => (
+                  <li key={i} className="flex gap-2 nx-body text-[15px]">
+                    <span className="text-primary">•</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
