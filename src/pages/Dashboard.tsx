@@ -30,6 +30,17 @@ const Dashboard = () => {
     [assets]
   );
 
+  const pulse = useMemo(() => {
+    const pct = (cat: string) => {
+      const rows = assets.filter((a) => a.category === cat);
+      if (!rows.length) return 0;
+      return Math.round((rows.filter((a) => a.up).length / rows.length) * 100);
+    };
+    const topMover = [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change))[0] ?? null;
+    return { crypto: pct("كريبتو"), forex: pct("فوركس"), topMover };
+  }, [assets]);
+
+
   return (
     <motion.div
       initial="hidden"
