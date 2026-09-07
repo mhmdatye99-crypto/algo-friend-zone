@@ -182,11 +182,11 @@
   .nx-badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[13px] font-semibold leading-none;
   }
-  .nx-badge-long { @apply nx-badge bg-success/12 text-success; }
-  .nx-badge-short { @apply nx-badge bg-destructive/12 text-destructive; }
+  .nx-badge-long { @apply nx-badge bg-success/10 text-success; }
+  .nx-badge-short { @apply nx-badge bg-destructive/10 text-destructive; }
   .nx-badge-wait { @apply nx-badge bg-muted text-muted-foreground; }
-  .nx-badge-gold { @apply nx-badge bg-primary/12 text-primary; }
-  .nx-badge-warn { @apply nx-badge bg-warning/12 text-warning; }
+  .nx-badge-gold { @apply nx-badge bg-primary/10 text-primary; }
+  .nx-badge-warn { @apply nx-badge bg-warning/10 text-warning; }
   .nx-badge-neutral { @apply nx-badge bg-secondary text-secondary-foreground border border-border; }
 
   /* ---------- Layout helpers ---------- */

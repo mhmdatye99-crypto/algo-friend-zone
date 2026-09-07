@@ -7,31 +7,31 @@ const slides = [
     icon: BarChart3,
     title: "مركز استخبارات التداول",
     subtitle: "توصيات حية، نسبة ثقة AI، مؤشر المخاطرة، ومنحنى رأس المال — كل شيء في لوحة واحدة",
-    color: "43, 100%, 50%",
+    color: "var(--primary)",
   },
   {
     icon: ScanLine,
     title: "ماسح الأسواق بالذكاء الاصطناعي",
     subtitle: "التقط صورة لأي شارت أو ابحث عن أي زوج واحصل على تحليل مؤسسي فوري",
-    color: "190, 100%, 50%",
+    color: "var(--primary)",
   },
   {
     icon: Brain,
     title: "المُرشد — مدربك الشخصي",
     subtitle: "يتابع انضباطك، يحلل سلوكك، ويقدم نصائح مخصصة لتطوير أدائك",
-    color: "260, 80%, 60%",
+    color: "var(--primary)",
   },
   {
     icon: Users,
     title: "المجتمع والتحديات",
     subtitle: "تحديات أسبوعية، تصنيفات، وشارات إنجاز — الانضباط أهم من الربح",
-    color: "150, 80%, 45%",
+    color: "var(--primary)",
   },
   {
     icon: UserCircle,
     title: "ملفك المهني",
     subtitle: "إحصائيات أدائك، سجل صفقاتك، ومنحنى نموّك كمتداول محترف",
-    color: "20, 90%, 55%",
+    color: "var(--primary)",
   },
 ];
 
@@ -68,9 +68,9 @@ const OnboardingSlides = ({ onComplete }: Props) => {
           <motion.div
             className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
             style={{
-              background: `hsla(${slide.color}, 0.12)`,
-              border: `1px solid hsla(${slide.color}, 0.25)`,
-              boxShadow: `0 0 40px hsla(${slide.color}, 0.15)`,
+              background: `hsl(${slide.color} / 0.12)`,
+              border: `1px solid hsl(${slide.color} / 0.25)`,
+              boxShadow: `0 0 40px hsl(${slide.color} / 0.15)`,
             }}
             animate={{ scale: [1, 1.06, 1] }}
             transition={{ duration: 2.5, repeat: Infinity }}
