@@ -12,11 +12,11 @@ interface SignalCardProps {
 }
 
 const Level = ({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" }) => (
-  <div className="rounded-xl bg-secondary/60 border border-border/60 py-2 px-2 text-center">
+  <div className="rounded-lg bg-secondary/60 border border-border/60 min-w-0 min-h-[58px] py-2 px-1.5 text-center flex flex-col justify-center">
     <p className="text-[13px] font-medium text-muted-foreground leading-none mb-1.5">{label}</p>
     <p
       className={cn(
-        "font-mono text-[14px] font-semibold tabular-nums nx-ltr leading-none",
+        "font-mono text-[13px] min-[380px]:text-[14px] font-semibold tabular-nums nx-ltr leading-none truncate",
         tone === "up" && "text-success",
         tone === "down" && "text-destructive",
         !tone && "text-foreground"
@@ -31,6 +31,9 @@ const SignalCard = ({ signal, variant = "full", onOpen }: SignalCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
   const isLong = signal.direction === "صعودي";
+  const hasRsi = Number.isFinite(signal.rsi);
+  const hasProbability = Number.isFinite(signal.winProbability);
+  const hasMacd = Boolean(signal.macd?.trim());
 
   const handlePrimary = () => {
     if (onOpen) onOpen();
@@ -50,15 +53,15 @@ const SignalCard = ({ signal, variant = "full", onOpen }: SignalCardProps) => {
       </div>
 
       {/* Primary metric */}
-      <div className="flex items-baseline gap-2">
-        <span className="font-mono text-[30px] font-bold tabular-nums text-primary leading-none nx-ltr">
+       <div className="flex items-baseline gap-2">
+         <span className="font-mono text-[26px] font-bold tabular-nums text-primary leading-none nx-ltr">
           {signal.confidence}%
         </span>
         <span className="nx-label">ثقة التحليل</span>
       </div>
 
       {/* Trade setup */}
-      <div className="grid grid-cols-4 gap-2">
+       <div className="grid grid-cols-4 gap-1.5 min-[380px]:gap-2">
         <Level label="ENTRY" value={signal.entry} />
         <Level label="STOP" value={signal.sl} tone="down" />
         <Level label="TP1" value={signal.target1} tone="up" />
@@ -116,10 +119,10 @@ const SignalCard = ({ signal, variant = "full", onOpen }: SignalCardProps) => {
             className="overflow-hidden"
           >
             <div className="border-t border-border pt-4 space-y-3">
-              <div className="grid grid-cols-3 gap-2">
+             <div className="grid grid-cols-2 gap-2">
                 <div className="text-center">
                   <p className="nx-meta">RSI</p>
-                  <p className="font-mono text-[16px] font-semibold nx-ltr">{signal.rsi}</p>
+                   <p className="font-mono text-[16px] font-semibold nx-ltr">{hasRsi ? signal.rsi : "غير متاح"}</p>
                 </div>
                 <div className="text-center">
                   <p className="nx-meta">الزخم</p>
@@ -127,9 +130,14 @@ const SignalCard = ({ signal, variant = "full", onOpen }: SignalCardProps) => {
                 </div>
                 <div className="text-center">
                   <p className="nx-meta">احتمال النجاح</p>
-                  <p className="font-mono text-[16px] font-semibold nx-ltr">{signal.winProbability}%</p>
+                   <p className="font-mono text-[16px] font-semibold nx-ltr">{hasProbability ? `${signal.winProbability}%` : "غير متاح"}</p>
+                 </div>
+                 <div className="text-center">
+                   <p className="nx-meta">MACD</p>
+                   <p className="text-[15px] font-semibold">{hasMacd ? signal.macd : "غير متاح"}</p>
                 </div>
               </div>
+               <p className="nx-label">منطق الإشارة</p>
               <ul className="space-y-2">
                 {signal.reasons.map((r, i) => (
                   <li key={i} className="flex gap-2 nx-body text-[15px]">

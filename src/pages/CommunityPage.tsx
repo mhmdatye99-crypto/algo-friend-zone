@@ -196,10 +196,10 @@ const CommunityPage = () => {
         <motion.button
           onClick={() => setShowCreate(true)}
           aria-label="نشر تحليل"
-          className="fixed bottom-24 left-4 z-30 w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
+          className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-4 z-30 w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
           whileTap={{ scale: 0.95 }}
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-5 h-5" />
         </motion.button>
       )}
 

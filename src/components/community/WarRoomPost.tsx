@@ -35,12 +35,12 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
       animate={{ opacity: 1, y: 0 }}
       className="nx-card overflow-hidden"
     >
-      <div className="space-y-4">
+       <div className="space-y-3.5">
         {/* User Row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/15 flex items-center justify-center text-[13px] font-bold font-mono text-primary border border-primary/15">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-[14px] font-bold font-mono text-primary border border-primary/20">
                 {(post.display_name || "M")[0].toUpperCase()}
               </div>
               <BadgeCheck className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 text-accent" />
@@ -48,7 +48,7 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[15px] font-bold">{post.display_name}</span>
-                <span className="nx-meta">· {timeAgo(post.created_at)}</span>
+                <span className="nx-meta nx-ltr">· {timeAgo(post.created_at)}</span>
               </div>
               <span className="nx-meta">{post.timeframe}</span>
             </div>
@@ -57,36 +57,48 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
           <button
             onClick={() => onSave(post.id)}
             className={cn(
-              "nx-tap px-3.5 rounded-xl text-[13px] font-bold transition-all border flex items-center gap-1",
+              "w-11 h-11 rounded-lg transition-colors border flex items-center justify-center",
               post.is_saved
                 ? "bg-primary/10 text-primary border-primary/20"
                 : "bg-secondary text-muted-foreground border-border hover:text-primary hover:border-primary/20"
             )}
           >
-            {post.is_saved ? <><BookmarkCheck className="w-3.5 h-3.5" />محفوظ</> : "+ حفظ"}
+            <BookmarkCheck className={cn("w-[18px] h-[18px]", post.is_saved && "fill-current")} />
           </button>
         </div>
 
-        {/* Analysis Text */}
-        {post.analysis_summary && (
-          <p className="text-[16px] leading-[1.7] text-foreground/90">
-            {post.analysis_summary}
-          </p>
-        )}
-
-        {/* Image */}
-        {post.image_url && (
-          <div className="rounded-2xl overflow-hidden border border-border">
-            <img src={post.image_url} alt="تحليل" className="w-full max-h-56 object-cover" loading="lazy" />
-          </div>
-        )}
-
-        {/* Asset + Direction Tag + Outcome Badge */}
+        {/* Asset + Direction Tag */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className={post.prediction === "bullish" ? "nx-badge-long" : "nx-badge-short"}>
             {post.prediction === "bullish" ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             <span className="nx-ltr font-mono">{post.pair}</span>
           </span>
+          <span className="nx-badge-neutral nx-ltr">{post.timeframe}</span>
+        </div>
+
+        {/* Analysis Text */}
+        {post.analysis_summary && (
+          <div>
+            <p className={cn("text-[16px] leading-[1.85] text-foreground/90", !showDetails && "nx-line-clamp")}>
+              {post.analysis_summary}
+            </p>
+            {post.analysis_summary.length > 220 && (
+              <button onClick={() => setShowDetails(!showDetails)} className="nx-btn-text min-h-[40px] mt-1">
+                {showDetails ? "عرض أقل" : "قراءة المزيد"}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Image */}
+        {post.image_url && (
+           <div className="rounded-xl overflow-hidden border border-border">
+            <img src={post.image_url} alt="تحليل" className="w-full max-h-56 object-cover" loading="lazy" />
+          </div>
+        )}
+
+        {/* Intelligence + Outcome */}
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="nx-badge-gold">
             <Shield className="w-3.5 h-3.5" />
             AI {post.ai_confidence}%
@@ -120,8 +132,8 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
         </div>
 
         {/* Actions — Clean, minimal */}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between pt-1 border-t border-border/60">
+          <div className="flex items-center gap-3 min-w-0">
             <ActionBtn
               icon={ThumbsUp}
               count={post.bullish_count + post.bearish_count}
@@ -142,7 +154,7 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
           {/* Details Toggle */}
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="nx-tap flex items-center gap-1 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            className="nx-tap flex items-center gap-1 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             تفاصيل
             {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -160,15 +172,15 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
             >
               <div className="pt-3 border-t border-border grid grid-cols-3 gap-2 text-center">
                 <div className="nx-card-flat p-2">
-                  <p className="text-[12px] text-muted-foreground mb-0.5">صعودي</p>
+                   <p className="text-[13px] text-muted-foreground mb-0.5">صعودي</p>
                   <p className="nx-num text-success">{post.bullish_count}</p>
                 </div>
                 <div className="nx-card-flat p-2">
-                  <p className="text-[12px] text-muted-foreground mb-0.5">هبوطي</p>
+                   <p className="text-[13px] text-muted-foreground mb-0.5">هبوطي</p>
                   <p className="nx-num text-destructive">{post.bearish_count}</p>
                 </div>
                 <div className="nx-card-flat p-2">
-                  <p className="text-[12px] text-muted-foreground mb-0.5">نسبة صعود</p>
+                   <p className="text-[13px] text-muted-foreground mb-0.5">نسبة صعود</p>
                   <p className="nx-num text-primary">{bullishPct}%</p>
                 </div>
               </div>

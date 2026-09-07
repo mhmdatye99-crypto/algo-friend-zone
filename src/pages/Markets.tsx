@@ -58,8 +58,8 @@ const Markets = () => {
       </motion.div>
 
       {/* Filters */}
-      <motion.div variants={fade} className="flex items-center gap-2">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 -mx-1 px-1">
+      <motion.div variants={fade} className="flex items-center gap-2 min-w-0">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 min-w-0 -mx-1 px-1 pb-0.5">
           {assetCategories.map((cat) => (
             <button
               key={cat}
@@ -85,7 +85,7 @@ const Markets = () => {
       </motion.div>
 
       {/* Asset list */}
-      <motion.div variants={fade} className="rounded-2xl border border-border bg-card overflow-hidden">
+      <motion.div variants={fade} className="rounded-xl border border-border/80 bg-card overflow-hidden">
         {filteredAssets.length === 0 ? (
           <div className="py-12 text-center nx-body text-muted-foreground">لا توجد نتائج مطابقة</div>
         ) : (
@@ -93,7 +93,7 @@ const Markets = () => {
             <div
               key={item.pair}
               onClick={() => navigate(`/asset/${encodeURIComponent(item.pair)}`)}
-              className="nx-row cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 transition-colors"
+              className="grid grid-cols-[40px_minmax(60px,1fr)_48px_minmax(82px,auto)_44px] min-[380px]:grid-cols-[40px_minmax(70px,1fr)_56px_minmax(92px,auto)_44px] items-center gap-2 min-h-[68px] px-3 border-b border-border/70 last:border-b-0 cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 transition-colors"
             >
               <AssetLogo pair={item.pair} icon={item.icon} category={item.category} size={40} />
 
@@ -104,12 +104,12 @@ const Markets = () => {
                 <p className="nx-meta truncate">{item.category}</p>
               </div>
 
-              <div className="hidden min-[380px]:block shrink-0">
-                <MiniChart data={item.sparkline} up={item.up} width={40} height={20} />
+              <div className="w-12 min-[380px]:w-14 flex justify-center overflow-hidden" aria-hidden="true">
+                <MiniChart data={item.sparkline} up={item.up} width={48} height={22} />
               </div>
 
-              <div className="text-left shrink-0">
-                <p className="font-mono font-semibold text-[15px] tabular-nums nx-ltr">
+              <div className="text-left min-w-0" dir="ltr">
+                <p className="font-mono font-semibold text-[14px] min-[380px]:text-[15px] tabular-nums nx-ltr whitespace-nowrap">
                   {formatPrice(item.price)}
                 </p>
                 <p
@@ -127,7 +127,7 @@ const Markets = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleFavorite(item.pair); }}
                   aria-label="مفضلة"
-                  className="w-11 h-11 flex items-center justify-center shrink-0 -mr-1"
+                  className="w-11 h-11 flex items-center justify-center rounded-lg shrink-0"
                 >
                   <Star
                     className={cn(
