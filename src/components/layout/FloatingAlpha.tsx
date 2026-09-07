@@ -200,7 +200,6 @@ const FloatingAlpha = () => {
                           ? "bg-background border border-accent/30 text-foreground rounded-br-md"
                           : "rounded-bl-md text-foreground"
                       )}
-                      className={cn(msg.role === "assistant" && "bg-primary/6 border border-primary/10")}
                     >
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
