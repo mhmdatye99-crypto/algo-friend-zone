@@ -211,24 +211,62 @@ function formatVolume(vol: number): string {
   return `$${(vol / 1e3).toFixed(0)}K`;
 }
 
+const FOREX_PAIRS = initialAssets.filter(a => a.category === "فوركس").map(a => a.pair);
+
 export const useLivePrices = () => {
   const [assets, setAssets] = useState<Asset[]>(() =>
     initialAssets.map(a => ({ ...a, sparkline: generateSparkline(a.price) }))
   );
   const wsRef = useRef<WebSocket | null>(null);
-  const openPricesRef = useRef<Record<string, number>>({});
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Store initial open prices for 24h change calculation
-  useEffect(() => {
-    const openPrices: Record<string, number> = {};
-    initialAssets.forEach(a => {
-      if (a.category === "كريبتو") {
-        openPrices[a.pair] = a.price;
-      }
-    });
-    openPricesRef.current = openPrices;
+  const applySnapshots = useCallback((snaps: Record<string, MarketSnapshot>) => {
+    setAssets(prev => prev.map(a => {
+      const s = snaps[a.pair];
+      if (!s) return a;
+      const sparkline = s.sparkline?.length ? s.sparkline : a.sparkline;
+      const rsi = computeRsi(sparkline);
+      const macd = s.change > 0.5 ? "صعودي" : s.change < -0.5 ? "هبوطي" : "محايد";
+      return {
+        ...a,
+        price: s.price,
+        change: s.change,
+        up: s.change >= 0,
+        vol: s.volume ? formatVolume(s.volume) : a.vol,
+        sparkline,
+        rsi,
+        macd,
+        signal: deriveSignal(rsi, macd),
+      };
+    }));
   }, []);
+
+  // Real crypto snapshot (Binance REST) — replaces hardcoded seed values
+  useEffect(() => {
+    let cancelled = false;
+    fetchCryptoSnapshots(BINANCE_SYMBOL_MAP)
+      .then(snaps => { if (!cancelled) applySnapshots(snaps); })
+      .catch(e => console.warn("Crypto snapshot failed", e));
+    fetchCryptoSparklines(BINANCE_SYMBOL_MAP)
+      .then(map => {
+        if (cancelled) return;
+        setAssets(prev => prev.map(a => (map[a.pair] ? { ...a, sparkline: map[a.pair] } : a)));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [applySnapshots]);
+
+  // Real forex rates (ECB via Frankfurter), refreshed periodically
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      fetchForexSnapshots(FOREX_PAIRS)
+        .then(snaps => { if (!cancelled) applySnapshots(snaps); })
+        .catch(e => console.warn("Forex rates failed", e));
+    load();
+    const id = setInterval(load, 5 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [applySnapshots]);
 
   // Binance WebSocket for crypto
   useEffect(() => {
@@ -258,7 +296,7 @@ export const useLivePrices = () => {
 
           const price = parseFloat(data.c); // current price
           const open24h = parseFloat(data.o); // 24h open price
-          const volume = parseFloat(data.v) * price; // volume in USDT (approx)
+          const volume = parseFloat(data.q ?? data.v); // quote volume
           const change = open24h > 0 ? +((price / open24h - 1) * 100).toFixed(2) : 0;
 
           setAssets(prev => prev.map(a => {
@@ -306,33 +344,9 @@ export const useLivePrices = () => {
     };
   }, []);
 
-  // Simulation tick for non-crypto assets only (forex, commodities, indices)
-  const tick = useCallback(() => {
-    setAssets(prev =>
-      prev.map(asset => {
-        if (asset.category === "كريبتو") return asset; // Skip crypto — handled by WebSocket
-        const delta = (Math.random() - 0.48) * asset.price * 0.001;
-        const newPrice = +(asset.price + delta).toFixed(asset.price < 1 ? 4 : 2);
-        const newChange = +((newPrice / (asset.price / (1 + asset.change / 100)) - 1) * 100).toFixed(2);
-        const newSparkline = [...asset.sparkline.slice(1), newPrice];
-        return {
-          ...asset,
-          price: newPrice,
-          change: newChange,
-          up: newChange >= 0,
-          sparkline: newSparkline,
-        };
-      })
-    );
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [tick]);
-
   return assets;
 };
+
 
 export const formatPrice = (price: number): string => {
   if (price >= 10000) return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
