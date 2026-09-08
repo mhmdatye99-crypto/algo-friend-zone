@@ -12,7 +12,9 @@ import KeyLevelsSection from "@/components/analysis/KeyLevelsSection";
 import IndicatorSection from "@/components/analysis/IndicatorSection";
 import ReasoningSection from "@/components/analysis/ReasoningSection";
 import ScenarioSection from "@/components/analysis/ScenarioSection";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { getBias, toShareable, type AIAnalysisResult } from "@/components/analysis/types";
+
 
 const fade = {
   hidden: { opacity: 0, y: 8 },
