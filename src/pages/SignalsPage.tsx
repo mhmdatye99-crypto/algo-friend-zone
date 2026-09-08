@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, X, AlertTriangle, ScanLine } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useSignals } from "@/hooks/useSignals";
+import { useChartAnalyses } from "@/hooks/useChartAnalyses";
 import SignalCard from "@/components/signals/SignalCard";
+import ChartSignalCard from "@/components/signals/ChartSignalCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const fade = {
@@ -23,12 +25,24 @@ const filters: { key: FilterKey; label: string }[] = [
 
 const SignalsPage = () => {
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "mine" ? "mine" : "live";
   const { signals } = useSignals();
+  const { data: mine = [], isLoading: mineLoading } = useChartAnalyses();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const bullish = signals.filter((s) => s.direction === "صعودي").length;
   const bearish = signals.length - bullish;
+
+  const mineFiltered = useMemo(() => {
+    let list = mine.filter((s) => !search || s.pair.toLowerCase().includes(search.toLowerCase()));
+    if (filter === "long") list = list.filter((s) => s.direction === "صعودي");
+    if (filter === "short") list = list.filter((s) => s.direction === "هبوطي");
+    if (filter === "confidence") list = [...list].sort((a, b) => b.confidence - a.confidence);
+    return list;
+  }, [mine, search, filter]);
+
 
   const filtered = useMemo(() => {
     let list = signals.filter(
@@ -57,6 +71,16 @@ const SignalsPage = () => {
           <span className="font-mono font-bold tabular-nums nx-ltr">{bearish}</span>
           <span>SHORT</span>
         </div>
+      </motion.div>
+
+      {/* Tabs */}
+      <motion.div variants={fade} className="flex gap-2">
+        <button onClick={() => setParams({})} className={cn("nx-chip flex-1", tab === "live" && "nx-chip-on")}>
+          الإشارات الحية
+        </button>
+        <button onClick={() => setParams({ tab: "mine" })} className={cn("nx-chip flex-1", tab === "mine" && "nx-chip-on")}>
+          إشاراتي من الشارت{mine.length ? ` (${mine.length})` : ""}
+        </button>
       </motion.div>
 
       {/* Chart analysis entry */}
@@ -101,7 +125,26 @@ const SignalsPage = () => {
       </motion.div>
 
       {/* Cards */}
-      {signals.length === 0 ? (
+      {tab === "mine" ? (
+        mineLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : mineFiltered.length === 0 ? (
+          <div className="text-center py-12 space-y-2">
+            <p className="nx-body text-muted-foreground">لا توجد إشارات من تحليل الشارت بعد</p>
+            <p className="nx-meta">كل صورة تحللها تُسجَّل هنا تلقائياً مع تاريخها ومستوى الثقة.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {mineFiltered.map((item) => (
+              <ChartSignalCard key={item.id} item={item} />
+            ))}
+          </div>
+        )
+      ) : signals.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-56 w-full rounded-2xl" />

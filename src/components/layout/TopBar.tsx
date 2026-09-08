@@ -20,6 +20,7 @@ const pageTitles: Record<string, string> = {
   "/morning-brief": "الإحاطة اليومية",
   "/chart-analysis": "تحليل الشارت",
   "/chart-analysis/result": "نتيجة التحليل",
+  "/chart-analysis/result/:id": "نتيجة التحليل",
 };
 
 const TopBar = () => {
@@ -31,7 +32,7 @@ const TopBar = () => {
   const { isDark, toggle } = useThemeMode();
 
   const isHome = location.pathname === "/";
-  const currentTitle = pageTitles[location.pathname] || "";
+  const currentTitle = pageTitles[location.pathname] || (location.pathname.startsWith("/chart-analysis/result/") ? "نتيجة التحليل" : "");
 
   return (
     <>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Clock, TrendingUp, TrendingDown, Minus, Trash2, Loader2 } from "lucide-react";
+import { Clock, TrendingUp, TrendingDown, Minus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +44,10 @@ const MyAnalyses = () => {
       const { error } = await supabase.from("saved_analyses").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["saved-analyses"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-analyses"] });
+      queryClient.invalidateQueries({ queryKey: ["chart-analyses"] });
+    },
   });
 
   return (
@@ -81,9 +84,18 @@ const MyAnalyses = () => {
             <motion.div
               key={a.id}
               variants={fadeUp}
-              className="glass rounded-[14px] p-4 space-y-2 border border-border/10"
-              onClick={() => navigate(`/asset/${encodeURIComponent(a.pair)}`)}
+              className="glass rounded-[14px] p-4 space-y-2 border border-border/10 cursor-pointer"
+              onClick={() =>
+                a.source === "chart"
+                  ? navigate(`/chart-analysis/result/${a.id}`)
+                  : navigate(`/asset/${encodeURIComponent(a.pair)}`)
+              }
             >
+              {a.source === "chart" && (
+                <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-primary bg-primary/10 border border-primary/20 rounded-md px-2 py-0.5">
+                  <ImageIcon className="w-3 h-3" /> تحليل صورة
+                </span>
+              )}
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border", directionBg(a.direction))}>
                   {a.direction === "صعودي" ? <TrendingUp className="w-3 h-3" /> : a.direction === "هبوطي" ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
