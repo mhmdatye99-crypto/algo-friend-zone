@@ -3,8 +3,11 @@ import { motion } from "framer-motion";
 import { RefreshCw, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
+import { saveChartAnalysis } from "@/hooks/useChartAnalyses";
 import ChartUploader from "@/components/analysis/ChartUploader";
 import ChartPreview from "@/components/analysis/ChartPreview";
 import ChartTips from "@/components/analysis/ChartTips";
@@ -18,6 +21,8 @@ const fade = {
 
 const ChartAnalysisPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { spendCredits, canAfford, isFounder } = useCredits();
 
   const [image, setImage] = useState<string | null>(null);
@@ -77,9 +82,21 @@ const ChartAnalysisPage = () => {
       stopTimer();
       setStage(chartAnalysisStages.length);
       setProgress(100);
+      const createdAt = new Date().toISOString();
+      // تسجيل التحليل تلقائياً في المحفوظات والإشارات
+      let savedId: string | null = null;
+      if (user) {
+        try {
+          savedId = await saveChartAnalysis(user.id, result);
+          queryClient.invalidateQueries({ queryKey: ["chart-analyses"] });
+          queryClient.invalidateQueries({ queryKey: ["saved-analyses"] });
+        } catch {
+          toast.error("تم التحليل لكن تعذر حفظه في المحفوظات");
+        }
+      }
       await new Promise((r) => setTimeout(r, 350));
-      navigate("/chart-analysis/result", {
-        state: { analysis: result, imagePreview: image, createdAt: new Date().toISOString() },
+      navigate(savedId ? `/chart-analysis/result/${savedId}` : "/chart-analysis/result", {
+        state: { analysis: result, imagePreview: image, createdAt, savedId },
       });
     } catch {
       toast.error("فشل التحليل. حاول مرة أخرى.");
