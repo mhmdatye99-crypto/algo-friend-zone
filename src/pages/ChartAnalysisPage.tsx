@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import ChartUploader from "@/components/analysis/ChartUploader";
 import ChartPreview from "@/components/analysis/ChartPreview";
+import ChartTips from "@/components/analysis/ChartTips";
 import AnalysisLoadingState, { chartAnalysisStages } from "@/components/analysis/AnalysisLoadingState";
 import type { AIAnalysisResult } from "@/components/analysis/types";
 
@@ -15,12 +16,6 @@ const fade = {
   show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
-const TIPS = [
-  "استخدم صورة واضحة",
-  "تأكد من ظهور السعر والفريم",
-  "أظهر المؤشرات التي تريد تحليلها",
-];
-
 const ChartAnalysisPage = () => {
   const navigate = useNavigate();
   const { spendCredits, canAfford, isFounder } = useCredits();
@@ -28,9 +23,15 @@ const ChartAnalysisPage = () => {
   const [image, setImage] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [stage, setStage] = useState(0);
+  const [progress, setProgress] = useState(0);
   const timerRef = useRef<number | null>(null);
 
-  useEffect(() => () => { if (timerRef.current) window.clearInterval(timerRef.current); }, []);
+  const stopTimer = () => {
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
+
+  useEffect(() => () => stopTimer(), []);
 
   const startAnalysis = async () => {
     if (!image || analyzing) return;
@@ -44,10 +45,24 @@ const ChartAnalysisPage = () => {
     }
 
     setAnalyzing(true);
+    // مرحلة 1: تجهيز الصورة (مكتملة فعلياً بمجرد بدء الإرسال)
     setStage(0);
+    setProgress(6);
+
+    window.setTimeout(() => {
+      setStage(1);
+      setProgress(22);
+    }, 250);
+
+    // تقدّم تدريجي محسوب حتى وصول الرد الحقيقي (لا يتجاوز 90%)
     timerRef.current = window.setInterval(() => {
-      setStage((s) => (s >= chartAnalysisStages.length - 1 ? s : s + 1));
-    }, 1600);
+      setProgress((p) => {
+        const next = p + Math.max(0.6, (90 - p) * 0.06);
+        const capped = Math.min(next, 90);
+        setStage(capped > 70 ? 3 : capped > 45 ? 2 : 1);
+        return capped;
+      });
+    }, 400);
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-chart", {
@@ -59,13 +74,17 @@ const ChartAnalysisPage = () => {
         toast.error(result.error);
         return;
       }
+      stopTimer();
+      setStage(chartAnalysisStages.length);
+      setProgress(100);
+      await new Promise((r) => setTimeout(r, 350));
       navigate("/chart-analysis/result", {
         state: { analysis: result, imagePreview: image, createdAt: new Date().toISOString() },
       });
     } catch {
       toast.error("فشل التحليل. حاول مرة أخرى.");
     } finally {
-      if (timerRef.current) window.clearInterval(timerRef.current);
+      stopTimer();
       setAnalyzing(false);
     }
   };
@@ -81,7 +100,7 @@ const ChartAnalysisPage = () => {
 
       {analyzing ? (
         <motion.div variants={fade}>
-          <AnalysisLoadingState imagePreview={image} stage={stage} />
+          <AnalysisLoadingState imagePreview={image} stage={stage} progress={progress} />
         </motion.div>
       ) : image ? (
         <motion.div variants={fade} className="space-y-3">
@@ -104,17 +123,9 @@ const ChartAnalysisPage = () => {
             <ChartUploader onSelect={setImage} onError={(m) => toast.error(m)} />
           </motion.div>
 
-          <motion.section variants={fade} className="space-y-2 px-1">
-            <p className="nx-label">لأفضل نتيجة</p>
-            <ul className="space-y-1.5">
-              {TIPS.map((t) => (
-                <li key={t} className="flex items-start gap-2.5">
-                  <span className="w-1 h-1 rounded-full bg-muted-foreground shrink-0 mt-2.5" />
-                  <p className="nx-body text-muted-foreground">{t}</p>
-                </li>
-              ))}
-            </ul>
-          </motion.section>
+          <motion.div variants={fade}>
+            <ChartTips />
+          </motion.div>
         </>
       )}
     </motion.div>
