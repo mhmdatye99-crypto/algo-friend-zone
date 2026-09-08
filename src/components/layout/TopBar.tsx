@@ -32,7 +32,7 @@ const TopBar = () => {
   const { isDark, toggle } = useThemeMode();
 
   const isHome = location.pathname === "/";
-  const currentTitle = pageTitles[location.pathname] || "";
+  const currentTitle = pageTitles[location.pathname] || (location.pathname.startsWith("/chart-analysis/result/") ? "نتيجة التحليل" : "");
 
   return (
     <>
