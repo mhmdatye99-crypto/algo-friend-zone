@@ -447,6 +447,7 @@ export type Database = {
       }
       saved_analyses: {
         Row: {
+          analysis: Json | null
           confidence: number
           created_at: string
           direction: string
@@ -458,10 +459,15 @@ export type Database = {
           price: number
           rsi: number | null
           signal: string | null
+          source: string
+          stop_loss: string | null
+          take_profit1: string | null
+          take_profit2: string | null
           timeframe: string
           user_id: string
         }
         Insert: {
+          analysis?: Json | null
           confidence?: number
           created_at?: string
           direction: string
@@ -473,10 +479,15 @@ export type Database = {
           price: number
           rsi?: number | null
           signal?: string | null
+          source?: string
+          stop_loss?: string | null
+          take_profit1?: string | null
+          take_profit2?: string | null
           timeframe?: string
           user_id: string
         }
         Update: {
+          analysis?: Json | null
           confidence?: number
           created_at?: string
           direction?: string
@@ -488,6 +499,10 @@ export type Database = {
           price?: number
           rsi?: number | null
           signal?: string | null
+          source?: string
+          stop_loss?: string | null
+          take_profit1?: string | null
+          take_profit2?: string | null
           timeframe?: string
           user_id?: string
         }
