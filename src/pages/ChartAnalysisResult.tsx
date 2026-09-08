@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Loader2, Share2 } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Bookmark, Loader2, Share2, Signal } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import AnalysisSummary from "@/components/analysis/AnalysisSummary";
 import TradeSetupCard from "@/components/analysis/TradeSetupCard";
 import MarketAnalysisSection from "@/components/analysis/MarketAnalysisSection";
@@ -13,8 +11,8 @@ import IndicatorSection from "@/components/analysis/IndicatorSection";
 import ReasoningSection from "@/components/analysis/ReasoningSection";
 import ScenarioSection from "@/components/analysis/ScenarioSection";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { getBias, toShareable, type AIAnalysisResult } from "@/components/analysis/types";
-
+import { toShareable, type AIAnalysisResult } from "@/components/analysis/types";
+import { useChartAnalysis } from "@/hooks/useChartAnalyses";
 
 const fade = {
   hidden: { opacity: 0, y: 8 },
@@ -25,46 +23,32 @@ interface ResultState {
   analysis?: AIAnalysisResult;
   imagePreview?: string | null;
   createdAt?: string;
+  savedId?: string | null;
 }
 
 const ChartAnalysisResult = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { analysis, imagePreview, createdAt } = (useLocation().state || {}) as ResultState;
-  const [saving, setSaving] = useState(false);
+  const { id } = useParams<{ id?: string }>();
+  const state = (useLocation().state || {}) as ResultState;
+  const { data: saved, isLoading } = useChartAnalysis(state.analysis ? undefined : id);
+
+  const analysis = state.analysis ?? saved?.analysis ?? null;
+  const stamp = state.createdAt ?? saved?.created_at ?? new Date().toISOString();
+  const imagePreview = state.imagePreview ?? null;
+  const isSaved = Boolean(state.savedId || id);
 
   useEffect(() => {
-    if (!analysis) navigate("/chart-analysis", { replace: true });
-  }, [analysis, navigate]);
+    if (!analysis && !isLoading && !id) navigate("/chart-analysis", { replace: true });
+    if (!analysis && !isLoading && id && saved === null) navigate("/journal", { replace: true });
+  }, [analysis, isLoading, id, saved, navigate]);
 
-  if (!analysis) return null;
-
-  const stamp = createdAt || new Date().toISOString();
-  const bias = getBias(analysis);
-
-  const saveAnalysis = async () => {
-    if (!user) {
-      toast.error("سجّل الدخول لحفظ التحليل");
-      return;
-    }
-    setSaving(true);
-    try {
-      const { error } = await supabase.from("saved_analyses").insert({
-        user_id: user.id,
-        pair: analysis.pair || "غير محدد",
-        price: Number(String(analysis.entry ?? "").replace(/[^\d.]/g, "")) || 0,
-        direction: bias === "long" ? "صعودي" : bias === "short" ? "هبوطي" : "جانبي",
-        confidence: analysis.directionConfidence ?? 0,
-        timeframe: analysis.timeframe || "—",
-        notes: analysis.summary || analysis.strategy || null,
-      });
-      if (error) throw error;
-      toast.success("تم حفظ التحليل");
-    } catch {
-      toast.error("تعذر حفظ التحليل");
-    }
-    setSaving(false);
-  };
+  if (!analysis) {
+    return (
+      <div className="nx-page flex items-center justify-center py-24">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   const shareResult = async () => {
     const s = toShareable(analysis, stamp);
@@ -106,6 +90,13 @@ const ChartAnalysisResult = () => {
       </motion.div>
       <motion.div variants={fade}><TradeSetupCard analysis={analysis} /></motion.div>
 
+      {isSaved && (
+        <motion.div variants={fade} className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2">
+          <Bookmark className="w-4 h-4 text-primary shrink-0" />
+          <p className="nx-meta text-foreground">محفوظ في محفوظاتي ومُدرج كإشارة في قسم الإشارات لتتبعه.</p>
+        </motion.div>
+      )}
+
       <motion.div variants={fade}>
         <p className="nx-label mb-2">تفاصيل إضافية</p>
         <Accordion type="single" collapsible className="space-y-2">
@@ -121,20 +112,18 @@ const ChartAnalysisResult = () => {
       </motion.div>
 
       <motion.div variants={fade} className="space-y-3">
-        <button onClick={() => navigate("/chart-analysis")} className="nx-btn-primary w-full">
-          تحليل شارت جديد
+        <button onClick={() => navigate("/signals?tab=mine")} className="nx-btn-primary w-full">
+          <Signal className="w-5 h-5" /> فتح في الإشارات
         </button>
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={saveAnalysis} disabled={saving} className="nx-btn-secondary">
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Bookmark className="w-5 h-5" />}
-            حفظ
+          <button onClick={() => navigate("/chart-analysis")} className="nx-btn-secondary">
+            تحليل جديد
           </button>
           <button onClick={shareResult} className="nx-btn-secondary">
             <Share2 className="w-5 h-5" /> مشاركة
           </button>
         </div>
       </motion.div>
-
     </motion.div>
   );
 };
