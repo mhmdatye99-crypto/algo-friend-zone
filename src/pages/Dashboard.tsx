@@ -149,7 +149,7 @@ const Dashboard = () => {
       <motion.section variants={fade} className="nx-card space-y-4">
         <div className="flex items-center gap-2.5">
           <Sun className="w-5 h-5 text-primary" strokeWidth={1.8} />
-          <h2 className="nx-card-title">إحاطة NEXUS اليومية</h2>
+          <h2 className="nx-card-title">نبض السوق الآن</h2>
         </div>
         <div className="grid grid-cols-3 gap-2.5 text-center">
           <div className="rounded-xl border border-border/70 bg-secondary/30 p-3">
