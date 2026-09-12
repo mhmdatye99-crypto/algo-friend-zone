@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, TrendingDown, MessageCircle,
   BookmarkCheck, Shield, ChevronDown, ChevronUp,
-  ThumbsUp, Eye, BadgeCheck
+  ThumbsUp, BadgeCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CommunityPost } from "@/hooks/useCommunity";

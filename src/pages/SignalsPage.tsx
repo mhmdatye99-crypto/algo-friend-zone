@@ -61,16 +61,32 @@ const SignalsPage = () => {
       variants={{ show: { transition: { staggerChildren: 0.03 } } }}
       className="nx-page"
     >
-      {/* Summary */}
-      <motion.div variants={fade} className="flex items-center gap-2">
-        <div className="nx-badge-long">
-          <span className="font-mono font-bold tabular-nums nx-ltr">{bullish}</span>
-          <span>LONG</span>
+      {/* Header + summary */}
+      <motion.div variants={fade} className="flex items-center justify-between gap-2">
+        <h1 className="nx-section">الإشارات</h1>
+        <div className="flex items-center gap-2">
+          <div className="nx-badge-long">
+            <span className="font-mono font-bold tabular-nums nx-ltr">{bullish}</span>
+            <span>LONG</span>
+          </div>
+          <div className="nx-badge-short">
+            <span className="font-mono font-bold tabular-nums nx-ltr">{bearish}</span>
+            <span>SHORT</span>
+          </div>
         </div>
-        <div className="nx-badge-short">
-          <span className="font-mono font-bold tabular-nums nx-ltr">{bearish}</span>
-          <span>SHORT</span>
-        </div>
+      </motion.div>
+
+      {/* Chart analysis entry */}
+      <motion.div variants={fade}>
+        <button onClick={() => navigate("/chart-analysis")} className="nx-card-action-gold">
+          <span className="nx-icon-box-gold">
+            <ScanLine className="w-5 h-5 text-primary" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block nx-card-title">تحليل صورة شارت</span>
+            <span className="block nx-meta">خطة صفقة كاملة من صورة واحدة</span>
+          </span>
+        </button>
       </motion.div>
 
       {/* Tabs */}
@@ -80,13 +96,6 @@ const SignalsPage = () => {
         </button>
         <button onClick={() => setParams({ tab: "mine" })} className={cn("nx-chip flex-1", tab === "mine" && "nx-chip-on")}>
           إشاراتي من الشارت{mine.length ? ` (${mine.length})` : ""}
-        </button>
-      </motion.div>
-
-      {/* Chart analysis entry */}
-      <motion.div variants={fade}>
-        <button onClick={() => navigate("/chart-analysis")} className="nx-btn-secondary w-full">
-          <ScanLine className="w-5 h-5 text-primary" /> تحليل شارت
         </button>
       </motion.div>
 
