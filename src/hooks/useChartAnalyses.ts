@@ -74,7 +74,8 @@ export const useChartAnalysis = (id?: string) =>
   useQuery({
     queryKey: ["chart-analysis", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("saved_analyses").select("*").eq("id", id!).maybeSingle();
+      if (!id) return null;
+      const { data, error } = await supabase.from("saved_analyses").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       return (data as unknown as SavedChartAnalysis | null) ?? null;
     },

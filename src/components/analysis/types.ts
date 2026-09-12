@@ -43,8 +43,8 @@ export type Bias = "long" | "short" | "wait";
 export const getBias = (a: AIAnalysisResult): Bias => {
   const d = (a.direction || "").toLowerCase();
   const ar = a.directionAr || "";
-  if (d.includes("bullish") || ar.includes("صاعد")) return "long";
-  if (d.includes("bearish") || ar.includes("هابط")) return "short";
+  if (d.includes("bullish") || d === "long" || ar.includes("صاعد")) return "long";
+  if (d.includes("bearish") || d === "short" || ar.includes("هابط")) return "short";
   return "wait";
 };
 

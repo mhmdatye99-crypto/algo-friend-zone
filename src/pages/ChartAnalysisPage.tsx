@@ -10,7 +10,6 @@ import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { saveChartAnalysis } from "@/hooks/useChartAnalyses";
 import ChartUploader from "@/components/analysis/ChartUploader";
 import ChartPreview from "@/components/analysis/ChartPreview";
-import ChartTips from "@/components/analysis/ChartTips";
 import AnalysisLoadingState, { chartAnalysisStages } from "@/components/analysis/AnalysisLoadingState";
 import { normalizeAnalysis } from "@/components/analysis/types";
 import { Button } from "@/components/ui/button";
@@ -146,15 +145,9 @@ const ChartAnalysisPage = () => {
           </Button>
         </motion.div>
       ) : (
-        <>
-          <motion.div variants={fade}>
-            <ChartUploader onSelect={(value) => { setImage(value); setErrorMessage(null); }} onError={(m) => toast.error(m)} />
-          </motion.div>
-
-          <motion.div variants={fade}>
-            <ChartTips />
-          </motion.div>
-        </>
+        <motion.div variants={fade}>
+          <ChartUploader onSelect={(value) => { setImage(value); setErrorMessage(null); }} onError={(m) => toast.error(m)} />
+        </motion.div>
       )}
     </motion.div>
   );
