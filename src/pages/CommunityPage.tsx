@@ -61,13 +61,26 @@ const CommunityPage = () => {
       {tab === "feed" && (
         <div className="space-y-4">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="nx-card space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="skeleton w-10 h-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <div className="skeleton h-3.5 w-24 rounded" />
+                      <div className="skeleton h-3 w-14 rounded" />
+                    </div>
+                  </div>
+                  <div className="skeleton h-3 w-full rounded" />
+                  <div className="skeleton h-3 w-2/3 rounded" />
+                </div>
+              ))}
             </div>
           ) : posts.length === 0 ? (
-            <div className="nx-card text-center py-10">
-              <Sparkles className="w-6 h-6 text-primary/50 mx-auto mb-3" />
+            <div className="nx-card text-center py-10 space-y-2">
+              <Sparkles className="w-6 h-6 text-primary/50 mx-auto" />
               <p className="nx-body text-muted-foreground">كن أول من ينشر تحليلاً</p>
+              <p className="nx-meta">شارك قراءتك للسوق واحصل على رأي المتداولين.</p>
             </div>
           ) : (
             posts.slice(0, 15).map((post) => (

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronLeft, Sun, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Sun, AlertTriangle, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
@@ -40,6 +40,20 @@ const Dashboard = () => {
     return { crypto: pct("كريبتو"), forex: pct("فوركس"), topMover };
   }, [assets]);
 
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 12) return "صباح الخير";
+    if (h < 18) return "مساء الخير";
+    return "مساء الخير";
+  }, []);
+
+  const marketState = useMemo(() => {
+    if (!assets.length) return "جارٍ تحديث بيانات السوق...";
+    if (pulse.crypto >= 55) return "السوق يميل للصعود اليوم — راقب مستويات الدخول بعناية.";
+    if (pulse.crypto <= 45) return "السوق يميل للهبوط اليوم — التزم بإدارة المخاطر.";
+    return "السوق متوازن اليوم — انتظر تأكيد الاتجاه.";
+  }, [assets.length, pulse.crypto]);
+
 
   return (
     <motion.div
@@ -48,6 +62,39 @@ const Dashboard = () => {
       variants={{ show: { transition: { staggerChildren: 0.06 } } }}
       className="nx-page"
     >
+
+      {/* ═══ GREETING + MARKET STATE ═══ */}
+      <motion.section variants={fade} className="space-y-1">
+        <h1 className="nx-title">{greeting}</h1>
+        <p className="nx-body text-muted-foreground">
+          {marketState}
+        </p>
+      </motion.section>
+
+      {/* ═══ PRIMARY ACTIONS ═══ */}
+      <motion.section variants={fade} className="space-y-3">
+        <button onClick={() => navigate("/chart-analysis")} className="nx-card-action-gold">
+          <span className="nx-icon-box-gold">
+            <ScanLine className="w-5 h-5 text-primary" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block nx-card-title">تحليل صورة شارت</span>
+            <span className="block nx-meta">ارفع صورة واحصل على خطة صفقة كاملة</span>
+          </span>
+          <ChevronLeft className="w-5 h-5 text-primary shrink-0" />
+        </button>
+
+        <button onClick={() => navigate("/morning-brief")} className="nx-card-action">
+          <span className="nx-icon-box">
+            <Sun className="w-5 h-5 text-muted-foreground" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block nx-card-title">إحاطة NEXUS اليومية</span>
+            <span className="block nx-meta">الاتجاهات ومستويات الدعم والمقاومة</span>
+          </span>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" />
+        </button>
+      </motion.section>
 
       {/* ═══ MARKET OVERVIEW ═══ */}
       <motion.section variants={fade} className="space-y-3">
@@ -102,7 +149,7 @@ const Dashboard = () => {
       <motion.section variants={fade} className="nx-card space-y-4">
         <div className="flex items-center gap-2.5">
           <Sun className="w-5 h-5 text-primary" strokeWidth={1.8} />
-          <h2 className="nx-card-title">إحاطة NEXUS اليومية</h2>
+          <h2 className="nx-card-title">نبض السوق الآن</h2>
         </div>
         <div className="grid grid-cols-3 gap-2.5 text-center">
           <div className="rounded-xl border border-border/70 bg-secondary/30 p-3">
@@ -134,9 +181,6 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <button onClick={() => navigate("/morning-brief")} className="nx-btn-secondary w-full">
-          الاتجاهات ومستويات الدعم والمقاومة
-        </button>
       </motion.section>
 
 

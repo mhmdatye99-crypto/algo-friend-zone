@@ -86,8 +86,24 @@ const Markets = () => {
 
       {/* Asset list */}
       <motion.div variants={fade} className="rounded-xl border border-border/80 bg-card overflow-hidden">
-        {filteredAssets.length === 0 ? (
-          <div className="py-12 text-center nx-body text-muted-foreground">لا توجد نتائج مطابقة</div>
+        {assets.length === 0 ? (
+          <div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex items-center gap-3 min-h-[68px] px-3 border-b border-border/70 last:border-b-0">
+                <div className="skeleton w-10 h-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton h-3.5 w-20 rounded" />
+                  <div className="skeleton h-3 w-12 rounded" />
+                </div>
+                <div className="skeleton h-3.5 w-16 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : filteredAssets.length === 0 ? (
+          <div className="py-12 text-center space-y-1">
+            <p className="nx-body text-muted-foreground">لا توجد نتائج مطابقة</p>
+            <p className="nx-meta">جرّب اسم أصل آخر أو أزل عوامل التصفية.</p>
+          </div>
         ) : (
           filteredAssets.map((item) => (
             <div

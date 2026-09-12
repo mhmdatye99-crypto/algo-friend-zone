@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, TrendingDown, MessageCircle,
   BookmarkCheck, Shield, ChevronDown, ChevronUp,
-  ThumbsUp, Eye, BadgeCheck
+  ThumbsUp, BadgeCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CommunityPost } from "@/hooks/useCommunity";
@@ -144,10 +144,6 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
               icon={MessageCircle}
               count={post.comment_count}
               onClick={() => onOpenComments(post.id)}
-            />
-            <ActionBtn
-              icon={Eye}
-              count={totalVotes * 3 + post.comment_count * 2}
             />
           </div>
 
