@@ -95,7 +95,7 @@ const ChartAnalysisPage = () => {
         state: { analysis: result, imagePreview: image, createdAt, savedId },
       });
     } catch (error) {
-      const timedOut = error instanceof DOMException && error.name === "AbortError";
+      const timedOut = controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError");
       setErrorMessage(timedOut
         ? "استغرق التحليل وقتاً أطول من المتوقع. أعد المحاولة بصورة أصغر أو أوضح."
         : "تعذر الوصول إلى خدمة التحليل الآن. لم يتم إنشاء أي نتيجة. حاول مرة أخرى.");

@@ -12,7 +12,7 @@ import ReasoningSection from "@/components/analysis/ReasoningSection";
 import ScenarioSection from "@/components/analysis/ScenarioSection";
 import { toShareable, type AIAnalysisResult } from "@/components/analysis/types";
 import { useChartAnalysis } from "@/hooks/useChartAnalyses";
-import { saveChartAnalysis } from "@/hooks/useChartAnalyses";
+import { saveChartAnalysis, useChartAnalyses } from "@/hooks/useChartAnalyses";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -31,6 +31,7 @@ interface ResultState {
 const ChartAnalysisResult = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { invalidate } = useChartAnalyses();
   const { id } = useParams<{ id?: string }>();
   const state = (useLocation().state || {}) as ResultState;
   const { data: saved, isLoading } = useChartAnalysis(state.analysis ? undefined : id);
@@ -86,6 +87,7 @@ const ChartAnalysisResult = () => {
     try {
       const createdId = await saveChartAnalysis(user.id, analysis);
       setSavedId(createdId);
+      invalidate();
       toast.success("تم حفظ التحليل في محفوظاتك");
     } catch {
       toast.error("تعذر حفظ التحليل. حاول مرة أخرى.");
