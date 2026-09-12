@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronLeft, Sun, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Sun, AlertTriangle, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
@@ -39,6 +39,20 @@ const Dashboard = () => {
     const topMover = [...assets].sort((a, b) => Math.abs(b.change) - Math.abs(a.change))[0] ?? null;
     return { crypto: pct("كريبتو"), forex: pct("فوركس"), topMover };
   }, [assets]);
+
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 12) return "صباح الخير";
+    if (h < 18) return "مساء الخير";
+    return "مساء الخير";
+  }, []);
+
+  const marketState = useMemo(() => {
+    if (!assets.length) return "جارٍ تحديث بيانات السوق...";
+    if (pulse.crypto >= 55) return "السوق يميل للصعود اليوم — راقب مستويات الدخول بعناية.";
+    if (pulse.crypto <= 45) return "السوق يميل للهبوط اليوم — التزم بإدارة المخاطر.";
+    return "السوق متوازن اليوم — انتظر تأكيد الاتجاه.";
+  }, [assets.length, pulse.crypto]);
 
 
   return (

@@ -145,10 +145,6 @@ const WarRoomPost = ({ post, onVote, onSave, onOpenComments }: Props) => {
               count={post.comment_count}
               onClick={() => onOpenComments(post.id)}
             />
-            <ActionBtn
-              icon={Eye}
-              count={totalVotes * 3 + post.comment_count * 2}
-            />
           </div>
 
           {/* Details Toggle */}
