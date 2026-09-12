@@ -1,6 +1,7 @@
-# UI Refinement Roadmap
+# Chart Analysis Experience Roadmap
 
-- [ ] Audit global design tokens, header, ticker, and bottom navigation
-- [ ] Refine Home, Markets, Signals, expanded signal, and Community
-- [ ] Verify narrow mobile overflow, RTL/LTR, and navigation overlap
-- [ ] Confirm no backend/API/business logic changes
+- [ ] Refine upload, selected-image preview, validation, and full-size preview
+- [ ] Replace percentage loading with status-driven NEXUS scanning and timeout handling
+- [ ] Refine response-backed result sections and explicit save/share actions
+- [ ] Verify narrow mobile overflow and RTL/LTR at 320–430px
+- [ ] Confirm the existing AI service, history, database, and authentication remain unchanged
