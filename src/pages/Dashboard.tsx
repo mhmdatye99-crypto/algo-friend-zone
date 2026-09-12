@@ -181,9 +181,6 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <button onClick={() => navigate("/morning-brief")} className="nx-btn-secondary w-full">
-          الاتجاهات ومستويات الدعم والمقاومة
-        </button>
       </motion.section>
 
 
