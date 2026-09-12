@@ -4,16 +4,19 @@ import type { AIAnalysisResult } from "./types";
 const NO_LEVEL = "لم يتم اكتشاف مستوى موثوق";
 
 const Column = ({ title, levels, tone }: { title: string; levels?: string[]; tone: string }) => (
-  <div className="space-y-2 min-w-0">
-    <p className={cn("nx-label", tone)}>{title}</p>
+  <div className="space-y-1 min-w-0">
     {levels?.length ? (
       levels.map((l, i) => (
-        <p key={i} className="nx-num text-[14px] nx-ltr bg-secondary/60 rounded-lg px-2.5 py-2 text-center truncate">
-          {l}
-        </p>
+        <div key={i} className="flex items-center justify-between gap-3 min-h-[48px] border-b border-border/60 last:border-b-0">
+          <p className={cn("nx-label", tone)}>{title}{levels.length > 1 ? ` ${i + 1}` : ""}</p>
+          <p className="nx-num text-[15px] nx-ltr break-all text-left">{l}</p>
+        </div>
       ))
     ) : (
-      <p className="nx-meta leading-relaxed">{NO_LEVEL}</p>
+      <div className="py-3 border-b border-border/60 last:border-b-0">
+        <p className={cn("nx-label", tone)}>{title}</p>
+        <p className="nx-meta leading-relaxed">{NO_LEVEL}</p>
+      </div>
     )}
   </div>
 );
@@ -21,7 +24,7 @@ const Column = ({ title, levels, tone }: { title: string; levels?: string[]; ton
 const KeyLevelsSection = ({ analysis }: { analysis: AIAnalysisResult }) => (
   <section className="nx-card space-y-4">
     <h2 className="nx-card-title">المستويات المهمة</h2>
-    <div className="grid grid-cols-2 gap-3">
+    <div>
       <Column title="الدعم" levels={analysis.supportLevels} tone="text-success" />
       <Column title="المقاومة" levels={analysis.resistanceLevels} tone="text-destructive" />
     </div>
