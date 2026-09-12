@@ -49,6 +49,39 @@ const Dashboard = () => {
       className="nx-page"
     >
 
+      {/* ═══ GREETING + MARKET STATE ═══ */}
+      <motion.section variants={fade} className="space-y-1">
+        <h1 className="nx-title">{greeting}</h1>
+        <p className="nx-body text-muted-foreground">
+          {marketState}
+        </p>
+      </motion.section>
+
+      {/* ═══ PRIMARY ACTIONS ═══ */}
+      <motion.section variants={fade} className="space-y-3">
+        <button onClick={() => navigate("/chart-analysis")} className="nx-card-action-gold">
+          <span className="nx-icon-box-gold">
+            <ScanLine className="w-5 h-5 text-primary" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block nx-card-title">تحليل صورة شارت</span>
+            <span className="block nx-meta">ارفع صورة واحصل على خطة صفقة كاملة</span>
+          </span>
+          <ChevronLeft className="w-5 h-5 text-primary shrink-0" />
+        </button>
+
+        <button onClick={() => navigate("/morning-brief")} className="nx-card-action">
+          <span className="nx-icon-box">
+            <Sun className="w-5 h-5 text-muted-foreground" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block nx-card-title">إحاطة NEXUS اليومية</span>
+            <span className="block nx-meta">الاتجاهات ومستويات الدعم والمقاومة</span>
+          </span>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" />
+        </button>
+      </motion.section>
+
       {/* ═══ MARKET OVERVIEW ═══ */}
       <motion.section variants={fade} className="space-y-3">
         <div className="flex items-center justify-between">
