@@ -1,77 +1,46 @@
 import { motion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ScanLine } from "lucide-react";
 
 export const chartAnalysisStages = [
-  "تجهيز الصورة",
-  "قراءة الشارت",
-  "تحديد المستويات",
-  "بناء السيناريو",
+  "قراءة الشارت...",
+  "تحليل اتجاه السوق...",
+  "تحديد المستويات المهمة...",
+  "تحليل الزخم...",
+  "بناء سيناريو السوق...",
 ];
 
 interface Props {
   imagePreview?: string | null;
   /** المرحلة الحالية (0-based) */
   stage: number;
-  /** نسبة التقدم الحقيقية 0-100 */
-  progress: number;
 }
 
-const AnalysisLoadingState = ({ imagePreview, stage, progress }: Props) => {
-  const pct = Math.max(0, Math.min(100, Math.round(progress)));
-
+const AnalysisLoadingState = ({ imagePreview, stage }: Props) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3" aria-live="polite" aria-busy="true">
       {imagePreview && (
-        <div className="relative rounded-xl overflow-hidden border border-border bg-secondary/30">
-          <img src={imagePreview} alt="صورة الشارت" className="w-full max-h-[220px] object-contain opacity-70" />
+        <div className="relative rounded-xl overflow-hidden border border-primary/30 bg-secondary/30 gold-glow">
+          <img src={imagePreview} alt="صورة الشارت قيد التحليل" className="block w-full max-h-[420px] object-contain opacity-75" />
           <motion.div
-            className="absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-primary/15 to-transparent"
-            animate={{ top: ["-10%", "100%"] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-x-0 h-px bg-primary shadow-[0_0_16px_hsl(var(--primary)/0.8)]"
+            animate={{ top: ["4%", "96%", "4%"] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
           />
+          <div className="absolute inset-0 ring-1 ring-inset ring-primary/15 pointer-events-none" />
         </div>
       )}
 
-      <div className="nx-card space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="nx-card-title">جارٍ التحليل</h3>
-          <span className="nx-num nx-ltr text-primary">{pct}%</span>
-        </div>
-
-        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-primary"
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-          />
-        </div>
-
-        <div className="space-y-1">
-          {chartAnalysisStages.map((label, i) => {
-            const done = i < stage;
-            const active = i === stage;
-            return (
-              <div
-                key={label}
-                className={cn(
-                  "flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors",
-                  active ? "bg-primary/5" : "opacity-55"
-                )}
-              >
-                {done ? (
-                  <Check className="w-4 h-4 text-success shrink-0" />
-                ) : active ? (
-                  <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
-                ) : (
-                  <span className="w-4 h-4 rounded-full border border-border shrink-0" />
-                )}
-                <span className={cn("nx-body", active ? "text-foreground font-semibold" : "text-muted-foreground")}>
-                  {label}
-                </span>
-              </div>
-            );
-          })}
+      <div className="rounded-xl border border-primary/25 bg-primary/[0.05] px-4 py-4">
+        <div className="flex items-center gap-3">
+          <span className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <ScanLine className="w-5 h-5 text-primary animate-pulse" />
+          </span>
+          <div className="min-w-0">
+            <p className="nx-meta text-primary">NEXUS VISION</p>
+            <motion.p key={stage} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="nx-card-title">
+              {chartAnalysisStages[stage] ?? chartAnalysisStages[chartAnalysisStages.length - 1]}
+            </motion.p>
+          </div>
         </div>
       </div>
     </div>
