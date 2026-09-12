@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Loader2, Share2, Signal } from "lucide-react";
+import { Bookmark, Check, Loader2, Plus, Share2 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import AnalysisSummary from "@/components/analysis/AnalysisSummary";
@@ -10,9 +10,11 @@ import KeyLevelsSection from "@/components/analysis/KeyLevelsSection";
 import IndicatorSection from "@/components/analysis/IndicatorSection";
 import ReasoningSection from "@/components/analysis/ReasoningSection";
 import ScenarioSection from "@/components/analysis/ScenarioSection";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toShareable, type AIAnalysisResult } from "@/components/analysis/types";
 import { useChartAnalysis } from "@/hooks/useChartAnalyses";
+import { saveChartAnalysis, useChartAnalyses } from "@/hooks/useChartAnalyses";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const fade = {
   hidden: { opacity: 0, y: 8 },
@@ -28,6 +30,8 @@ interface ResultState {
 
 const ChartAnalysisResult = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { invalidate } = useChartAnalyses();
   const { id } = useParams<{ id?: string }>();
   const state = (useLocation().state || {}) as ResultState;
   const { data: saved, isLoading } = useChartAnalysis(state.analysis ? undefined : id);
@@ -35,7 +39,9 @@ const ChartAnalysisResult = () => {
   const analysis = state.analysis ?? saved?.analysis ?? null;
   const stamp = state.createdAt ?? saved?.created_at ?? new Date().toISOString();
   const imagePreview = state.imagePreview ?? null;
-  const isSaved = Boolean(state.savedId || id);
+  const [savedId, setSavedId] = useState<string | null>(state.savedId ?? id ?? null);
+  const [saving, setSaving] = useState(false);
+  const isSaved = Boolean(savedId);
 
   useEffect(() => {
     if (!analysis && !isLoading && !id) navigate("/chart-analysis", { replace: true });
@@ -75,13 +81,20 @@ const ChartAnalysisResult = () => {
     }
   };
 
-  const details: { id: string; label: string; node: JSX.Element }[] = [
-    { id: "market", label: "قراءة السوق", node: <MarketAnalysisSection analysis={analysis} /> },
-    { id: "levels", label: "المستويات المهمة", node: <KeyLevelsSection analysis={analysis} /> },
-    { id: "indicators", label: "المؤشرات", node: <IndicatorSection analysis={analysis} /> },
-    { id: "reasoning", label: "لماذا هذا التحليل؟", node: <ReasoningSection analysis={analysis} /> },
-    { id: "scenarios", label: "السيناريوهات", node: <ScenarioSection analysis={analysis} /> },
-  ];
+  const saveResult = async () => {
+    if (!user || isSaved || saving) return;
+    setSaving(true);
+    try {
+      const createdId = await saveChartAnalysis(user.id, analysis);
+      setSavedId(createdId);
+      invalidate();
+      toast.success("تم حفظ التحليل في محفوظاتك");
+    } catch {
+      toast.error("تعذر حفظ التحليل. حاول مرة أخرى.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.05 } } }} className="nx-page">
@@ -93,35 +106,28 @@ const ChartAnalysisResult = () => {
       {isSaved && (
         <motion.div variants={fade} className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2">
           <Bookmark className="w-4 h-4 text-primary shrink-0" />
-          <p className="nx-meta text-foreground">محفوظ في محفوظاتي ومُدرج كإشارة في قسم الإشارات لتتبعه.</p>
+          <p className="nx-meta text-foreground">محفوظ في محفوظاتك ومُدرج ضمن إشارات الشارت.</p>
         </motion.div>
       )}
 
-      <motion.div variants={fade}>
-        <p className="nx-label mb-2">تفاصيل إضافية</p>
-        <Accordion type="single" collapsible className="space-y-2">
-          {details.map((d) => (
-            <AccordionItem key={d.id} value={d.id} className="border border-border rounded-xl px-3 bg-card/40">
-              <AccordionTrigger className="nx-body font-semibold py-3 hover:no-underline text-right">
-                {d.label}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">{d.node}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </motion.div>
+      <motion.div variants={fade}><ReasoningSection analysis={analysis} /></motion.div>
+      <motion.div variants={fade}><MarketAnalysisSection analysis={analysis} /></motion.div>
+      <motion.div variants={fade}><KeyLevelsSection analysis={analysis} /></motion.div>
+      <motion.div variants={fade}><IndicatorSection analysis={analysis} /></motion.div>
+      <motion.div variants={fade}><ScenarioSection analysis={analysis} /></motion.div>
 
       <motion.div variants={fade} className="space-y-3">
-        <button onClick={() => navigate("/signals?tab=mine")} className="nx-btn-primary w-full">
-          <Signal className="w-5 h-5" /> فتح في الإشارات
-        </button>
+        <Button onClick={() => navigate("/chart-analysis")} className="nx-btn-primary w-full gold-glow">
+          <Plus className="w-5 h-5" /> تحليل شارت جديد
+        </Button>
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => navigate("/chart-analysis")} className="nx-btn-secondary">
-            تحليل جديد
-          </button>
-          <button onClick={shareResult} className="nx-btn-secondary">
+          <Button onClick={saveResult} disabled={isSaved || saving} variant="secondary" className="nx-btn-secondary min-w-0 px-3">
+            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : isSaved ? <Check className="w-5 h-5 text-success" /> : <Bookmark className="w-5 h-5" />}
+            {isSaved ? "تم الحفظ" : "حفظ التحليل"}
+          </Button>
+          <Button onClick={shareResult} variant="secondary" className="nx-btn-secondary min-w-0 px-3">
             <Share2 className="w-5 h-5" /> مشاركة
-          </button>
+          </Button>
         </div>
       </motion.div>
     </motion.div>

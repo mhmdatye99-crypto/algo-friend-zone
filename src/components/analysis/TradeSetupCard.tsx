@@ -4,7 +4,7 @@ import { NA, type AIAnalysisResult } from "./types";
 const Cell = ({ label, value, tone }: { label: string; value?: string | null; tone?: string }) => (
   <div className="min-w-0 space-y-1">
     <p className="nx-meta">{label}</p>
-    <p className={cn("nx-num text-[15px] nx-ltr truncate", value ? tone : "text-muted-foreground")}>
+    <p className={cn("nx-num text-[clamp(14px,4.5vw,19px)] nx-ltr break-words leading-tight", value ? tone : "text-muted-foreground")}>
       {value || NA}
     </p>
   </div>
@@ -13,7 +13,7 @@ const Cell = ({ label, value, tone }: { label: string; value?: string | null; to
 const TradeSetupCard = ({ analysis }: { analysis: AIAnalysisResult }) => (
   <section className="nx-card space-y-4">
     <h2 className="nx-card-title">إعداد الصفقة</h2>
-    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-5">
       <Cell label="الدخول" value={analysis.entry} tone="text-foreground" />
       <Cell label="وقف الخسارة" value={analysis.stopLoss} tone="text-destructive" />
       <Cell label="الهدف الأول" value={analysis.takeProfit1} tone="text-success" />

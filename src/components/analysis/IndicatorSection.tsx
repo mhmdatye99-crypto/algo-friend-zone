@@ -20,8 +20,8 @@ const IndicatorSection = ({ analysis }: { analysis: AIAnalysisResult }) => {
                   key={i}
                   className="flex items-center justify-between gap-3 min-h-[48px] border-b border-border/60 last:border-b-0"
                 >
-                  <p className="nx-body nx-ltr">{ind.name}</p>
-                  <p className="nx-body text-muted-foreground truncate">
+                  <p className="nx-body nx-ltr shrink-0">{ind.name}</p>
+                  <p className="nx-body text-muted-foreground break-words text-left min-w-0">
                     {[ind.value, ind.signal].filter(Boolean).join(" · ") || NOT_VISIBLE}
                   </p>
                 </div>

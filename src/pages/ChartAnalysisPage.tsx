@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { RefreshCw, Trash2 } from "lucide-react";
+import { AlertTriangle, RefreshCw, ScanLine, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,9 +10,9 @@ import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { saveChartAnalysis } from "@/hooks/useChartAnalyses";
 import ChartUploader from "@/components/analysis/ChartUploader";
 import ChartPreview from "@/components/analysis/ChartPreview";
-import ChartTips from "@/components/analysis/ChartTips";
 import AnalysisLoadingState, { chartAnalysisStages } from "@/components/analysis/AnalysisLoadingState";
-import type { AIAnalysisResult } from "@/components/analysis/types";
+import { normalizeAnalysis } from "@/components/analysis/types";
+import { Button } from "@/components/ui/button";
 
 const fade = {
   hidden: { opacity: 0, y: 8 },
@@ -28,8 +28,9 @@ const ChartAnalysisPage = () => {
   const [image, setImage] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [stage, setStage] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
+  const requestRef = useRef(false);
 
   const stopTimer = () => {
     if (timerRef.current) window.clearInterval(timerRef.current);
@@ -40,6 +41,7 @@ const ChartAnalysisPage = () => {
 
   const startAnalysis = async () => {
     if (!image || analyzing) return;
+    if (requestRef.current) return;
     if (!isFounder && !canAfford(CREDIT_COSTS.chart_analysis)) {
       toast.error("رصيد غير كافٍ");
       return;
@@ -49,39 +51,33 @@ const ChartAnalysisPage = () => {
       if (!ok) return;
     }
 
+    requestRef.current = true;
     setAnalyzing(true);
-    // مرحلة 1: تجهيز الصورة (مكتملة فعلياً بمجرد بدء الإرسال)
+    setErrorMessage(null);
     setStage(0);
-    setProgress(6);
-
-    window.setTimeout(() => {
-      setStage(1);
-      setProgress(22);
-    }, 250);
-
-    // تقدّم تدريجي محسوب حتى وصول الرد الحقيقي (لا يتجاوز 90%)
+    // رسائل حالة دورية فقط، بدون ادعاء نسبة تقدم غير حقيقية.
     timerRef.current = window.setInterval(() => {
-      setProgress((p) => {
-        const next = p + Math.max(0.6, (90 - p) * 0.06);
-        const capped = Math.min(next, 90);
-        setStage(capped > 70 ? 3 : capped > 45 ? 2 : 1);
-        return capped;
-      });
-    }, 400);
+      setStage((current) => (current + 1) % chartAnalysisStages.length);
+    }, 2400);
 
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 45_000);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-chart", {
         body: { imageBase64: image },
+        signal: controller.signal,
       });
       if (error) throw error;
-      const result = data as AIAnalysisResult;
+      const result = normalizeAnalysis(data);
+      if (!result) {
+        setErrorMessage("لم تتوفر بيانات كافية وموثوقة من الصورة. جرّب لقطة أوضح يظهر فيها الأصل والإطار الزمني ومحور السعر.");
+        return;
+      }
       if (result?.error) {
-        toast.error(result.error);
+        setErrorMessage(result.error);
         return;
       }
       stopTimer();
-      setStage(chartAnalysisStages.length);
-      setProgress(100);
       const createdAt = new Date().toISOString();
       // تسجيل التحليل تلقائياً في المحفوظات والإشارات
       let savedId: string | null = null;
@@ -98,11 +94,16 @@ const ChartAnalysisPage = () => {
       navigate(savedId ? `/chart-analysis/result/${savedId}` : "/chart-analysis/result", {
         state: { analysis: result, imagePreview: image, createdAt, savedId },
       });
-    } catch {
-      toast.error("فشل التحليل. حاول مرة أخرى.");
+    } catch (error) {
+      const timedOut = controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError");
+      setErrorMessage(timedOut
+        ? "استغرق التحليل وقتاً أطول من المتوقع. أعد المحاولة بصورة أصغر أو أوضح."
+        : "تعذر الوصول إلى خدمة التحليل الآن. لم يتم إنشاء أي نتيجة. حاول مرة أخرى.");
     } finally {
+      window.clearTimeout(timeout);
       stopTimer();
       setAnalyzing(false);
+      requestRef.current = false;
     }
   };
 
@@ -117,33 +118,36 @@ const ChartAnalysisPage = () => {
 
       {analyzing ? (
         <motion.div variants={fade}>
-          <AnalysisLoadingState imagePreview={image} stage={stage} progress={progress} />
+          <AnalysisLoadingState imagePreview={image} stage={stage} />
         </motion.div>
       ) : image ? (
         <motion.div variants={fade} className="space-y-3">
           <ChartPreview src={image} />
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => setImage(null)} className="nx-btn-secondary">
+          {errorMessage && (
+            <div role="alert" className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/[0.06] p-3.5">
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <div className="min-w-0 space-y-1">
+                <p className="nx-label text-destructive">تعذر إكمال التحليل</p>
+                <p className="nx-meta text-foreground">{errorMessage}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <Button variant="secondary" onClick={() => { setImage(null); setErrorMessage(null); }} className="nx-btn-secondary flex-1">
               <RefreshCw className="w-5 h-5" /> تغيير الصورة
-            </button>
-            <button onClick={() => setImage(null)} className="nx-btn-secondary text-destructive">
+            </Button>
+            <Button variant="ghost" onClick={() => { setImage(null); setErrorMessage(null); }} className="nx-btn-ghost text-destructive px-3">
               <Trash2 className="w-5 h-5" /> حذف
-            </button>
+            </Button>
           </div>
-          <button onClick={startAnalysis} className="nx-btn-primary w-full">
-            بدء التحليل
-          </button>
+          <Button onClick={startAnalysis} disabled={analyzing} className="nx-btn-primary w-full gold-glow">
+            <ScanLine className="w-5 h-5" /> بدء التحليل
+          </Button>
         </motion.div>
       ) : (
-        <>
-          <motion.div variants={fade}>
-            <ChartUploader onSelect={setImage} onError={(m) => toast.error(m)} />
-          </motion.div>
-
-          <motion.div variants={fade}>
-            <ChartTips />
-          </motion.div>
-        </>
+        <motion.div variants={fade}>
+          <ChartUploader onSelect={(value) => { setImage(value); setErrorMessage(null); }} onError={(m) => toast.error(m)} />
+        </motion.div>
       )}
     </motion.div>
   );
